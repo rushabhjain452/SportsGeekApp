@@ -4,9 +4,9 @@ import { ScrollView } from "react-native-gesture-handler";
 import {
   Avatar
 } from 'react-native-paper';
-import baseurl from './url';
+import showSweetAlert from '../helpers/showSweetAlert';
+import {baseurl} from '../config';
 import AsyncStorage from '@react-native-community/async-storage';
-import SweetAlert from 'react-native-sweet-alert';
 import { Card} from 'react-native-elements';
 
 function UsersContestsForLiveMatch(props) {
@@ -35,17 +35,6 @@ function UsersContestsForLiveMatch(props) {
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
   }, []);
-
-  const showSweetAlert = (status, title, msg) => {
-    SweetAlert.showAlertWithOptions({
-        title: title,
-        subTitle: msg,
-        confirmButtonTitle: 'OK',
-        confirmButtonColor: '#000',
-        style: status,
-        cancellable: true
-    });
-  }
 
   const fetchMatchData = (token) => {
     // console.log('MatchId : ' + matchId);

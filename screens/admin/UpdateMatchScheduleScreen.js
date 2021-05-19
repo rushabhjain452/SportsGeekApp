@@ -2,9 +2,9 @@ import React, { Component,useState, useEffect} from "react";
 import { StyleSheet, View, Text, ScrollView, Alert, ActivityIndicator, RefreshControl } from "react-native";
 import { Card, ListItem, Button, Icon } from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
-import SweetAlert from 'react-native-sweet-alert';
 // import { useNavigation } from '@react-navigation/native';
-import baseurl from '../url';
+import showSweetAlert from '../../helpers/showSweetAlert';
+import {baseurl} from '../../config';
 import AsyncStorage from '@react-native-community/async-storage';
 
 function UpdateMatchScheduleScreen({navigation}) {
@@ -57,17 +57,6 @@ function UpdateMatchScheduleScreen({navigation}) {
         setRefreshing(false);
         showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
       });
-  }
-
-  const showSweetAlert = (status, title, msg) => {
-    SweetAlert.showAlertWithOptions({
-        title: title,
-        subTitle: msg,
-        confirmButtonTitle: 'OK',
-        confirmButtonColor: '#000',
-        style: status,
-        cancellable: true
-    });
   }
 
   const formatDate = (str) => {

@@ -14,39 +14,15 @@ import * as Animatable from 'react-native-animatable';
 // import LinearGradient from 'react-native-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
-import SweetAlert from 'react-native-sweet-alert';
 
 import { useTheme } from 'react-native-paper';
-import baseurl from './url';
+import {baseurl} from '../config';
+import showSweetAlert from '../helpers/showSweetAlert';
 import Spinner from 'react-native-loading-spinner-overlay';
 import AsyncStorage from '@react-native-community/async-storage';
+import axios from 'axios';
 
-// const Users = [
-//     {
-//         id: 1, 
-//         email: 'user1@email.com',
-//         username: 'user1', 
-//         password: 'password', 
-//         userToken: 'token123'
-//     },
-//     {
-//         id: 2, 
-//         email: 'user2@email.com',
-//         username: 'user2', 
-//         password: 'pass1234', 
-//         userToken: 'token12345'
-//     },
-//     {
-//         id: 3, 
-//         email: 'testuser@email.com',
-//         username: 'testuser', 
-//         password: 'testpass', 
-//         userToken: 'testtoken'
-//     },
-// ];
 import { AuthContext } from '../components/context';
-
-// import Users from '../model/User';
 
 const SignInScreen = ({navigation}) => {
 
@@ -60,21 +36,6 @@ const SignInScreen = ({navigation}) => {
     });
 
     const [waiting, setWaiting] = React.useState(false);
-
-    const showSweetAlert = (status, title, msg) => {
-        SweetAlert.showAlertWithOptions({
-                title: title,
-                subTitle: msg,
-                confirmButtonTitle: 'OK',
-                confirmButtonColor: '#000',
-                style: status,
-                cancellable: true
-            },
-            () => {
-                setWaiting(false);
-            }
-        );
-    }
 
     const { colors } = useTheme();
     const { signIn } = React.useContext(AuthContext);
@@ -151,88 +112,10 @@ const SignInScreen = ({navigation}) => {
             return;
         }
 
+        // New API
         setWaiting(true);
-        console.log('Uname : ' + data.username);
-        fetch(baseurl+'/user/authenticateStatus', {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json' 
-            },
-            body: JSON.stringify({
-                username: data.username
-            })
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            // console.log('Data Code1 : ' + json.code);
-            if(json.code == 401){ // User is blocked by the admin
-                setWaiting(false);
-                showSweetAlert('warning', 'Login Failed', json.message); 
-            }else if(json.code == 400){
-                setWaiting(false);
-                showSweetAlert('warning', 'Login Failed', "Invalid username or password.");
-            }
-            else if (json.code == 200){
-                // console.log('Role : ' + json.data.role);
-                // setRole(json.data.role);
-                // setUsername(json.data.username);
-                // setUserId(json.data.userId);
-                fetch(baseurl+'/user/authenticate', {
-                    method: 'POST',
-                    headers: {
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json' 
-                    },
-                    body: JSON.stringify({
-                        username: data.username,
-                        password: data.password
-                    })
-                })
-                .then((response) => {
-                    // console.log('Response status : ' + response.status);
-                    setWaiting(false);
-                    if(response.status == 200){
-                        return response.json(); 
-                    }
-                    else if(response.status == 404){
-                        showSweetAlert('warning', 'Service Unavailble', "Something went wrong. Please try again after sometime...");
-                    }
-                    else if(response.status == 500){
-                        showSweetAlert('warning', 'Login Failed', "Invalid username or password.");
-                    }
-                })
-                .then((json2) => {
-                    setWaiting(false);
-                    if(json2){
-                        console.log('Token : ' + json2.token);
-                        console.log('Code : ' + json2.token);
-                        if(json2.code == 500){
-                            showSweetAlert('warning', 'Login Failed', "Invalid username or password.");
-                        }
-                        else if(json2.token == undefined){
-                            showSweetAlert('warning', 'Service Unavailble', "Something went wrong. Please try again after sometime...");
-                        }
-                        else{
-                            const user = json.data;
-                            // console.log('From Main : ' + user.userId + ' ' + user.username + ' ' + user.role + ' ' + json2.token);
-                            // signIn(userId, username, role, json2.token);
-                            signIn(user.userId, user.username, user.role, json2.token);
-                        }
-                    }
-                })
-                .catch((error) => {
-                    // console.log(error);
-                    setWaiting(false);
-                    showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
-                });
-            }
-        })
-        .catch((error) => {
-            showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
-        })
-
-        // fetch(baseurl+'/user/authenticate', {
+        // Using Fetch
+        // fetch(baseurl+'/users/authenticate', {
         //     method: 'POST',
         //     headers: {
         //         Accept: 'application/json',
@@ -244,53 +127,66 @@ const SignInScreen = ({navigation}) => {
         //     })
         // })
         // .then((response) => {
+        //     setWaiting(false);
         //     // console.log(response);
-        //     console.log(response.status);
+        //     // console.log(response.status);
         //     if(response.status == 200){
         //         return response.json();
+        //     }
+        //     else if(response.status == 400){ // Invalid username or password
+        //         // console.log('Response in JSON : ');
+        //         // console.log(response.json());
+        //         showSweetAlert('warning', 'Login Failed', "Invalid username or password!");
+        //     }
+        //     else if(response.status == 401){ // blocked
+        //         showSweetAlert('warning', 'Login Failed', "Sorry! you have been blocked by the admin."); 
         //     }
         //     else if(response.status == 404){
         //         showSweetAlert('warning', 'Service Unavailble', "Something went wrong. Please try again after sometime...");
         //     }
-        //     else if(response.status == 500){
-        //         showSweetAlert('warning', 'Login Failed', "Invalid username or password.");
+        //     else{
+        //         showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
         //     }
-        //     setWaiting(false);
         // })
         // .then((json) => {
-        //     // if(json.code == 200){
-        //     //     // if(json.data.role == 'Admin'){
-        //     //     //     // showSweetAlert('success', 'Login Success', 'You are admin.');
-        //     //     //     signIn(json.data.username, json.data.role);
-        //     //     // }
-        //     //     // else if(json.data.role == 'User'){
-        //     //     //     // showSweetAlert('success', 'Login Success', 'You are User.');
-        //     //     //     signIn(json.data.username, json.data.role);
-        //     //     // }
-        //     //     // signIn(json.data.userId, json.data.username, json.data.role);
-        //     //     // console.log('UserId in SignInScreen : ' + json.data.userId);
-        //     // }
-        //     // else if(json.code == 401){
-        //     //     showSweetAlert('warning', 'Login Failed', json.message);
-        //     // }
-        //     // else if(json.code == 400){
-        //     //     showSweetAlert('warning', 'Login Failed', json.message);
-        //     // }
-        //     // console.log("After : " + json.token);
         //     if(json){
-        //         // showSweetAlert('success', 'Success', 'Login success.');
-        //         // console.log(data.username);
-        //         signIn(data.username, json.token);
+        //         console.log('Trying to sign in...');
+        //         console.log(json);
+        //         signIn(json.userId, json.username, json.role, json.token);
         //     }
-        //     setWaiting(false);
         // })
         // .catch((error) => {
-        //     // console.log(error.code);
-        //     console.log(error);
+        //     console.log('Error : ' + error);
+        //     setWaiting(false);
         //     showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
         // });
 
-        // signIn(foundUser);
+        // Using Axios
+        const reqData = {
+            username: data.username,
+            password: data.password
+        };
+        axios.post(baseurl+'/users/authenticate', reqData)
+        .then((response) => {
+            setWaiting(false);
+            // console.log(response.status);
+            // console.log(response.data);
+            if(response.status == 200){
+                signIn(response.data.userId, response.data.username, response.data.role, response.data.token);
+            }
+        })
+        .catch((error) => {
+            setWaiting(false);
+            // console.log('catch');
+            // console.log(error.response.status);
+            // console.log(error.response.data);
+            const response = error.response;
+            if(response.status == 400 || response.status == 401){
+                showSweetAlert('warning', 'Login Failed', response.data.message);
+            }else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
+        });
     }
 
     return (

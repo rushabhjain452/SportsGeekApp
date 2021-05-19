@@ -2,11 +2,14 @@
 import { StyleSheet, View, Text, ScrollView, Alert, ActivityIndicator, RefreshControl } from "react-native";
 import { Card, ListItem, Button, Icon } from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
-import SweetAlert from 'react-native-sweet-alert';
 // import { useNavigation } from '@react-navigation/native';
-import baseurl from './url';
 import ContestScreen from "./ContestScreen";
 import AsyncStorage from '@react-native-community/async-storage';
+import axios from 'axios';
+
+import showSweetAlert from '../helpers/showSweetAlert';
+import formatDate from '../helpers/formatDate';
+import {baseurl} from '../config';
 
 function ScheduleScreen({navigation}) {
 
@@ -40,103 +43,47 @@ function ScheduleScreen({navigation}) {
 
   const fetchData = (token) => {
     // console.log(token);
-      fetch(baseurl+'/matches', {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      })
-      .then((response) => response.json())
-      .then((json) => {
-        // console.log(json.data);
-        if(json.code == 200){
-          setData(json.data);
-        }else{
-          showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        }
-        setLoading(false);
-        setRefreshing(false);
-      })
-      .catch((error) => {
-        
-        setLoading(false);
-        setRefreshing(false);
-      });
-  }
-
-  const showSweetAlert = (status, title, msg) => {
-    SweetAlert.showAlertWithOptions({
-        title: title,
-        subTitle: msg,
-        confirmButtonTitle: 'OK',
-        confirmButtonColor: '#000',
-        style: status,
-        cancellable: true
+    // fetch(baseurl+'/matches', {
+    //   headers: {
+    //     'Authorization': 'Bearer ' + token
+    //   }
+    // })
+    // .then((response) => {
+    //   if(response.status == 200){
+    //     return response.json();
+    //   }else{
+    //     showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+    //   }
+    // })
+    // .then((json) => {
+    //   if(json){
+    //     setData(json);
+    //   }
+    //   setLoading(false);
+    //   setRefreshing(false);
+    // })
+    // .catch((error) => {
+    //   setLoading(false);
+    //   setRefreshing(false);
+    // });
+    axios.get(baseurl+'/matches', {
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    })
+    .then((response) => {
+      setLoading(false);
+      setRefreshing(false);
+      if(response.status == 200){
+        setData(response.data);
+      }
+    })
+    .catch((error) => {
+      setLoading(false);
+      setRefreshing(false);
+      // const response = error.message;
+      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
     });
-  }
-
-  const formatDate = (str) => {
-    // let day = str.substring(8,10);
-    // let mth = str.substring(5,7);
-    // let yr = str.substring(0,4);
-    // let hr = str.substring(11,13);
-    // let min = str.substring(14,16);
-    // let ampm;
-    // if(hr < 12){
-    //   ampm = 'AM';
-    // }
-    // else{
-    //   ampm = 'PM';
-    //   hr -= 12;
-    // }
-
-    // let dt = new Date(dateStr);
-    // let str = dt.toString();
-    // console.log(str);
-    // // Wed May 26 2021 19:30:00 GMT+0530 (IST)
-    // let day = str.substring(8,10);
-    // let mth = str.substring(4,7);
-    // let yr = str.substring(11,15);
-    // let hr = str.substring(16,18);
-    // let min = str.substring(19,21);
-    // let ampm;
-    // if(hr < 12){
-    //   ampm = 'AM';
-    // }
-    // else{
-    //   ampm = 'PM';
-    //   hr -= 12;
-    // }
-      
-    // return day + '-' + mth + '-' + yr + '  ' + hr + ':' + min + ' ' + ampm;
-
-    // let current_timestamp = new Date();
-    // console.log(current_timestamp < str);
-
-    // console.log('--------------------------------------------');
-    // console.log('Current date : ' + current_timestamp.toString());
-    // console.log('Current milliseconds : ' + current_timestamp.getMilliseconds());
-    // console.log('Original Date : ' + str);
-    // let dt = new Date(str);
-    // let dt2 = new Date(dt.toISOString());
-    // console.log('Formatted date : ' + dt2.toString());
-    // console.log('Match milliseconds : ' + dt2.getMilliseconds());
-
-    // 2021-04-05T15:30:00.000+00:00
-    let day = str.substring(8,10);
-    let mth = str.substring(5,7);
-    let yr = str.substring(0,4);
-    let hr = str.substring(11,13);
-    let min = str.substring(14,16);
-    let ampm;
-    if(hr < 12){
-      ampm = 'AM';
-    }
-    else{
-      ampm = 'PM';
-      hr -= 12;
-    }
-      
-    return day + '-' + mth + '-' + yr + '  ' + hr + ':' + min + ' ' + ampm;
   }
 
   const handleCardClick = (index, startDatetime, matchId) => {
@@ -169,7 +116,6 @@ function ScheduleScreen({navigation}) {
     // wait(2000).then(() => setRefreshing(false));
   }, []);
 
-
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}> 
     <Text style={styles.text_header}>Upcoming Matches</Text>
@@ -201,6 +147,7 @@ function ScheduleScreen({navigation}) {
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -15,10 +15,10 @@ import {
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
-import SweetAlert from 'react-native-sweet-alert';
 import SwipeList from 'react-native-smooth-swipe-list';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import baseurl from '../url';
+import showSweetAlert from '../../helpers/showSweetAlert';
+import {baseurl} from '../../config';
 import { Card} from 'react-native-elements';
 
 const VenueScreen = ({navigation}) => {
@@ -49,17 +49,6 @@ const VenueScreen = ({navigation}) => {
         })
         .catch((error) => {
             showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-        });
-    }
-
-    const showSweetAlert = (status, title, msg) => {
-        SweetAlert.showAlertWithOptions({
-            title: title,
-            subTitle: msg,
-            confirmButtonTitle: 'OK',
-            confirmButtonColor: '#000',
-            style: status,
-            cancellable: true
         });
     }
 

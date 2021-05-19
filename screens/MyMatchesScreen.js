@@ -4,23 +4,13 @@ import { useTheme } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Card} from 'react-native-elements';
-import SweetAlert from 'react-native-sweet-alert';
 import AsyncStorage from '@react-native-community/async-storage';
-import baseurl from './url';
+import showSweetAlert from '../helpers/showSweetAlert';
+import {baseurl} from '../config';
 import { Alert } from 'react-native';
 
 const Tab = createMaterialTopTabNavigator();
 
-const showSweetAlert = (status, title, msg) => {
-  SweetAlert.showAlertWithOptions({
-      title: title,
-      subTitle: msg,
-      confirmButtonTitle: 'OK',
-      confirmButtonColor: '#000',
-      style: status,
-      cancellable: true
-  });
-}
 const formatDate = (str) => {
   // let dt = new Date(dateStr);
   // let str = dt.toString();

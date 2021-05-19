@@ -15,8 +15,8 @@ import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-community/async-storage';
-import SweetAlert from 'react-native-sweet-alert';
-import baseurl from './url';
+import showSweetAlert from '../helpers/showSweetAlert';
+import {baseurl} from '../config';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 const ChangePasswordScreen = ({navigation}) => {
@@ -42,21 +42,6 @@ const ChangePasswordScreen = ({navigation}) => {
         setUserId(userId+"");
         // console.log(userId);
     }, []);
-
-    const showSweetAlert = (status, title, msg) => {
-        SweetAlert.showAlertWithOptions({
-                title: title,
-                subTitle: msg,
-                confirmButtonTitle: 'OK',
-                confirmButtonColor: '#000',
-                style: status,
-                cancellable: true
-            },
-            () => {
-                setWaiting(false);
-            }
-        );
-    }
 
     const changePasswordHandler = () => {
         console.log(token);

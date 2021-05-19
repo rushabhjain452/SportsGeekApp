@@ -16,8 +16,8 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 // import ImagePicker from 'react-native-image-crop-picker';
 import AsyncStorage from '@react-native-community/async-storage';
-import SweetAlert from 'react-native-sweet-alert';
-import baseurl from '../url';
+import showSweetAlert from '../../helpers/showSweetAlert';
+import {baseurl} from '../../config';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 const UpdateUserScreen = (props) => {
@@ -89,21 +89,6 @@ const UpdateUserScreen = (props) => {
         .catch((error) => {
             // showSweetAlert('error', 'Network Error', 'Error in fetching data. Please try again...');
         });
-    }
-
-    const showSweetAlert = (status, title, msg) => {
-        SweetAlert.showAlertWithOptions({
-                title: title,
-                subTitle: msg,
-                confirmButtonTitle: 'OK',
-                confirmButtonColor: '#000',
-                style: status,
-                cancellable: true
-            },
-            () => {
-                setWaiting(false);
-            }
-        );
     }
 
     const updateProfileHandler = () => {

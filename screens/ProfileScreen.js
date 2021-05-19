@@ -14,8 +14,8 @@ import ChangePasswordScreen from './ChangePasswordScreen';
 import { TouchableOpacity } from 'react-native';
 import { AuthContext } from '../components/context';
 import AsyncStorage from '@react-native-community/async-storage';
-import SweetAlert from 'react-native-sweet-alert';
-import baseurl from './url';
+import showSweetAlert from '../helpers/showSweetAlert';
+import {baseurl} from '../config';
 
 const ProfileScreen = ({navigation}) => {
 
@@ -58,17 +58,6 @@ const ProfileScreen = ({navigation}) => {
     // displayWinningPoints(userId);
     // displayLoosingPoints(userId);
   }, []);
-
-  const showSweetAlert = (status, title, msg) => {
-    SweetAlert.showAlertWithOptions({
-        title: title,
-        subTitle: msg,
-        confirmButtonTitle: 'OK',
-        confirmButtonColor: '#000',
-        style: status,
-        cancellable: true
-    });
-  }
 
   const displayProfile = (userId, token) => {
     // console.log("User Id : " + userId);

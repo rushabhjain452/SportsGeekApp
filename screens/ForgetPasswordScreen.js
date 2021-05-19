@@ -14,8 +14,8 @@ import {
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
-import SweetAlert from 'react-native-sweet-alert';
-import baseurl from './url';
+import showSweetAlert from '../helpers/showSweetAlert';
+import {baseurl} from '../config';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { useNavigation } from '@react-navigation/native';
 const ForgetPasswordScreen = () => {
@@ -40,26 +40,6 @@ const ForgetPasswordScreen = () => {
     const [loading, setLoading] = React.useState(false);
 
     const email_regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-    const showSweetAlert = (status, title, msg) => {
-        SweetAlert.showAlertWithOptions({
-                title: title,
-                subTitle: msg,
-                confirmButtonTitle: 'OK',
-                confirmButtonColor: '#000',
-                style: status,
-                cancellable: true
-            },
-            () => {
-                setLoading(false);
-                // console.log('Success : ' + success);
-                // if(success == true){
-                //     setSuccess(false);
-                //     navigation.navigate('ForgetPasswordScreen2', {userId: userId});
-                // }
-            }
-        );
-    }
 
     const ForgetPasswordHandler = () => {
         if(!validEmail){

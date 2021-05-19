@@ -18,12 +18,12 @@ import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Card} from 'react-native-elements';
 import Feather from 'react-native-vector-icons/Feather';
-import SweetAlert from 'react-native-sweet-alert';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import { useTheme } from 'react-native-paper';
-import baseurl from '../url';
+import showSweetAlert from '../../helpers/showSweetAlert';
+import {baseurl} from '../../config';
 
 import { AuthContext } from '../components/context';
 import { log } from 'react-native-reanimated';
@@ -60,21 +60,6 @@ const UpdateMatchMinBet = (props) => {
     const [team2BetPoints, setTeam2BetPoints] = useState(0);
 
     const [token, setToken] = useState('');
-
-    const showSweetAlert = (status, title, msg) => {
-        SweetAlert.showAlertWithOptions({
-                title: title,
-                subTitle: msg,
-                confirmButtonTitle: 'OK',
-                confirmButtonColor: '#000',
-                style: status,
-                cancellable: true
-            },
-            () => {
-                setLoading(false);
-            }
-        );
-    }
 
     useEffect(async() => {
         const token = await AsyncStorage.getItem('token');

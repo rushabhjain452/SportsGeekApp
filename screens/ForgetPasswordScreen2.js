@@ -14,8 +14,8 @@ import {
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
-import SweetAlert from 'react-native-sweet-alert';
-import baseurl from './url';
+import showSweetAlert from '../helpers/showSweetAlert';
+import {baseurl} from '../config';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 const ForgetPasswordScreen2 = (props) => {
@@ -32,21 +32,6 @@ const ForgetPasswordScreen2 = (props) => {
     const [success, setSuccess] = useState(false);
 
     const password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@%!])[0-9a-zA-Z@%!]{8,}$/;
-
-    const showSweetAlert = (status, title, msg) => {
-        SweetAlert.showAlertWithOptions({
-                title: title,
-                subTitle: msg,
-                confirmButtonTitle: 'OK',
-                confirmButtonColor: '#000',
-                style: status,
-                cancellable: true
-            },
-            () => {
-                setWaiting(false);
-            }
-        );
-    }
 
     const updatePasswordHandler = () => {
         if (otp.length != 6) {

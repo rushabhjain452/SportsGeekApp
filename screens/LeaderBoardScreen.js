@@ -5,10 +5,12 @@ import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import {
   Avatar
 } from 'react-native-paper';
-import baseurl from './url';
+import showSweetAlert from '../helpers/showSweetAlert';
+import {baseurl} from '../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useTheme } from 'react-native-paper';
+
 function LeaderBoard(props) {
 
   const [data, setData] = useState([]);

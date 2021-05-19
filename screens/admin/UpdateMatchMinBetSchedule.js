@@ -2,9 +2,9 @@ import React, { Component,useState, useEffect} from "react";
 import { StyleSheet, View, Text, ScrollView, Alert, ActivityIndicator, RefreshControl } from "react-native";
 import { Card, ListItem, Button, Icon } from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
-import SweetAlert from 'react-native-sweet-alert';
 // import { useNavigation } from '@react-navigation/native';
-import baseurl from '../url';
+import showSweetAlert from '../../helpers/showSweetAlert';
+import {baseurl} from '../../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import UpdateMatchMinBet from './UpdateMatchMinBet';
 
@@ -57,17 +57,6 @@ function UpdateMatchMinBetSchedule({navigation}) {
         setLoading(false);
         setRefreshing(false);
       });
-  }
-
-  const showSweetAlert = (status, title, msg) => {
-    SweetAlert.showAlertWithOptions({
-        title: title,
-        subTitle: msg,
-        confirmButtonTitle: 'OK',
-        confirmButtonColor: '#000',
-        style: status,
-        cancellable: true
-    });
   }
 
   const formatDate = (str) => {

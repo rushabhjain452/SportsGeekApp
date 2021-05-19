@@ -15,4 +15,4 @@ export default data = [
     body: "With the crowd pouring in virtually, stadiums jam-packed, sweats and shouts, heartbeats palpitating, you know the IPL (Indian Premier League) is just about to commence, and it’s gonna roll in full excitement.",
     imgUrl: "https://c.ndtvimg.com/2021-02/a26egge8_ipl-trophy-instagram_625x300_17_February_21.jpg?output-quality=60&output-format=webp&downsize=555:*"
   }
-]
+];

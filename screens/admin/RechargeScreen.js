@@ -20,14 +20,13 @@ import {
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
-import SweetAlert from 'react-native-sweet-alert';
 import SwipeList from 'react-native-smooth-swipe-list';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-import baseurl from '../url';
-
+import showSweetAlert from '../../helpers/showSweetAlert';
+import {baseurl} from '../../config';
 
 const RechargeScreen = ({navigation}) => {
 
@@ -114,21 +113,6 @@ const RechargeScreen = ({navigation}) => {
     const onChangeSS = (value) => {
         setUserId(value);
     };
-
-    const showSweetAlert = (status, title, msg) => {
-        SweetAlert.showAlertWithOptions({
-                title: title,
-                subTitle: msg,
-                confirmButtonTitle: 'OK',
-                confirmButtonColor: '#000',
-                style: status,
-                cancellable: true
-            },
-            () => {
-                setLoading(false);
-            }
-        );
-    }
 
     const rechargeHandler = () => {
         if(userId == 0){

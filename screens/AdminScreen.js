@@ -9,7 +9,6 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useTheme, TouchableRipple } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-
 const AdminScreen = ({navigation}) => {
 
   const [index, setIndex] = React.useState(0)

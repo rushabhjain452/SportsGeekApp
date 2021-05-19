@@ -15,7 +15,7 @@ import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import SweetAlert from 'react-native-sweet-alert';
-import baseurl from './url';
+import {baseurl} from '../config';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 const SignUpScreen = ({navigation}) => {
@@ -122,7 +122,7 @@ const SignUpScreen = ({navigation}) => {
             //     showSweetAlert('error', 'Error 500', 'Error in fetching data. Please try again...');
             // });
             setWaiting(true);
-            fetch(baseurl+'/user/addUser', {
+            fetch(baseurl+'/users/add-user', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -163,7 +163,7 @@ const SignUpScreen = ({navigation}) => {
         }
     }
 
-   return (
+    return (
       <View style={styles.container}>
         <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
         <Spinner visible={waiting} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
