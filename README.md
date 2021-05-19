@@ -1,1 +1,1 @@
-# SportsGeek_ReactNative
+# SportsGeekApp
