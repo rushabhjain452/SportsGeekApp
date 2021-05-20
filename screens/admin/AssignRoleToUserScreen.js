@@ -24,6 +24,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 import {baseurl} from '../../config';
 import showSweetAlert from '../../helpers/showSweetAlert';
+import axios from 'axios';
 
 const AssignRoleToUserScreen = ({navigation}) => {
 
@@ -47,18 +48,15 @@ const AssignRoleToUserScreen = ({navigation}) => {
     }, []);
 
     const displayUser = (token) => {
-        fetch(baseurl+'/user',{
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200)
-            {
-                setData(json.data);
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/users', {headers})
+        .then(response => {
+            if(response.status == 200){
+                setData(response.data);
                 // console.log(json.data);
-                let dt = json.data;
+                let dt = response.data;
                 // console.log(dt.length);
                 let arr = [];
                 for(let i=0; i<dt.length; i++){
@@ -70,29 +68,26 @@ const AssignRoleToUserScreen = ({navigation}) => {
                 setUserData(arr);
                 // console.log(userData);
             }
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching User data. Please try again...');
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
         })
-        .catch((error) => {
-            showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-            console.log(error);
-        });
+        .catch(error => {
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
     }
 
     const displayRole = (token) => {
-        fetch(baseurl+'/role',{
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then((response) => response.json())
-        .then((json) => {
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/roles', {headers})
+        .then(response => {
             setLoading(false);
-            if(json.code == 200)
-            {
-                setData(json.data);
+            if(response.status == 200){
+                setData(response.data);
                 // console.log(json.data);
-                let dt = json.data;
+                let dt = response.data;
                 // console.log(dt.length);
                 let arr = [];
                 for(let i=0; i<dt.length; i++){
@@ -104,14 +99,14 @@ const AssignRoleToUserScreen = ({navigation}) => {
                 setRoleData(arr);
                 // console.log(userData);
             }
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching User data. Please try again...');
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
         })
-        .catch((error) => {
+        .catch(error => {
             setLoading(false);
-            showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-            // console.log(error);
-        });
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
     }
 
     const assignRoleHandler = () => {
@@ -124,30 +119,25 @@ const AssignRoleToUserScreen = ({navigation}) => {
         }
         else{
             setLoading(true);
-            fetch(baseurl+'/user/updateUserRole/'+userId+'/'+roleId, {
-                method: 'PUT',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                }
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                setLoading(false);
-                if(json.code == 201){
-                    showSweetAlert('success', 'Success', 'Role Assigned successfully.');
-                }
-                else{
-                    showSweetAlert('error', 'Error', 'Error in assigning Role.Please try again after sometime.');
-                }
-                setUserId(0);
-                setRoleId(0);
-            })
-            .catch((error) => {
-                setLoading(false);
-                showSweetAlert('error', 'Error', 'Error in processing recharge.Please try again after sometime.');
-            });
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.put(baseurl+'/users/'+userId+'/update-user-role/'+roleId, {}, {headers})
+        .then((response) => {
+            setLoading(false);
+            if(response.status == 200){
+                showSweetAlert('success', 'Success', 'Role Assigned successfully.');
+            }
+            else {
+                showSweetAlert('error', 'Error', 'Fail to Assign Role.Please try again after sometime.');
+            }      
+            setUserId(0);
+                setRoleId(0);        
+        })
+        .catch((error) => {
+            setLoading(false);
+            showSweetAlert('error', 'Error', 'Fail to Assign Role.Please try again after sometime.');
+        })
         }
     }
 

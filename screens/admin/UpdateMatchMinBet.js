@@ -30,7 +30,7 @@ import { log } from 'react-native-reanimated';
 // import { FlatList, ScrollView } from 'react-native-gesture-handler';
 // import { FlatList, ScrollView } from 'react-native-gesture-handler';
 import Spinner from 'react-native-loading-spinner-overlay';
-
+import axios from 'axios';
 // import Users from '../model/User';
 
 const UpdateMatchMinBet = (props) => {
@@ -84,27 +84,45 @@ const UpdateMatchMinBet = (props) => {
 
     const fetchMatchData = (token) => {
         // console.log("MatchId : " + matchId);
-        fetch(baseurl+'/matches/'+matchId, {
-            headers: {
-                'Authorization': 'Bearer ' + token
+        // fetch(baseurl+'/matches/'+matchId, {
+        //     headers: {
+        //         'Authorization': 'Bearer ' + token
+        //     }
+        // })
+        // .then((response) => response.json())
+        // .then((json) => {
+        //     setLoading(false);
+        //     if(json.code == 404){
+        //         setMatchData([]);
+        //     }else if(json.code == 200){
+        //         setMatchData(json.data);
+        //         // console.log('Match Data'+ json.data.minimumBet);
+        //         setPoints(json.data.minimumBet);
+        //         // fetchData(token, json.data);
+        //     } 
+        // })
+        // .catch((error) => {
+        //     setLoading(false);
+        //     showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        // });
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/matches/'+matchId, {headers})
+        .then(response => {
+            setLoading(false);
+            if(response.status == 200){
+                setMatchData(response.data);
+                setPoints(response.data.minimumPoints);
+            }
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
             }
         })
-        .then((response) => response.json())
-        .then((json) => {
+        .catch(error => {
             setLoading(false);
-            if(json.code == 404){
-                setMatchData([]);
-            }else if(json.code == 200){
-                setMatchData(json.data);
-                // console.log('Match Data'+ json.data.minimumBet);
-                setPoints(json.data.minimumBet);
-                // fetchData(token, json.data);
-            } 
-        })
-        .catch((error) => {
-            setLoading(false);
-            showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        });        
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })          
     }
 
     const { colors } = useTheme();
@@ -138,42 +156,59 @@ const UpdateMatchMinBet = (props) => {
         }
         else{
             setLoading(true);
-            fetch(baseurl+'/matches/updateMinBet/'+matchId+'/'+points, {
-                method: 'PUT',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                }
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                // console.log('JSON : ' + json);
-                // console.log('Code : ' + json.code);
-                setLoading(false);
-                if(json.code == 201){
-                    // setAvailablePoints((availablePoints) => parseInt(availablePoints) + parseInt(oldPoints) - parseInt(points));
-                    // // console.log('After update : ' + typeof(oldPoints));
-                    // setOldPoints(points);
-                    // setBetTeamId(json.data.betTeamId);
-                    // // console.log('Update success : BetTeamId = ' + json.data.betTeamId);
-                    // fetchData(token, matchData);
-                    // fetchUserData(userId, token);
-                    // showSweetAlert('success', 'Contest updated successfully', "Your contest is updated from " + oldPoints + " points to " + points + " points.");
-                    showSweetAlert('success', 'Success', "Minimum Bet Updated Successfully");
-                }
-                else{
-                    // console.log('code : ' + json.code);
-                    // console.log('Data : ' + json.data);
-                    showSweetAlert('warning', 'Server Error', 'Something went wrong. Please try again after sometime...');
-                }
-                // setWaiting(false);
-            })
-            .catch((error) => {
-                setLoading(false);
-                showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
-                // setWaiting(false);
-            });
+            // fetch(baseurl+'/matches/updateMinBet/'+matchId+'/'+points, {
+            //     method: 'PUT',
+            //     headers: {
+            //         Accept: 'application/json',
+            //         'Content-Type': 'application/json',
+            //         'Authorization': 'Bearer ' + token
+            //     }
+            // })
+            // .then((response) => response.json())
+            // .then((json) => {
+            //     // console.log('JSON : ' + json);
+            //     // console.log('Code : ' + json.code);
+            //     setLoading(false);
+            //     if(json.code == 201){
+            //         // setAvailablePoints((availablePoints) => parseInt(availablePoints) + parseInt(oldPoints) - parseInt(points));
+            //         // // console.log('After update : ' + typeof(oldPoints));
+            //         // setOldPoints(points);
+            //         // setBetTeamId(json.data.betTeamId);
+            //         // // console.log('Update success : BetTeamId = ' + json.data.betTeamId);
+            //         // fetchData(token, matchData);
+            //         // fetchUserData(userId, token);
+            //         // showSweetAlert('success', 'Contest updated successfully', "Your contest is updated from " + oldPoints + " points to " + points + " points.");
+            //         showSweetAlert('success', 'Success', "Minimum Bet Updated Successfully");
+            //     }
+            //     else{
+            //         // console.log('code : ' + json.code);
+            //         // console.log('Data : ' + json.data);
+            //         showSweetAlert('warning', 'Server Error', 'Something went wrong. Please try again after sometime...');
+            //     }
+            //     // setWaiting(false);
+            // })
+            // .catch((error) => {
+            //     setLoading(false);
+            //     showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
+            //     // setWaiting(false);
+            // });
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.put(baseurl+'/matches/'+matchId+'/update-min-points/'+points, {} , {headers})
+        .then((response) => {
+            setLoading(false);
+            if(response.status == 200){
+                showSweetAlert('success', 'Success', "Minimum Bet Updated Successfully");
+            }
+            else {
+                showSweetAlert('error', 'Error', 'Something went wrong. Please try again after sometime...');
+            }              
+        })
+        .catch((error) => {
+            setLoading(false);
+            showSweetAlert('error', 'Error', 'Something went wrong. Please try again after sometime...');
+        }) 
         }
     }
 

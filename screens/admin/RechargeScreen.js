@@ -27,6 +27,7 @@ import Spinner from 'react-native-loading-spinner-overlay';
 
 import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
+import axios from 'axios';
 
 const RechargeScreen = ({navigation}) => {
 
@@ -54,18 +55,15 @@ const RechargeScreen = ({navigation}) => {
     }, [refreshing]);
 
     const displayUser = (token) => {
-        fetch(baseurl+'/user',{
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200)
-            {
-                setData(json.data);
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/users', {headers})
+        .then(response => {
+            if(response.status == 200){
+                setData(response.data);
                 // console.log(json.data);
-                let dt = json.data;
+                let dt = response.data;
                 // console.log(dt.length);
                 let arr = [];
                 for(let i=0; i<dt.length; i++){
@@ -77,37 +75,56 @@ const RechargeScreen = ({navigation}) => {
                 setUserData(arr);
                 // console.log(userData);
             }
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching User data. Please try again...');
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
         })
-        .catch((error) => {
-            showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-            console.log(error);
-        });
+        .catch(error => {
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
     }
 
     const displayRecharge = (token) => {
-        fetch(baseurl+'/recharge', {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200)
-            {
-                setRecData(json.data);
-            }
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching User data. Please try again...');
+        // fetch(baseurl+'/recharge', {
+        //     headers: {
+        //         'Authorization': 'Bearer ' + token
+        //     }
+        // })
+        // .then((response) => response.json())
+        // .then((json) => {
+        //     if(json.code == 200)
+        //     {
+        //         setRecData(json.data);
+        //     }
+        //     else
+        //         showSweetAlert('error', 'Error', 'Error in fetching User data. Please try again...');
+        //     setLoading(false);
+        //     setRefreshing(false);
+        // })
+        // .catch((error) => {
+        //     showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+        //     setLoading(false);
+        //     setRefreshing(false);
+        // });
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/recharge', {headers})
+        .then(response => {
             setLoading(false);
             setRefreshing(false);
+            if(response.status == 200){
+                setRecData(response.data);
+            }
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
         })
-        .catch((error) => {
-            showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+        .catch(error => {
             setLoading(false);
             setRefreshing(false);
-        });
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
     }
 
     const onChangeSS = (value) => {
@@ -123,35 +140,59 @@ const RechargeScreen = ({navigation}) => {
         }
         else{
             setLoading(true);
-            fetch(baseurl+'/recharge', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    userId: userId,
-                    points: points
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                setLoading(false);
-                if(json.code == 201){
-                    showSweetAlert('success', 'Success', 'Recharge done successfully.');
-                }
-                else{
-                    showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
-                }
-                setUserId(0);
+            // fetch(baseurl+'/recharge', {
+            //     method: 'POST',
+            //     headers: {
+            //         Accept: 'application/json',
+            //         'Content-Type': 'application/json',
+            //         'Authorization': 'Bearer ' + token
+            //     },
+            //     body: JSON.stringify({
+            //         userId: userId,
+            //         points: points
+            //     })
+            // })
+            // .then((response) => response.json())
+            // .then((json) => {
+            //     setLoading(false);
+            //     if(json.code == 201){
+            //         showSweetAlert('success', 'Success', 'Recharge done successfully.');
+            //     }
+            //     else{
+            //         showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
+            //     }
+            //     setUserId(0);
+            //     setPoints(0);
+            //     displayRecharge(token);
+            // })
+            // .catch((error) => {
+            //     setLoading(false);
+            //     showSweetAlert('error', 'Error', 'Error in processing recharge.Please try again after sometime.');
+            // });
+            const reqData = {
+                userId: userId,
+                points: points
+            };
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.post(baseurl+'/recharge', reqData, {headers})
+        .then((response) => {
+            setLoading(false);
+            if(response.status == 201){
+                showSweetAlert('success', 'Success', 'Recharge done successfully.');
+            }
+            else {
+                showSweetAlert('error', 'Error', 'Failed to do Recharge. Please try again...');
+            }           
+            setUserId(0);
                 setPoints(0);
-                displayRecharge(token);
-            })
-            .catch((error) => {
-                setLoading(false);
-                showSweetAlert('error', 'Error', 'Error in processing recharge.Please try again after sometime.');
-            });
+                displayRecharge(token);   
+        })
+        .catch((error) => {
+            setLoading(false);
+            showSweetAlert('error', 'Error', 'Failed to update Tournament. Please try again...');
+        })
         }
     }
 
@@ -269,10 +310,10 @@ const RechargeScreen = ({navigation}) => {
                     <View style={styles.card} key={item.rechargeId} >
                         <View style={styles.cardlist}>  
                             <View style={styles.ellipse1}>
-                                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>{(item.userName).substr(0,2)}</Text>
+                                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>{(item.username).substr(0,2)}</Text>
                             </View>
                             <Text style={[styles.carditem, {width: '30%',paddingLeft:2}]}>{formatDate(item.rechargeDate)}</Text>
-                            <Text style={[styles.carditem, {width: '40%',paddingLeft:2}]}>{item.userName}</Text>
+                            <Text style={[styles.carditem, {width: '40%',paddingLeft:2}]}>{item.username}</Text>
                             <Text style={[styles.carditem, {width: '15%',paddingLeft:2}]}>{item.points}</Text>
                         </View>
                     </View>

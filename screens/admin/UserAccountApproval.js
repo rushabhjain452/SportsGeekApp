@@ -25,6 +25,7 @@ import {baseurl} from '../../config';
 import { Card} from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
+import axios from 'axios';
 
 const UserAccountApproval = ({navigation}) => {
 
@@ -37,7 +38,6 @@ const UserAccountApproval = ({navigation}) => {
     useEffect(async() => {
         const token = await AsyncStorage.getItem('token');
         setToken(token);
-        console.log(token);
         displayUser(token);
     }, [refreshing]);
 
@@ -50,57 +50,50 @@ const UserAccountApproval = ({navigation}) => {
     const displayUser = (token) => {
         let userStatus =0;
         setWaiting(true);
-        fetch(baseurl+'/user/userWithStatus'+'/'+userStatus,{
-            headers: {
-                'Authorization': 'Bearer ' + token
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/users/user-with-status/'+userStatus, {headers})
+        .then(response => {
+            setWaiting(false);
+            if(response.status == 200){
+                setData(response.data);
             }
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            setWaiting(false);
-            if(json.code == 200)
-                setData(json.data);
-            else if(json.code == 400)
+            else{
                 setData([]);
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
             setRefreshing(false);
-            // setLoading(false);
         })
-        .catch((error) => {
+        .catch(error => {
             setWaiting(false);
-            showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
             setRefreshing(false);
-            // setLoading(false);
-        });
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
     }
  
     const updateUser = (userId) => {
+        let userStatus =true;
         setWaiting(true);
-        fetch(baseurl+'/user/updateStatus/'+userId+'/1', {
-            method: 'PUT',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify({
-            })
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            setWaiting(false);
-            if(json.code == 201){
-                showSweetAlert('success', 'Success', 'User Approved');
-                displayUser(token);
-            }
-            else
-                showSweetAlert('error', 'Error', 'Failed to update Status. Please try again...');
-        })
-        .catch((error) => {
-            setWaiting(false);
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.put(baseurl+'/users/'+userId+'/update-status/true', {}, {headers})
+    .then((response) => {
+        setWaiting(false);
+        if(response.status == 200){
+            showSweetAlert('success', 'Success', 'User Approved');
+            displayUser(token);
+        }
+        else {
             showSweetAlert('error', 'Error', 'Failed to update Status. Please try again...');
-        });
+        }              
+    })
+    .catch((error) => {
+        setWaiting(false);
+        console.log(error)
+        showSweetAlert('error', 'Error', 'Failed to update Status. Please try again...');
+    })
     }
 
     const getConfirmation = (userId, username) =>

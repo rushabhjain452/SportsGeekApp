@@ -23,6 +23,7 @@ import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
 import Spinner from 'react-native-loading-spinner-overlay';
 import AsyncStorage from '@react-native-community/async-storage';
+import axios from 'axios';
 
 const GenderScreen = ({navigation}) => {
     // LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
@@ -48,21 +49,22 @@ const GenderScreen = ({navigation}) => {
     }, [refreshing]);
 
     const displayGender = () => {
-        fetch(baseurl+'/gender')
-        .then((response) => response.json())
-        .then((json) => {
+        axios.get(baseurl+'/genders')
+        .then(response => {
             setLoading(false);
             setRefreshing(false);
-            if(json.code == 200)
-                setData(json.data);
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+            if(response.status == 200){
+                setData(response.data);
+            }
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
         })
-        .catch((error) => {
+        .catch(error => {
             setLoading(false);
             setRefreshing(false);
-            showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-        });
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
     }
 
     // const [data, setData] = React.useState({
@@ -85,36 +87,33 @@ const GenderScreen = ({navigation}) => {
     // }
    
     const addGender = () => {
-        // console.log(data.gender);
-        // console.log(baseurl+'/gender');
         if(gender != ''){
             setLoading(true);
-            fetch(baseurl+'/gender', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    name: gender
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
+            // Axios
+            const reqData = {
+                name: gender
+            };
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios
+            .post(baseurl+'/genders', reqData, {headers})
+            .then((response) => {
                 setLoading(false);
-                if(json.code == 201){
+                if(response.status == 201){
                     showSweetAlert('success', 'Success', 'Gender added successfully.');
                     displayGender();
                 }
-                else
+                else {
                     showSweetAlert('error', 'Error', 'Failed to add Gender. Please try again...');
+                }              
                 setGender('');
             })
             .catch((error) => {
+                console.log(error);
                 setLoading(false);
                 showSweetAlert('error', 'Error', 'Failed to add Gender. Please try again...');
-            });
+            })
         }else{
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for Gender.');
         }
@@ -122,27 +121,27 @@ const GenderScreen = ({navigation}) => {
 
     const deleteGender = (id) => {
         setLoading(true);
-        fetch(baseurl+'/gender/'+id, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then((response) => response.json())
-        .then((json) => {
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        // Axios
+        axios.delete(baseurl+'/genders/'+id, {headers})
+        .then((response) => {
             setLoading(false);
-            if(json.code == 200){
+            if(response.status == 200){
                 showSweetAlert('success', 'Success', 'Gender deleted successfully.');
                 displayGender();
             }
-            else
+            else {
                 showSweetAlert('error', 'Error', 'Failed to delete Gender. Please try again...');
+            }              
             setGender('');
         })
         .catch((error) => {
+            console.log(error);
             setLoading(false);
             showSweetAlert('error', 'Error', 'Failed to delete Gender. Please try again...');
-        });
+        })
     }
 
     const editGender = (genderId, name) => {
@@ -154,34 +153,29 @@ const GenderScreen = ({navigation}) => {
     const updateGender = () => {
         if(gender != ''){
             setLoading(true);
-            fetch(baseurl+'/gender/'+genderId, {
-                method: 'PUT',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    name: gender
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                setLoading(false);
-                if(json.code == 201){
-                    showSweetAlert('success', 'Success', 'Gender updated successfully.');
-                    displayGender();
-                }
-                else
-                    showSweetAlert('error', 'Error', 'Failed to update Gender. Please try again...');
-                setGender('');
-                setBtnText('Add');
-                // setGenderId(0);
-            })
-            .catch((error) => {
-                setLoading(false);
+            const reqData = {
+                name: gender
+            };
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.put(baseurl+'/genders/'+genderId, reqData, {headers})
+        .then((response) => {
+            setLoading(false);
+            if(response.status == 200){
+                showSweetAlert('success', 'Success', 'Gender updated successfully.');
+                displayGender();
+            }
+            else {
                 showSweetAlert('error', 'Error', 'Failed to update Gender. Please try again...');
-            });
+            }              
+            setGender('');
+            setBtnText('Add');
+        })
+        .catch((error) => {
+            setLoading(false);
+            showSweetAlert('error', 'Error', 'Failed to update Gender. Please try again...');
+        })
         }else{
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for Gender.');
         }

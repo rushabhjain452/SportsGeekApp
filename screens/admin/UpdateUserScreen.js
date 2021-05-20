@@ -19,6 +19,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
 import Spinner from 'react-native-loading-spinner-overlay';
+import axios from 'axios';
 
 const UpdateUserScreen = (props) => {
 
@@ -48,47 +49,81 @@ const UpdateUserScreen = (props) => {
     }, []);
 
     const fetchGenderData = () => {
-        fetch(baseurl+'/gender')
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200){
-                setGenderData(json.data);
-                setGenderId(data.genderId);
+        // fetch(baseurl+'/genders')
+        // .then((response) => response.json())
+        // .then((json) => {
+        //     if(json.code == 200){
+        //         setGenderData(json.data);
+        //         setGenderId(data.genderId);
+        //     }
+        //     else
+        //         showSweetAlert('error', 'Error', 'Error in fetching gender data. Please try again...');
+        // })
+        // .catch((error) => {
+        //     showSweetAlert('error', 'Error', 'Error in fetching gender data. Please try again...');
+        // });
+        axios.get(baseurl+'/genders')
+        .then(response => {
+            if(response.status == 200){
+                setGenderData(response.data);
+                setGenderId(response.data.genderId);
+                // console.log(genderId)
             }
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching gender data. Please try again...');
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
         })
-        .catch((error) => {
-            showSweetAlert('error', 'Error', 'Error in fetching gender data. Please try again...');
-        });
+        .catch(error => {
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
     }
     
     const fetchUserData = (userId, token) => {
-        fetch(baseurl+'/user/'+userId, {
-            headers: {
-                'Authorization': 'Bearer ' + token
+        // fetch(baseurl+'/user/'+userId, {
+        //     headers: {
+        //         'Authorization': 'Bearer ' + token
+        //     }
+        // })
+        // .then((response) => {
+        //   return response.json();
+        // })
+        // .then((json) => {
+        //     if(json.code == 200)
+        //     {
+        //         // setData(json.data);
+        //         setEmail(json.data.email);
+        //         setFirstName(json.data.firstName);
+        //         setLastName(json.data.lastName);
+        //         setMobileNumber(json.data.mobileNumber);
+        //         setGenderId(json.data.genderId);
+        //     }
+        //     else
+        //       showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+        //     setWaiting(false);
+        // })
+        // .catch((error) => {
+        //     // showSweetAlert('error', 'Network Error', 'Error in fetching data. Please try again...');
+        // });
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/users/'+userId, {headers})
+        .then(response => {
+            if(response.status == 200){
+                setEmail(response.data.email);
+                setFirstName(response.data.firstName);
+                setLastName(response.data.lastName);
+                setMobileNumber(response.data.mobileNumber);
+                setGenderId(response.data.genderId);
             }
-        })
-        .then((response) => {
-          return response.json();
-        })
-        .then((json) => {
-            if(json.code == 200)
-            {
-                // setData(json.data);
-                setEmail(json.data.email);
-                setFirstName(json.data.firstName);
-                setLastName(json.data.lastName);
-                setMobileNumber(json.data.mobileNumber);
-                setGenderId(json.data.genderId);
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
             }
-            else
-              showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
             setWaiting(false);
         })
-        .catch((error) => {
-            // showSweetAlert('error', 'Network Error', 'Error in fetching data. Please try again...');
-        });
+        .catch(error => {
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
     }
 
     const updateProfileHandler = () => {
@@ -109,33 +144,56 @@ const UpdateUserScreen = (props) => {
         }
         else{
             setWaiting(true);
-            fetch(baseurl+'/user/'+userId, {
-                method: 'PUT',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    firstName: firstName,
+            // fetch(baseurl+'/user/'+userId, {
+            //     method: 'PUT',
+            //     headers: {
+            //         Accept: 'application/json',
+            //         'Content-Type': 'application/json',
+            //         'Authorization': 'Bearer ' + token
+            //     },
+            //     body: JSON.stringify({
+            //         firstName: firstName,
+            //         lastName: lastName,
+            //         email: email,
+            //         mobileNumber: mobileNumber,
+            //         genderId: genderId,
+            //     })
+            // })
+            // .then((response) => response.json())
+            // .then((json) => {
+            //     if(json.code == 201){
+            //         showSweetAlert('success', 'Success', 'Profile Updated Successfully...!');
+            //     }else{
+            //         showSweetAlert('warning', 'Updation Failed', 'Profile Updation failed...!');
+            //     }
+            //     setWaiting(false);
+            // })
+            // .catch((error) => {
+            //     showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
+            // });
+            const reqData = {
+                firstName: firstName,
                     lastName: lastName,
                     email: email,
                     mobileNumber: mobileNumber,
                     genderId: genderId,
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                if(json.code == 201){
-                    showSweetAlert('success', 'Success', 'Profile Updated Successfully...!');
-                }else{
-                    showSweetAlert('warning', 'Updation Failed', 'Profile Updation failed...!');
-                }
-                setWaiting(false);
-            })
-            .catch((error) => {
-                showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
-            });
+            };
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.put(baseurl+'/users/'+userId, reqData, {headers})
+        .then((response) => {
+            if(response.status == 200){
+                showSweetAlert('success', 'Success', 'Profile Updated Successfully...!');
+            }
+            else {
+                showSweetAlert('warning', 'Updation Failed', 'Profile Updation failed...!');
+            }     
+            setWaiting(false);         
+        })
+        .catch((error) => {
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
         }
     }
 

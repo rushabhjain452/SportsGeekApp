@@ -10,7 +10,9 @@ import {
     StyleSheet,
     ScrollView,
     StatusBar,
-    LogBox
+    RefreshControl,
+    LogBox,
+    Alert
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -20,7 +22,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
 import AsyncStorage from '@react-native-community/async-storage';
-
+import axios from 'axios';
 
 const VenueScreen = ({navigation}) => {
 
@@ -30,85 +32,94 @@ const VenueScreen = ({navigation}) => {
     const [btnText, setBtnText] = useState('Add');
     const [venueId, setVenueId] = useState(0);
     const [token, setToken] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+    }, []);
 
     useEffect(async() => {
         const token = await AsyncStorage.getItem('token');
         setToken(token);
         displayVenue(token);
         setVenue('');
-    }, []);
+    }, [refreshing]);
 
     const displayVenue = (token) => {
-        fetch(baseurl+'/venue', {
-            headers: {
-                'Authorization': 'Bearer ' + token
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/venues', {headers})
+        .then(response => {
+            setLoading(false);
+            setRefreshing(false);
+            if(response.status == 200){
+                setData(response.data);
             }
-        }) 
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200)
-                setData(json.data);
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
         })
-        .catch((error) => {
-            showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-        });
+        .catch(error => {
+            setLoading(false);
+            setRefreshing(false);
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
     }
 
     const addVenue = () => {
-        // console.log(data.gender);
-        // console.log(baseurl+'/gender');
         if(venue != ''){
-            fetch(baseurl+'/venue', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json' ,
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    name: venue
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                if(json.code == 201){
+            setLoading(true);
+            const reqData = {
+                name: venue
+            };
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.post(baseurl+'/venues', reqData, {headers})
+            .then((response) => {
+                setLoading(false);
+                if(response.status == 201){
                     showSweetAlert('success', 'Success', 'Venue added successfully.');
                     displayVenue(token);
                 }
-                else
+                else {
                     showSweetAlert('error', 'Error', 'Failed to add Venue. Please try again...');
-                    setVenue('');
+                }              
+                setVenue('');
             })
             .catch((error) => {
+                console.log(error);
+                setLoading(false);
                 showSweetAlert('error', 'Error', 'Failed to add Venue. Please try again...');
-            });
+            })
         }else{
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for Venue.');
         }
     }
 
     const deleteVenue = (id) => {
-        fetch(baseurl+'/venue/'+id, {
-            method: 'DELETE', 
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200){
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.delete(baseurl+'/venues/'+id, {headers})
+        .then((response) => {
+            setLoading(false);
+            if(response.status == 200){
                 showSweetAlert('success', 'Success', 'Venue deleted successfully.');
                 displayVenue(token);
             }
-            else
+            else {
                 showSweetAlert('error', 'Error', 'Failed to delete Venue. Please try again...');
-                setVenue('');
+            }              
+            setVenue('');
         })
         .catch((error) => {
+            console.log(error);
+            setLoading(false);
             showSweetAlert('error', 'Error', 'Failed to delete Venue. Please try again...');
-        });
+        })
     }
 
     const editVenue = (venueId, name) => {
@@ -119,35 +130,48 @@ const VenueScreen = ({navigation}) => {
 
     const updateVenue = () => {
         if(venue != ''){
-            fetch(baseurl+'/venue/'+venueId, {
-                method: 'PUT',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json' ,
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    name: venue
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                if(json.code == 201){
-                    showSweetAlert('success', 'Success', 'Venue updated successfully.');
-                    displayVenue(token);
-                }
-                else
-                    showSweetAlert('error', 'Error', 'Failed to update Venue. Please try again...');
-                    setVenue('');
-                    setBtnText('Add');
-            })
-            .catch((error) => {
+            const reqData = {
+                name: venue
+            };
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.put(baseurl+'/venues/'+venueId, reqData, {headers})
+        .then((response) => {
+            setLoading(false);
+            if(response.status == 200){
+                showSweetAlert('success', 'Success', 'Venue updated successfully.');
+                displayVenue(token);
+            }
+            else {
                 showSweetAlert('error', 'Error', 'Failed to update Venue. Please try again...');
-            });
+            }              
+            setVenue('');
+            setBtnText('Add');
+        })
+        .catch((error) => {
+            setLoading(false);
+            showSweetAlert('error', 'Error', 'Failed to update Venue. Please try again...');
+        })
         }else{
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for Venue.');
         }
     }
+
+    const getConfirmation = (venueId) =>
+    Alert.alert(
+    "Delete Confirmation",
+    "Do you really want to delete the Venue ?",
+    [
+        {
+            text: "Cancel"
+        },
+        { 
+            text: "OK", 
+            onPress: () => {deleteVenue(venueId)}
+        }
+    ]
+);
 
    return (
       <View style={styles.container}>
@@ -224,7 +248,7 @@ const VenueScreen = ({navigation}) => {
                             </View>
                             <Text style={[styles.carditem, {width: '65%',paddingLeft:20}]}>{item.name}</Text>
                            <TouchableOpacity onPress={() => {editVenue(item.venueId, item.name)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="circle-edit-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                           <TouchableOpacity onPress={() => {deleteVenue(item.venueId)}}style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
+                           <TouchableOpacity onPress={() => {getConfirmation(item.venueId)}}style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
                         </View>
                         </View>
                 ))
