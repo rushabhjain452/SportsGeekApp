@@ -26,7 +26,7 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import { useTheme } from 'react-native-paper';
 import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
-
+import axios from 'axios';
 const UpdateMatchResultScreen = (props) => {
 
     const navigation = useNavigation();
@@ -71,25 +71,23 @@ const UpdateMatchResultScreen = (props) => {
     const fetchData = (token) => {
         // console.log("MatchId : " + matchId);
         setLoading(true);
-        fetch(baseurl+'/matches/'+matchId, {
-            headers: {
-                'Authorization': 'Bearer ' + token
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/matches/'+matchId, {headers})
+        .then(response => {
+            setLoading(false);
+            if(response.status == 200){
+                setData(response.data);
+            }
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
             }
         })
-        .then((response) => response.json())
-        .then((json) => {
+        .catch(error => {
             setLoading(false);
-            if(json.code == 200){
-                setData(json.data);
-            }else{
-                showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-        })
-        .catch((error) => {
-            setLoading(false);
-            showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            // console.log("ERR : " + error);
-        });    
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })    
     }
 
     // const onRefresh = React.useCallback(() => {
@@ -114,25 +112,23 @@ const UpdateMatchResultScreen = (props) => {
                 resultstatus = 0;
             else if(winnerTeamId == -1)
                 resultstatus = 2;
-            fetch(baseurl+'/matches/updateMatch/'+matchId+'/'+resultstatus+'/'+winnerTeamId, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                setLoading(false);
-                if(json.code == 201){
-                    showSweetAlert('success', 'Match result updated successfully', "Points will be allocated to the winners shortly.");
-                }else{
-                    showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
-                }
-            })
-            .catch((error) => {
-                setLoading(false);
-                showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
-            }); 
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.put(baseurl+'/matches/update-match/'+matchId+'/'+resultstatus+'/'+winnerTeamId, {} , {headers})
+        .then((response) => {
+            setLoading(false);
+            if(response.status == 200){
+                showSweetAlert('success', 'Match result updated successfully', "Points will be allocated to the winners shortly.");
+            }
+            else {
+                showSweetAlert('error', 'Error', 'Something went wrong. Please try again after sometime...');
+            }              
+        })
+        .catch((error) => {
+            setLoading(false);
+            showSweetAlert('error', 'Error', 'Something went wrong. Please try again after sometime...');
+        }) 
         }
     }
 

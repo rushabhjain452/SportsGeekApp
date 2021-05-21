@@ -23,6 +23,7 @@ import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
 import { Card} from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
+import axios from 'axios';
 
 const ListAllUsersScreen = ({navigation}) => {
 
@@ -32,7 +33,6 @@ const ListAllUsersScreen = ({navigation}) => {
     const [refreshing, setRefreshing] = useState(false);
 
     useEffect(async() => {
-        console.log('List All Users Screen');
         const token = await AsyncStorage.getItem('token');
         setToken(token);
         displayUser(token);
@@ -43,27 +43,25 @@ const ListAllUsersScreen = ({navigation}) => {
     }, []);
 
     const displayUser = (token) => {
-        // console.log('fetching data...');
-        fetch(baseurl+'/user', {
-            headers: {
-                'Authorization': 'Bearer ' + token
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/users', {headers})
+        .then(response => {
+            setLoading(false);
+            setRefreshing(false);
+            if(response.status == 200){
+                setData(response.data);
+            }
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
             }
         })
-        .then((response) => response.json())
-        .then((json) => {
-            // console.log('DATA : ' + json);
-            if(json.code == 200)
-                setData(json.data);
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+        .catch(error => {
             setLoading(false);
             setRefreshing(false);
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
         })
-        .catch((error) => {
-            showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-            setLoading(false);
-            setRefreshing(false);
-        });
     }
 
    return (

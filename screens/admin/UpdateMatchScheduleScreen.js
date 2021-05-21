@@ -6,6 +6,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
 import AsyncStorage from '@react-native-community/async-storage';
+import axios from 'axios';
 
 function UpdateMatchScheduleScreen({navigation}) {
 
@@ -35,28 +36,25 @@ function UpdateMatchScheduleScreen({navigation}) {
   // }
 
   const fetchData = (token) => {
-      fetch(baseurl+'/matches/oldMatches', {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      })
-      .then((response) => response.json())
-      .then((json) => {
-        console.log('Code : ' + json.code);
-        console.log(json);
+      const headers = {
+        'Authorization': 'Bearer ' + token
+    }
+    axios.get(baseurl+'/matches/old-match', {headers})
+    .then(response => {
         setLoading(false);
         setRefreshing(false);
-        if(json.code == 200){
-          setData(json.data);
-        }else{
-          showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        if(response.status == 200){
+            setData(response.data);
         }
-      })
-      .catch((error) => {
+        else{
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        }
+    })
+    .catch(error => {
         setLoading(false);
         setRefreshing(false);
-        showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-      });
+        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+    })
   }
 
   const formatDate = (str) => {

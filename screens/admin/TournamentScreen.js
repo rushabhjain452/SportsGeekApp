@@ -23,6 +23,7 @@ import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
+import axios from 'axios';
 
 const TournamentScreen = ({navigation}) => {
 
@@ -47,58 +48,53 @@ const TournamentScreen = ({navigation}) => {
     }, [refreshing]);
 
     const displayTournament = (token) => {
-        fetch(baseurl+'/tournament',{
-            headers: {
-                'Authorization': 'Bearer ' + token
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/tournaments', {headers})
+        .then(response => {
+            setLoading(false);
+            setRefreshing(false);
+            if(response.status == 200){
+                setData(response.data);
+            }
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
             }
         })
-        .then((response) => response.json())
-        .then((json) => {
+        .catch(error => {
             setLoading(false);
             setRefreshing(false);
-            if(json.code == 200)
-                setData(json.data);
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
         })
-        .catch((error) => {
-            setLoading(false);
-            setRefreshing(false);
-            showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-        });
     }
 
     const addTournament = () => {
-        // console.log(data.gender);
-        // console.log(baseurl+'/gender');
         if(tournament != ''){
             setLoading(true);
-            fetch(baseurl+'/tournament', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    name: tournament
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
+            const reqData = {
+                name: tournament
+            };
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.post(baseurl+'/tournaments', reqData, {headers})
+            .then((response) => {
                 setLoading(false);
-                if(json.code == 201){
+                if(response.status == 201){
                     showSweetAlert('success', 'Success', 'Tournament added successfully.');
                     displayTournament(token);
                 }
-                else
+                else {
                     showSweetAlert('error', 'Error', 'Failed to add Tournament. Please try again...');
-                    setTournament('');
+                }              
+                setTournament('');
             })
             .catch((error) => {
+                console.log(error);
                 setLoading(false);
                 showSweetAlert('error', 'Error', 'Failed to add Tournament. Please try again...');
-            });
+            })
         }else{
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for Tournament.');
         }
@@ -106,27 +102,26 @@ const TournamentScreen = ({navigation}) => {
 
     const deleteTournament = (id) => {
         setLoading(true);
-        fetch(baseurl+'/tournament/'+id, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then((response) => response.json())
-        .then((json) => {
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.delete(baseurl+'/tournaments/'+id, {headers})
+        .then((response) => {
             setLoading(false);
-            if(json.code == 200){
+            if(response.status == 200){
                 showSweetAlert('success', 'Success', 'Tournament deleted successfully.');
                 displayTournament(token);
             }
-            else
+            else {
                 showSweetAlert('error', 'Error', 'Failed to delete Tournament. Please try again...');
-                setTournament('');
+            }              
+            setTournament('');
         })
         .catch((error) => {
+            console.log(error);
             setLoading(false);
             showSweetAlert('error', 'Error', 'Failed to delete Tournament. Please try again...');
-        });
+        })
     }
 
     const editTournament = (tournamentId, name) => {
@@ -138,33 +133,29 @@ const TournamentScreen = ({navigation}) => {
     const updateTournament = () => {
         if(tournament != ''){
             setLoading(true);
-            fetch(baseurl+'/tournament/'+tournamentId, {
-                method: 'PUT',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    name: tournament
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                setLoading(false);
-                if(json.code == 201){
-                    showSweetAlert('success', 'Success', 'Tournament updated successfully.');
-                    displayTournament(token);
-                }
-                else
-                    showSweetAlert('error', 'Error', 'Failed to update Tournament. Please try again...');
-                    setTournament('');
-                    setBtnText('Add');
-            })
-            .catch((error) => {
-                setLoading(false);
+            const reqData = {
+                name: tournament
+            };
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.put(baseurl+'/tournaments/'+tournamentId, reqData, {headers})
+        .then((response) => {
+            setLoading(false);
+            if(response.status == 200){
+                showSweetAlert('success', 'Success', 'Tournament updated successfully..');
+                displayTournament(token);
+            }
+            else {
                 showSweetAlert('error', 'Error', 'Failed to update Tournament. Please try again...');
-            });
+            }              
+            setTournament('');
+            setBtnText('Add');
+        })
+        .catch((error) => {
+            setLoading(false);
+            showSweetAlert('error', 'Error', 'Failed to update Tournament. Please try again...');
+        })
         }else{
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for Tournament.');
         }

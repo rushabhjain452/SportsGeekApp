@@ -7,7 +7,7 @@ import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import UpdateMatchMinBet from './UpdateMatchMinBet';
-
+import axios from 'axios';
 function UpdateMatchMinBetSchedule({navigation}) {
 
   // const navigation = useNavigation();
@@ -40,23 +40,42 @@ function UpdateMatchMinBetSchedule({navigation}) {
 
   const fetchData = (token) => {
     // console.log(token);
-      fetch(baseurl+'/matches', {
-        headers: {
-          'Authorization': 'Bearer ' + token
+      // fetch(baseurl+'/matches', {
+      //   headers: {
+      //     'Authorization': 'Bearer ' + token
+      //   }
+      // })
+      // .then((response) => response.json())
+      // .then((json) => {
+      //   // console.log(json.data);
+      //   setData(json.data);
+      //   setLoading(false);
+      //   setRefreshing(false);
+      // })
+      // .catch((error) => {
+      //   showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+      //   setLoading(false);
+      //   setRefreshing(false);
+      // });
+      const headers = {
+        'Authorization': 'Bearer ' + token
+    }
+    axios.get(baseurl+'/matches', {headers})
+    .then(response => {
+        setLoading(false);
+        setRefreshing(false);
+        if(response.status == 200){
+            setData(response.data);
         }
-      })
-      .then((response) => response.json())
-      .then((json) => {
-        // console.log(json.data);
-        setData(json.data);
+        else{
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        }
+    })
+    .catch(error => {
         setLoading(false);
         setRefreshing(false);
-      })
-      .catch((error) => {
-        showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        setLoading(false);
-        setRefreshing(false);
-      });
+        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+    })
   }
 
   const formatDate = (str) => {

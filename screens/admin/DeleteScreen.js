@@ -24,6 +24,7 @@ import {baseurl} from '../../config';
 import { Card} from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
+import axios from 'axios';
 
 const DeleteScreen = ({navigation}) => {
 
@@ -45,53 +46,93 @@ const DeleteScreen = ({navigation}) => {
 
     const displayUser = (token) => {
         let userStatus = 1;
-        fetch(baseurl+'/user/userWithStatus'+'/'+userStatus, {
-            headers: {
-                'Authorization': 'Bearer ' + token
+        // fetch(baseurl+'/user/userWithStatus'+'/'+userStatus, {
+        //     headers: {
+        //         'Authorization': 'Bearer ' + token
+        //     }
+        // })
+        // .then((response) => response.json())
+        // .then((json) => {
+        //     if(json.code == 200)
+        //         setData(json.data);
+        //     else if(json.code == 400)
+        //         setData([]);
+        //     else
+        //         showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+        //     setLoading(false);
+        //     setRefreshing(false);
+        // })
+        // .catch((error) => {
+        //     showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+        //     setLoading(false);
+        //     setRefreshing(false);
+        // });
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/users/user-with-status/'+userStatus, {headers})
+        .then(response => {
+            if(response.status == 200){
+                setData(response.data);
             }
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200)
-                setData(json.data);
-            else if(json.code == 400)
+            else{
                 setData([]);
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
             setLoading(false);
             setRefreshing(false);
         })
-        .catch((error) => {
-            showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+        .catch(error => {
             setLoading(false);
             setRefreshing(false);
-        });
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
     }
  
     const updateUser = (userId) => {
         setLoading(true);
-        fetch(baseurl+'/user/deleteUser/'+userId, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then((response) => response.json())
-        .then((json) => {
+        // fetch(baseurl+'/users/'+userId, {
+        //     method: 'DELETE',
+        //     headers: {
+        //         'Authorization': 'Bearer ' + token
+        //     }
+        // })
+        // .then((response) => response.json())
+        // .then((json) => {
+        //     setLoading(false);
+        //     setRefreshing(false);
+        //     if(json.code == 201){
+        //         showSweetAlert('success', 'Success', 'User deleted successfully...');
+        //         displayUser(token);
+        //     }
+        //     else
+        //         showSweetAlert('error', 'Error', 'Failed to update Status. Please try again...');
+        // })
+        // .catch((error) => {
+        //     setLoading(false);
+        //     setRefreshing(false);
+        //     showSweetAlert('error', 'Error', 'Failed to update Status. Please try again...');
+        // });
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.delete(baseurl+'/users/'+userId, {headers})
+        .then((response) => {
             setLoading(false);
             setRefreshing(false);
-            if(json.code == 201){
+            if(response.status == 200){
                 showSweetAlert('success', 'Success', 'User deleted successfully...');
                 displayUser(token);
             }
-            else
-                showSweetAlert('error', 'Error', 'Failed to update Status. Please try again...');
+            else {
+                showSweetAlert('error', 'Error', 'Failed to delete User. Please try again...');
+            }              
         })
         .catch((error) => {
             setLoading(false);
             setRefreshing(false);
-            showSweetAlert('error', 'Error', 'Failed to update Status. Please try again...');
-        });
+            showSweetAlert('error', 'Error', 'Failed to delete User. Please try again...');
+        })
     }
 
     const getConfirmation = (userId, username) =>
