@@ -8,22 +8,23 @@ import AsyncStorage from '@react-native-community/async-storage';
 import showSweetAlert from '../helpers/showSweetAlert';
 import {baseurl} from '../config';
 import { Alert } from 'react-native';
+import axios from 'axios';
 
 const Tab = createMaterialTopTabNavigator();
 
-const formatDate = (str) => {
-  // let dt = new Date(dateStr);
-  // let str = dt.toString();
-  // let day = str.substring(8,10);
-  // let mth = str.substring(4,7);
-  // let yr = str.substring(11,15);
-  // let hr = str.substring(16,18);
-  // let min = str.substring(19,21);
+const formatDate = (dateStr) => {
+  let dt = new Date(dateStr);
+  let str = dt.toString();
   let day = str.substring(8,10);
-  let mth = str.substring(5,7);
-  let yr = str.substring(0,4);
-  let hr = str.substring(11,13);
-  let min = str.substring(14,16);
+  let mth = str.substring(4,7);
+  let yr = str.substring(11,15);
+  let hr = str.substring(16,18);
+  let min = str.substring(19,21);
+  // let day = str.substring(8,10);
+  // let mth = str.substring(5,7);
+  // let yr = str.substring(0,4);
+  // let hr = str.substring(11,13);
+  // let min = str.substring(14,16);
   let ampm;
   if(hr < 12){
     ampm = 'AM';
@@ -55,34 +56,25 @@ function UpcomingMatches() {
   }, []);
 
   const fetchData = (userId, token) => {
-    // console.log("Use Id : "+userId);
-    fetch(baseurl+'/myMatches/upcoming/'+userId, {
+    axios.get(baseurl+'/users/'+userId+'/upcoming', {
       headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      })
-      .then((response) => response.json())
-      .then((json) => {
-        // console.log('Upcoming Data : ' + data);
-        setLoading(false);
-        setRefreshing(false);
-        if(json.code == 200){
-          setData(json.data);
-        }
-        else if(json.code == 404){
-          // showSweetAlert('warning', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        }
-        else{
-          // setData([]);
-          showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        }
-      })
-      .catch((error) => {
-        setLoading(false);
-        setRefreshing(false);
-        // showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
-      });
+        'Authorization': 'Bearer ' + token
+      }
+    })
+    .then((response) => {
+      setLoading(false);
+      setRefreshing(false);
+      if(response.status == 200){
+        setData(response.data);
+      }else{
+        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+      }
+    })
+    .catch((error) => {
+      setLoading(false);
+      setRefreshing(false);
+      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+    });
   }  
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}> 
@@ -114,7 +106,7 @@ function UpcomingMatches() {
               <Card.Divider/>
               <View style={{display: "flex", flexDirection: 'row', justifyContent: 'space-between',width:'100%'}}>
               <Text style={{textAlign: 'left',fontSize:18,paddingLeft:20,fontWeight:'bold',width:'50%'}}>Placed Contest:{" "+item.teamName}</Text>
-              <Text style={{textAlign: 'right',fontSize:18,paddingRight:20,fontWeight:'bold',width:'50%'}}>BetPoints:{" "+item.betPoints}</Text>
+              <Text style={{textAlign: 'right',fontSize:18,paddingRight:20,fontWeight:'bold',width:'50%'}}>Contest Points:{" "+item.contestPoints}</Text>
               </View>
           </TouchableOpacity>
           ))
@@ -144,34 +136,29 @@ function LiveMatches({navigation}) {
 
   const fetchData = (userId, token) => {
     // console.log("U Id : " + userId);
+    setLoading(false);
+    setRefreshing(false);
+    axios.get(baseurl+'/users/'+userId+'/live', {
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    })
+    .then((response) => {
       setLoading(false);
       setRefreshing(false);
-      fetch(baseurl+'/myMatches/live/'+userId, {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      })
-      .then((response) => response.json())
-      .then((json) => {
-        // console.log('Live Data : ' + data);
-        if(json.code == 200){
-          setData(json.data);
-        }
-        else if(json.code == 404){
-          // showSweetAlert('warning', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        }
-        else{
-          showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        }
-        // console.log(data);
-      })
-      .catch((error) => {
-        setLoading(false);
-        setRefreshing(false);
-        // showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
-      });
+      if(response.status == 200){
+        setData(response.data);
+      }else{
+        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+      }
+    })
+    .catch((error) => {
+      setLoading(false);
+      setRefreshing(false);
+      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+    });
   }
+
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>} > 
     {loading == true  && (<ActivityIndicator size="large" color="#19398A" />)}
@@ -199,7 +186,7 @@ function LiveMatches({navigation}) {
               <Card.Divider/>
               <View style={{display: "flex", flexDirection: 'row', justifyContent: 'space-between',width:'100%'}}>
               <Text style={{textAlign: 'left',fontSize:18,paddingLeft:20,fontWeight:'bold',width:'50%'}}>Placed Contest:{" "+item.teamName}</Text>
-              <Text style={{textAlign: 'right',fontSize:18,paddingRight:20,fontWeight:'bold',width:'50%'}}>BetPoints:{" "+item.betPoints}</Text>
+              <Text style={{textAlign: 'right',fontSize:18,paddingRight:20,fontWeight:'bold',width:'50%'}}>Contest Points:{" "+item.contestPoints}</Text>
               </View>
           </TouchableOpacity>
           ))
@@ -229,33 +216,29 @@ function Results({navigation}) {
   }, []);
   
   const fetchResultData = (userId, token) => {
+    setLoading(false);
+    setRefreshing(false);
+  // console.log("User Id : " + userId);
+    axios.get(baseurl+'/users/'+userId+'/result', {
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    })
+    .then((response) => {
       setLoading(false);
       setRefreshing(false);
-    // console.log("User Id : " + userId);
-      fetch(baseurl+'/myMatches/result/'+userId, {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      })
-      .then((response) => response.json())
-      .then((json) => {
-        // console.log('Result Data : ' + data);
-        if(json.code == 200){
-          setResult(json.data);
-        }
-        else if(json.code == 404){
-          // showSweetAlert('warning', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        }
-        else{
-          showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        }
-      })
-      .catch((error) => {
-        setLoading(false);
-        setRefreshing(false);
-        // showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
-      });
+      if(response.status == 200){
+        setResult(response.data);
+      }else{
+        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      setLoading(false);
+      setRefreshing(false);
+      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+    });
   }
   return (
    <ScrollView style={styles.container} keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}> 
@@ -284,7 +267,7 @@ function Results({navigation}) {
               <Card.Divider/>
               <View style={{display: "flex", flexDirection: 'row', justifyContent: 'space-between',width:'100%'}}>
                 <Text style={{textAlign: 'left',fontSize:16,paddingLeft:10,fontWeight:'bold'}}>Placed contest : {oldresult.teamName}</Text>
-                <Text style={{textAlign: 'right',fontSize:16,paddingRight:10,fontWeight:'bold'}}>Contest Points : {oldresult.betPoints}</Text>
+                <Text style={{textAlign: 'right',fontSize:16,paddingRight:10,fontWeight:'bold'}}>Contest Points : {oldresult.contestPoints}</Text>
               </View>
               <View style={{display: "flex", flexDirection: 'row', justifyContent: 'space-between',width:'100%', marginTop: 10}}>
               {
@@ -295,7 +278,7 @@ function Results({navigation}) {
               {
                 (oldresult.winnerTeamName == null || oldresult.winnerTeamName == oldresult.teamName) ?
                 (<Text style={{textAlign: 'right',fontSize:16,paddingRight:10,fontWeight:'bold'}}>Winning Points:{" "+oldresult.winningPoints}</Text>) :
-                (<Text style={{textAlign: 'right',fontSize:16,paddingRight:10,fontWeight:'bold'}}>Losing Points:{" "+oldresult.betPoints}</Text>)
+                (<Text style={{textAlign: 'right',fontSize:16,paddingRight:10,fontWeight:'bold'}}>Losing Points:{" "+oldresult.contestPoints}</Text>)
               }
               </View>
           </TouchableOpacity>

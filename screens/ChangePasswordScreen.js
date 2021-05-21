@@ -16,8 +16,9 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-community/async-storage';
 import showSweetAlert from '../helpers/showSweetAlert';
-import {baseurl} from '../config';
+import {baseurl, errorMessage} from '../config';
 import Spinner from 'react-native-loading-spinner-overlay';
+import axios from 'axios';
 
 const ChangePasswordScreen = ({navigation}) => {
 
@@ -31,7 +32,7 @@ const ChangePasswordScreen = ({navigation}) => {
     const [secureTextEntry3, setSecureTextEntry3] = useState(true);
     const [token, setToken] = useState('');
 
-    const [waiting, setWaiting] = React.useState(false);
+    const [loading, setLoading] = React.useState(false);
 
     const password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@%!])[0-9a-zA-Z@%!]{8,}$/;
 
@@ -44,7 +45,7 @@ const ChangePasswordScreen = ({navigation}) => {
     }, []);
 
     const changePasswordHandler = () => {
-        console.log(token);
+        // console.log(token);
         if(oldPassword.length == 0){
             showSweetAlert('warning', 'Invalid Input!', 'Please enter valid old password to proceed.');
         }
@@ -55,46 +56,39 @@ const ChangePasswordScreen = ({navigation}) => {
             showSweetAlert('warning', 'Invalid Input!', 'New Password and Confirm New Password must match.');
         }
         else{
-            setWaiting(true);
-            fetch(baseurl+'/user/updatePassword', {
-                method: 'PUT',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    userId: userId,
-                    oldPassword: oldPassword,
-                    newPassword: newPassword
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                setWaiting(false);
-                if(json.code == 200){
+            setLoading(true);
+            const headers = {'Authorization': 'Bearer ' + token};
+            const reqData = {
+                userId: userId,
+                oldPassword: oldPassword,
+                newPassword: newPassword
+            };
+            axios.put(baseurl+'/users/update-password', reqData, {headers})
+            .then((response) => {
+                setLoading(false);
+                if(response.status == 200){
                     showSweetAlert('success', 'Success', 'Password updated successfully.!');
-                }
-                else if(json.code == 400){
-                    showSweetAlert('warning', 'Invalid Old Password', 'Sorry, your old Password is incorrect. Please contact administrator.');
-                }
-                else if(json.code == 500){
-                    showSweetAlert('error', 'Network error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
                 }else{
-                    showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
+                    showSweetAlert('error', 'Network Error', errorMessage);
                 }
             })
             .catch((error) => {
-                setWaiting(false);
-                // showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
-                showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
+                setLoading(false);
+                console.log(error.response.status);
+                if(error.response.status == 400){
+                    showSweetAlert('warning', 'Invalid Old Password', 'Sorry, your old Password is incorrect. Please contact administrator.');
+                }else if(error.response.status == 500){
+                    showSweetAlert('error', 'Network error', errorMessage);
+                }else{
+                    showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
+                }
             });
         }
     }
 
    return (
       <View style={styles.container}>
-        <Spinner visible={waiting} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
+        <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
         <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
         <View style={styles.header}>
             <Text style={styles.text_header}>Change Password</Text>

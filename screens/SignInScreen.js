@@ -35,7 +35,7 @@ const SignInScreen = ({navigation}) => {
         isValidPassword: true,
     });
 
-    const [waiting, setWaiting] = React.useState(false);
+    const [loading, setLoading] = React.useState(false);
 
     const { colors } = useTheme();
     const { signIn } = React.useContext(AuthContext);
@@ -94,14 +94,6 @@ const SignInScreen = ({navigation}) => {
         }
     }
 
-    // const [userId, setUserId] = useState(0);
-    // const [username, setUsername] = useState('');
-    // const [role, setRole] = useState('');
-
-    // const storeUserDetails = (userid, role) => {
-
-    // }
-
     const loginHandle = (userName, password) => {
 
         if ( data.username.length == 0 || data.password.length == 0 ) {
@@ -113,73 +105,20 @@ const SignInScreen = ({navigation}) => {
         }
 
         // New API
-        setWaiting(true);
-        // Using Fetch
-        // fetch(baseurl+'/users/authenticate', {
-        //     method: 'POST',
-        //     headers: {
-        //         Accept: 'application/json',
-        //         'Content-Type': 'application/json' 
-        //     },
-        //     body: JSON.stringify({
-        //         username: data.username,
-        //         password: data.password
-        //     })
-        // })
-        // .then((response) => {
-        //     setWaiting(false);
-        //     // console.log(response);
-        //     // console.log(response.status);
-        //     if(response.status == 200){
-        //         return response.json();
-        //     }
-        //     else if(response.status == 400){ // Invalid username or password
-        //         // console.log('Response in JSON : ');
-        //         // console.log(response.json());
-        //         showSweetAlert('warning', 'Login Failed', "Invalid username or password!");
-        //     }
-        //     else if(response.status == 401){ // blocked
-        //         showSweetAlert('warning', 'Login Failed', "Sorry! you have been blocked by the admin."); 
-        //     }
-        //     else if(response.status == 404){
-        //         showSweetAlert('warning', 'Service Unavailble', "Something went wrong. Please try again after sometime...");
-        //     }
-        //     else{
-        //         showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
-        //     }
-        // })
-        // .then((json) => {
-        //     if(json){
-        //         console.log('Trying to sign in...');
-        //         console.log(json);
-        //         signIn(json.userId, json.username, json.role, json.token);
-        //     }
-        // })
-        // .catch((error) => {
-        //     console.log('Error : ' + error);
-        //     setWaiting(false);
-        //     showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
-        // });
-
-        // Using Axios
+        setLoading(true);
         const reqData = {
             username: data.username,
             password: data.password
         };
         axios.post(baseurl+'/users/authenticate', reqData)
         .then((response) => {
-            setWaiting(false);
-            // console.log(response.status);
-            // console.log(response.data);
+            setLoading(false);
             if(response.status == 200){
                 signIn(response.data.userId, response.data.username, response.data.role, response.data.token);
             }
         })
         .catch((error) => {
-            setWaiting(false);
-            // console.log('catch');
-            // console.log(error.response.status);
-            // console.log(error.response.data);
+            setLoading(false);
             const response = error.response;
             if(response.status == 400 || response.status == 401){
                 showSweetAlert('warning', 'Login Failed', response.data.message);
@@ -192,7 +131,7 @@ const SignInScreen = ({navigation}) => {
     return (
       <View style={styles.container}>
           <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
-          <Spinner visible={waiting} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
+          <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
         <View style={styles.header}>
             <Text style={styles.text_header}>Welcome!</Text>
         </View>

@@ -18,7 +18,8 @@ import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 import showSweetAlert from '../helpers/showSweetAlert';
-import {baseurl} from '../config';
+import {baseurl, errorMessage} from '../config';
+import axios from 'axios';
 
 const UpdateProfileScreen = ({navigation}) => {
 
@@ -35,7 +36,7 @@ const UpdateProfileScreen = ({navigation}) => {
     const [genderData, setGenderData] = useState([]);
     const [token, setToken] = useState('');
 
-    const [waiting, setWaiting] = React.useState(true);
+    const [loading, setLoading] = React.useState(true);
 
     const email_regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -50,46 +51,37 @@ const UpdateProfileScreen = ({navigation}) => {
     }, []);
 
     const fetchGenderData = () => {
-        fetch(baseurl+'/gender')
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200){
-                setGenderData(json.data);
-                setGenderId(data.genderId);
+        axios.get(baseurl+'/genders')
+        .then((response) => {
+            if(response.status == 200){
+                setGenderData(response.data);
+            }else{
+                showSweetAlert('error', 'Network Error', errorMessage);
             }
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching gender data. Please try again...');
         })
         .catch((error) => {
-            showSweetAlert('error', 'Error', 'Error in fetching gender data. Please try again...');
+            showSweetAlert('error', 'Network Error', errorMessage);
         });
     }
 
     const fetchUserData = (userId, token) => {
-        fetch(baseurl+'/user/'+userId, {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
+        const headers = {'Authorization': 'Bearer ' + token};
+        axios.get(baseurl+'/users/'+userId, {headers})
         .then((response) => {
-          return response.json();
-        })
-        .then((json) => {
-            if(json.code == 200)
-            {
-                // setData(json.data);
-                setEmail(json.data.email);
-                setFirstName(json.data.firstName);
-                setLastName(json.data.lastName);
-                setMobileNumber(json.data.mobileNumber);
-                setGenderId(json.data.genderId);
+            setLoading(false);
+            if(response.status == 200){
+                setEmail(response.data.email);
+                setFirstName(response.data.firstName);
+                setLastName(response.data.lastName);
+                setMobileNumber(response.data.mobileNumber);
+                setGenderId(response.data.genderId);
+            }else{
+                showSweetAlert('error', 'Network Error', errorMessage);
             }
-            else
-              showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-            setWaiting(false);
         })
         .catch((error) => {
-            // showSweetAlert('error', 'Network Error', 'Error in fetching data. Please try again...');
+            setLoading(false);
+            showSweetAlert('error', 'Network Error', errorMessage);
         });
     }
 
@@ -120,40 +112,38 @@ const UpdateProfileScreen = ({navigation}) => {
             showSweetAlert('warning', 'Invalid Input!', 'Please select your gender to proceed.');
         }
         else{
-            setWaiting(true);
-            fetch(baseurl+'/user/'+userId, {
-                method: 'PUT',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    firstName: firstName,
-                    lastName: lastName,
-                    email: email,
-                    mobileNumber: mobileNumber,
-                    genderId: genderId,
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                if(json.code == 201){
+            setLoading(true);
+            const headers = {'Authorization': 'Bearer ' + token};
+            const requestData = {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                mobileNumber: mobileNumber,
+                genderId: genderId
+            };
+            axios.put(baseurl+'/users/'+userId, requestData, {headers})
+            .then((response) => {
+                setLoading(false);
+                console.log(response.status);
+                console.log(response.data);
+                if(response.status == 200){
                     showSweetAlert('success', 'Success', 'Profile Updated Successfully...!');
                 }else{
                     showSweetAlert('warning', 'Updation Failed', 'Profile Updation failed...!');
                 }
-                setWaiting(false);
             })
             .catch((error) => {
-                showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
+                console.log(error.response.status);
+                console.log(error.response.data);
+                setLoading(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
             });
         }
     }
 
     return (
       <View style={styles.container}>
-        <Spinner visible={waiting} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
+        <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
         <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
         <View style={styles.header}>
             <Text style={styles.text_header}>Update Profile</Text>

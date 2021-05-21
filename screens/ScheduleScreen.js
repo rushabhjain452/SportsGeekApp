@@ -42,30 +42,6 @@ function ScheduleScreen({navigation}) {
   // }
 
   const fetchData = (token) => {
-    // console.log(token);
-    // fetch(baseurl+'/matches', {
-    //   headers: {
-    //     'Authorization': 'Bearer ' + token
-    //   }
-    // })
-    // .then((response) => {
-    //   if(response.status == 200){
-    //     return response.json();
-    //   }else{
-    //     showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-    //   }
-    // })
-    // .then((json) => {
-    //   if(json){
-    //     setData(json);
-    //   }
-    //   setLoading(false);
-    //   setRefreshing(false);
-    // })
-    // .catch((error) => {
-    //   setLoading(false);
-    //   setRefreshing(false);
-    // });
     axios.get(baseurl+'/matches', {
       headers: {
         'Authorization': 'Bearer ' + token
@@ -76,6 +52,8 @@ function ScheduleScreen({navigation}) {
       setRefreshing(false);
       if(response.status == 200){
         setData(response.data);
+      }else{
+        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
       }
     })
     .catch((error) => {
