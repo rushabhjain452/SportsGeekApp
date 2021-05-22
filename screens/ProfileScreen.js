@@ -11,17 +11,17 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import Share from 'react-native-share';
 import ChangePasswordScreen from './ChangePasswordScreen';
-import { TouchableOpacity } from 'react-native';
 import { AuthContext } from '../components/context';
 import AsyncStorage from '@react-native-community/async-storage';
 import showSweetAlert from '../helpers/showSweetAlert';
 import {baseurl} from '../config';
+import axios from 'axios';
 
 const ProfileScreen = ({navigation}) => {
 
   const [data, setData] = useState({});
-  const [dataWinningPoints,setWinningPoints] = useState(0);
-  const [dataLoosingPoints,setLoosingPoints] = useState(0);
+  const [winningPoints, setWinningPoints] = useState(0);
+  const [loosingPoints, setLoosingPoints] = useState(0);
   const [userId, setUserId] = useState(0);
   const [shortName, setShortName] = useState('');
   const [refreshing, setRefreshing] = React.useState(false);
@@ -50,7 +50,7 @@ const ProfileScreen = ({navigation}) => {
     if(data.firstName){
       setShortName(data.firstName.substr(0,1) + data.lastName.substr(0,1));
     }
-  });
+  }, []);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -60,84 +60,60 @@ const ProfileScreen = ({navigation}) => {
   }, []);
 
   const displayProfile = (userId, token) => {
-    // console.log("User Id : " + userId);
-    fetch(baseurl+'/user/'+userId, {
-      headers: {
-        'Authorization': 'Bearer ' + token
+    if(userId == 0){
+      return;
+    }
+    const headers = {'Authorization': 'Bearer ' + token};
+    axios.get(baseurl+'/users/'+userId, {headers})
+    .then((response) => {
+      if(response.status == 200){
+          setData(response.data);
+      }else{
+        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
       }
     })
-    .then((response) => {
-      return response.json();
-    })
-    .then((json) => {
-        if(json.code == 200)
-        {
-          setData(json.data);
-        }
-        // else
-          // showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-    })
     .catch((error) => {
-        // console.log(error);
-        // showSweetAlert('error', 'Network Error', 'Error in fetching data. Please try again...');
+      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
     });
   }
 
   const displayWinningPoints = (userId, token) => {
-    // console.log("User Id : " + userId);
-    fetch(baseurl+'/user/WinningPoints/'+userId, {
-      headers: {
-        'Authorization': 'Bearer ' + token
+    const headers = {'Authorization': 'Bearer ' + token};
+    axios.get(baseurl+'/users/'+userId+'/winning-points', {headers})
+    .then((response) => {
+      if(response.status == 200){
+        setWinningPoints(response.data.winningPoints);
+      }else{
+        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
       }
     })
-    .then((response) => {
-      return response.json();
-    })
-    .then((json) => {
-        if(json.code == 200)
-        {
-          setWinningPoints(json.data);
-        }
-        // else
-          // showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-    })
     .catch((error) => {
-        // console.log(error);
-        // showSweetAlert('error', 'Network Error', 'Error in fetching data. Please try again...');
+      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
     });
   }
+
   const displayLoosingPoints = (userId, token) => {
-    // console.log("User Id : " + userId);
-    fetch(baseurl+'/user/LoosingPoints/'+userId, {
-      headers: {
-        'Authorization': 'Bearer ' + token
+    const headers = {'Authorization': 'Bearer ' + token};
+    axios.get(baseurl+'/users/'+userId+'/loosing-points', {headers})
+    .then((response) => {
+      setLoading(false);
+      setRefreshing(false);
+      if(response.status == 200){
+        setLoosingPoints(response.data.loosingPoints);
+      }else{
+        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
       }
     })
-    .then((response) => {
-      return response.json();
-    })
-    .then((json) => {
-        if(json.code == 200)
-        {
-          setLoosingPoints(json.data);
-        }
-        setLoading(false);
-        setRefreshing(false);
-        // else
-          // showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-    })
     .catch((error) => {
-        // console.log(error);
-        // showSweetAlert('error', 'Network Error', 'Error in fetching data. Please try again...');
-        setLoading(false);
-        setRefreshing(false);
+      setLoading(false);
+      setRefreshing(false);
+      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
     });
   }
   const { signOut } = React.useContext(AuthContext);
 
   return (
     <SafeAreaView style={styles.container}>
-
       <ScrollView keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}>
       {loading == true  && (<ActivityIndicator size="large" color="#19398A" />)}
       <View style={styles.userInfoSection}>
@@ -188,11 +164,11 @@ const ProfileScreen = ({navigation}) => {
             borderRightWidth: 1,
             
           }]}>
-            <Title style = {{color: '#30923D', fontWeight: 'bold'}}>{dataWinningPoints.winningPoints}</Title>
+            <Title style = {{color: '#30923D', fontWeight: 'bold'}}>{winningPoints}</Title>
             <Caption style = {{color: '#30923D'}}>Total Winnings</Caption>
           </View>
           <View style={styles.infoBox}>
-            <Title style = {{color: '#F00', fontWeight: 'bold'}}>{dataLoosingPoints.loosingPoints}</Title>
+            <Title style = {{color: '#F00', fontWeight: 'bold'}}>{loosingPoints}</Title>
             <Caption style = {{color: '#F00'}}>Total Losing</Caption>
           </View>
       </View>

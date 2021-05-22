@@ -18,6 +18,8 @@ import showSweetAlert from '../helpers/showSweetAlert';
 import {baseurl} from '../config';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+
 const ForgetPasswordScreen = () => {
 
     const navigation = useNavigation();
@@ -50,54 +52,32 @@ const ForgetPasswordScreen = () => {
         }
         else{
             setLoading(true);
-            fetch(baseurl+'/user/forgetPassword', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json' 
-                },
-                body: JSON.stringify({
-                    email: email,
-                    mobileNumber: mobileNumber
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
+            const reqData = {
+                email: email,
+                mobileNumber: mobileNumber
+            };
+            axios.post(baseurl+'/users/forget-password', reqData)
+            .then((response) => {
                 setLoading(false);
-                if(json.code == 200){
-                    // setSuccess(true);
-                    setUserId(json.data.userId);
+                console.log(response.data);
+                if(response.status == 200){
+                    setUserId(response.data.userId);
                     setEmail('');
                     setMobileNumber('');
                     showSweetAlert('success', 'Success', 'OTP sent successfully. Please check your email...!');
-                    // let userId = json.data.userId;
-                    // let username = json.data.username;
-                    // navigation.navigate('ForgetPasswordScreen2', {userId: userId});
-                    // Sweet Alert
-                    // SweetAlert.showAlertWithOptions({
-                    //         title: 'Success',
-                    //         subTitle: 'OTP sent successfully. Please check your email...!',
-                    //         confirmButtonTitle: 'OK',
-                    //         confirmButtonColor: '#000',
-                    //         style: 'success',
-                    //         cancellable: true
-                    //     },
-                    //     () => {
-                    //         setLoading(false);
-                    //         // , {userId: json.data.userId}
-                    //         navigation.navigate('AdminScreen');
-                    //     }
-                    // );
-                }else if(json.code == 404){
-                    showSweetAlert('warning', 'Invalid details', 'Email or mobile number is incorrect. Please enter correct email and mobile number to proceed.');
                 }else{
-                    showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
+                    showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
                 }
             })
             .catch((error) => {
+                console.log(error.response.status);
+                console.log(error.response.data);
                 setLoading(false);
-                // showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
-                showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
+                if(error.response.status == 404){
+                    showSweetAlert('warning', 'Invalid details', 'Email or mobile number is incorrect. Please enter correct email and mobile number to proceed.');
+                }else{
+                    showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+                }
             });
         }
     }
@@ -117,38 +97,34 @@ const ForgetPasswordScreen = () => {
         }
         else{
             setLoading(true);
-            // console.log(userId + ' ' + );
-            fetch(baseurl+'/user/forgetPassword', {
-                method: 'PUT',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json' 
-                },
-                body: JSON.stringify({
-                    userId: userId,
-                    otp: otp,
-                    password: password
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
+            const reqData = {
+                userId: userId,
+                otp: otp,
+                password: password
+            };
+            axios.put(baseurl+'/users/forget-password', reqData)
+            .then((response) => {
                 setLoading(false);
-                if(json.code == 200){
+                console.log(response.data);
+                if(response.status == 200){
                     setOtp('');
                     setPassword('');
                     setConfirmPassword('');
                     showSweetAlert('success', 'Success', 'Password changed successfully. Now, you can login with new password.');
                     // navigation.goBack();
-                }else if(json.code == 404){
-                    showSweetAlert('warning', 'Invalid OTP.', 'Please enter correct OTP to proceed');
                 }else{
-                    showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
+                    showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
                 }
             })
             .catch((error) => {
+                console.log(error.response.status);
+                console.log(error.response.data);
                 setLoading(false);
-                // showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
-                showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
+                if(error.response.status == 404){
+                    showSweetAlert('warning', 'Invalid OTP.', 'Please enter correct OTP to proceed');
+                }else{
+                    showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+                }
             });
         }
     }

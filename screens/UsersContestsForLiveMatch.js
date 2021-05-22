@@ -5,9 +5,10 @@ import {
   Avatar
 } from 'react-native-paper';
 import showSweetAlert from '../helpers/showSweetAlert';
-import {baseurl} from '../config';
+import {baseurl, errorMessage} from '../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card} from 'react-native-elements';
+import axios from 'axios';
 
 function UsersContestsForLiveMatch(props) {
 
@@ -20,8 +21,8 @@ function UsersContestsForLiveMatch(props) {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState('');
 
-  const [team1BetPoints, setTeam1BetPoints] = useState(0);
-  const [team2BetPoints, setTeam2BetPoints] = useState(0);
+  const [team1ContestPoints, setTeam1ContestPoints] = useState(0);
+  const [team2ContestPoints, setTeam2ContestPoints] = useState(0);
 
   useEffect(async() => {
     const token = await AsyncStorage.getItem('token');
@@ -37,72 +38,58 @@ function UsersContestsForLiveMatch(props) {
   }, []);
 
   const fetchMatchData = (token) => {
-    // console.log('MatchId : ' + matchId);
-    // console.log('Token : ' + token);
-    fetch(baseurl+'/matches/'+matchId, {
-      headers: {
-        'Authorization': 'Bearer ' + token
-      }
-    })
-    .then((response) => response.json())
-    .then((json) => {
-      // setLoading(false);
-      // setRefreshing(false);
-      if(json.code == 200){
-        setMatchData(json.data);
+    const headers = {
+      'Authorization': 'Bearer ' + token
+    };
+    axios.get(baseurl+'/matches/'+matchId, {headers})
+    .then((response) => {
+      if(response.status == 200){
+        setMatchData(response.data);
         // setMatchData([]);
-        const matchData = json.data;
+        const matchData = response.data;
         fetchData(token, matchData);
       }else{
-        showSweetAlert('error', 'Network Error1!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+          setMatchData([]);
       }
     })
     .catch((error) => {
-      setMatchData([]);
-      // setLoading(false);
-      // setRefreshing(false);
-      showSweetAlert('error', 'Network Error2!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-      console.log(error);
+      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
     });
   }
 
   const fetchData = (token, matchData) => {
-    // console.log('MatchId : ' + matchId);
-    // console.log('MatchData : ' + matchData);
-    fetch(baseurl+'/contest/contestResult/'+matchId,{
-      headers: {
-        'Authorization': 'Bearer ' + token
-      }
-    })
-    .then((response) => response.json())
-    .then((json) => {
-        setLoading(false);
+    const headers = {
+      'Authorization': 'Bearer ' + token
+    };
+    axios.get(baseurl+'/matches/'+matchId+'/contest', {headers})
+    .then((response) => {
+      setLoading(false);
         setRefreshing(false);
-        if(json.code == 200){
-          // console.log('Contest data : ' + json.data);
-          setData(json.data);
-          let records = json.data;
+        if(response.status == 200){
+          console.log(response.data);
+          setData(response.data);
+          let records = response.data;
           let team1points=0, team2points=0;
           records.forEach((item, index) => {
             if(item.teamShortName == matchData.team1Short){
-                team1points += item.betPoints;
+              team1points += item.contestPoints;
             }else if(item.teamShortName == matchData.team2Short){
-                team2points += item.betPoints;
+              team2points += item.contestPoints;
             }
           });
-          setTeam1BetPoints(team1points);
-          setTeam2BetPoints(team2points);
-        }
-        else{
-          setData([]);
-          showSweetAlert('error', 'Network Error3!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+          setTeam1ContestPoints(team1points);
+          setTeam2ContestPoints(team2points);
+        }else{
+            console.log(error);
+            showSweetAlert('error', 'Network Error', errorMessage);
         }
     })
     .catch((error) => {
         setLoading(false);
         setRefreshing(false);
-        showSweetAlert('error', 'Network Error4!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-    });     
+        console.log(error);
+        showSweetAlert('error', 'Network Error', errorMessage);
+    });
   }
 
   const formatDate = (str) => {
@@ -150,30 +137,30 @@ function UsersContestsForLiveMatch(props) {
         </View>
           <Card.Divider/>
           <View style={{display: "flex", flexDirection: 'row', justifyContent: 'space-between',width:'100%'}}>
-            <Text style={{textAlign: 'left',fontSize:20,paddingLeft:20,fontWeight:'bold'}}>{team1BetPoints}</Text>
-            <Text style={{textAlign: 'right',fontSize:20,paddingRight:20,fontWeight:'bold'}}>{team2BetPoints}</Text>
+            <Text style={{textAlign: 'left',fontSize:20,paddingLeft:20,fontWeight:'bold'}}>{team1ContestPoints}</Text>
+            <Text style={{textAlign: 'right',fontSize:20,paddingRight:20,fontWeight:'bold'}}>{team2ContestPoints}</Text>
           </View>
       </TouchableOpacity>
       <View>
         <View style={styles.rect3}>
           <View style={styles.rankRow}>
             <Text style={styles.col1}>User</Text>
-            <Text style={styles.col2}>Bet Team</Text>
-            <Text style={styles.col3}>Bet Points</Text>
+            <Text style={styles.col2}>Contest Team</Text>
+            <Text style={styles.col3}>Points</Text>
           </View>
         </View>
           {
             data.map((item, index) => {
               const mystyle = item.username == username ? styles.bgDark : styles.bgLight;
               return (
-                <View style={[styles.card, mystyle]} key={item.betTeamId}>
+                <View style={[styles.card, mystyle]} key={item.contestId}>
                     <View style={styles.cardlist}>  
                         <View style={styles.ellipse1}>
                             <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>{item.firstName.substr(0,1) + item.lastName.substr(0,1)}</Text>
                         </View>
                         <Text style={[styles.carditem, {width: '50%', fontSize: 17}]}>{item.firstName +" "+ item.lastName}</Text>
                         <Text style={[styles.carditem, {width: '15%'}]}>{item.teamShortName}</Text>
-                        <Text style={[styles.carditem, {width: '15%'}]}>{item.betPoints}</Text>
+                        <Text style={[styles.carditem, {width: '15%'}]}>{item.contestPoints}</Text>
                     </View>
                 </View>
               )

@@ -4,3 +4,5 @@
 export const baseurl = 'https://sports-geek.herokuapp.com';
 
 // export default baseurl;
+
+export const errorMessage = 'Oops! Something went wrong and we can’t help you right now. Please try again later.';

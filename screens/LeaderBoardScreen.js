@@ -10,11 +10,12 @@ import {baseurl} from '../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useTheme } from 'react-native-paper';
+import axios from 'axios';
 
 function LeaderBoard(props) {
 
   const [data, setData] = useState([]);
-  const [betData, setBetData] = useState([]);
+  const [contestData, setContestData] = useState([]);
   const [userId, setUserId] = useState(0);
   const [refreshing, setRefreshing] = React.useState(false);
   const [loading, setLoading] = useState(true);
@@ -36,48 +37,37 @@ function LeaderBoard(props) {
   }, []);
 
   const fetchData = (token) => {
-    fetch(baseurl+'/statistics',{
-      headers: {
-        'Authorization': 'Bearer ' + token
+    console.log('fetchData');
+    const headers = {'Authorization': 'Bearer ' + token};
+    axios.get(baseurl+'/users/statistics', {headers})
+    .then((response) => {
+      if(response.status == 200){
+        setData(response.data);
+        fetchContestData(response.data, token);
+      }else{
+        setData([]);
+        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
       }
-    })
-    .then((response) => response.json())
-    .then((json) => {
-        // setLoading(false);
-        // setRefreshing(false);
-        if(json.code == 200){
-          // setData(json.data);
-          fetchBetData(json.data, token);
-        }else{
-          setData([]);
-          showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        } 
     })
     .catch((error) => {
-        // setLoading(false);
-        // setRefreshing(false);
-        showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-    });     
+        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+    });
   }
 
-  const fetchBetData = (data, token) => {
-    fetch(baseurl+'/statistics/futureBets',{
-      headers: {
-        'Authorization': 'Bearer ' + token
-      }
-    })
-    .then((response) => response.json())
-    .then((json) => {
+  const fetchContestData = (data, token) => {
+    console.log('fetchContestData');
+    const headers = {'Authorization': 'Bearer ' + token};
+    axios.get(baseurl+'/users/future-contest', {headers})
+    .then((response) => {
         setLoading(false);
         setRefreshing(false);
-        if(json.code == 200){
-          setBetData(json.data);
-          let betData = json.data;
+        if(response.status == 200){
+          setContestData(response.data);
+          let contestData = response.data;
           data.forEach((item) => {
-            let obj = betData.find(o => o.userId == item.userId);
-            // console.log(item.userId + ' ' + obj);
+            let obj = contestData.find(o => o.userId == item.userId);
             if(obj)
-              item.totalWinningPoints += obj.betPoints;
+              item.totalWinningPoints += obj.contestPoints;
           });
           // setData(data);
           data.sort((obj1, obj2) => {
@@ -89,19 +79,19 @@ function LeaderBoard(props) {
             }
             return 0;
           });
+          console.log(data);
           setData(data);
-          // console.log(data);
+          console.log('setData');
         }else{
-          setBetData([]);
-          showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        } 
+          setContestData([]);
+          showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        }
     })
     .catch((error) => {
-        setLoading(false);
-        setRefreshing(false);
-        // showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
-    });     
+      setLoading(false);
+      setRefreshing(false);
+      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+    }); 
   }
 
   return (

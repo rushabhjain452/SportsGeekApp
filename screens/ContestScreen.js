@@ -31,6 +31,7 @@ import { AuthContext } from '../components/context';
 import { log } from 'react-native-reanimated';
 // import { FlatList, ScrollView } from 'react-native-gesture-handler';
 import Spinner from 'react-native-loading-spinner-overlay';
+import axios from 'axios';
 
 // import Users from '../model/User';
 
@@ -53,7 +54,7 @@ const ContestScreen = (props) => {
     const [availablePoints, setAvailablePoints] = useState(0);
     const [tempAvailablePoints, setTempAvailablePoints] = useState(0);
     const [option, setOption] = useState('insert');
-    const [betTeamId, setBetTeamId] = useState(0);
+    const [contestId, setContestId] = useState(0);
 
     const [refreshing, setRefreshing] = useState(false);
     const [waiting, setWaiting] = React.useState(true);
@@ -71,133 +72,127 @@ const ContestScreen = (props) => {
         setUserId(userId);
         const username = await AsyncStorage.getItem('username');
         setUsername(username);
-        checkUserBet(userId, token);
+        checkUserContest(userId, token);
         fetchUserData(userId, token);
         fetchMatchData(token);
         // fetchData(token);
     }, [refreshing]);
 
-    const checkUserBet = (userId, token) => {
-        fetch(baseurl+'/contest/'+userId+'/'+matchId, {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            // showSweetAlert('success', 'Data Found', json.code+"");
-            if(json.code == 200){
-                setPoints(json.data.betPoints);
-                setOldPoints(json.data.betPoints);
-                // console.log('checkUserBet : ' + typeof(json.data.betPoints));
-                // console.log(typeof(json.data.betPoints));
-                // console.log(json.data.betPoints);
-                setSelectedTeamId(json.data.teamId);
-                setBetTeamId(json.data.betTeamId);
+    const checkUserContest = (userId, token) => {
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        };
+        axios.get(baseurl+'/users/'+userId+'/contest/'+matchId, {headers})
+        .then((response) => {
+            if(response.status == 200){
+                setPoints(response.data.contestPoints);
+                setOldPoints(response.data.contestPoints);
+                // console.log('checkUserContest : ' + typeof(json.data.contestPoints));
+                // console.log(typeof(json.data.contestPoints));
+                // console.log(json.data.contestPoints);
+                setSelectedTeamId(response.data.teamId);
+                setContestId(response.data.contestId);
                 setOption('update');
             }else{
                 setOldPoints(0);
             }
         })
         .catch((error) => {
-            showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            setOldPoints(0);
+            // const response = error.message;
+            // console.log('Error 1');
+            // console.log(error);
+            // showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
         });
     }
 
     // BetOnTeam data
     const fetchData = (token, matchData) => {
-        // fetch(baseurl+'/contest/'+matchId, {
-        fetch(baseurl+'/contest/contestResult/'+matchId, {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            // console.log('Data : ' + json.data);
-            if(json.code == 404){
-                setData([]);
-            }else if(json.code == 200){
-                setData(json.data);
-                let records = json.data;
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        };
+        axios.get(baseurl+'/matches/'+matchId+'/contest', {headers})
+        .then((response) => {
+            setLoading(false);
+            setRefreshing(false);
+            setWaiting(false);
+            if(response.status == 200){
+                setData(response.data);
+                let records = response.data;
                 let team1points=0, team2points=0;
                 // console.log(records);
                 // console.log(matchData.team1Id);
                 // console.log(matchData.team2Id);
                 records.forEach((item) => {
                     // if(item.teamId == matchData.team1Id){
-                    //     // setTeam1BetPoints(oldPoints => oldPoints + item.betPoints);
-                    //     team1points += item.betPoints;
+                    //     // setTeam1BetPoints(oldPoints => oldPoints + item.contestPoints);
+                    //     team1points += item.contestPoints;
                     // }else if(item.teamId == matchData.team2Id){
-                    //     // setTeam2BetPoints(oldPoints => oldPoints + item.betPoints);
-                    //     team2points += item.betPoints;
+                    //     // setTeam2BetPoints(oldPoints => oldPoints + item.contestPoints);
+                    //     team2points += item.contestPoints;
                     // }
                     if(item.teamShortName == matchData.team1Short){
-                        team1points += item.betPoints;
+                        team1points += item.contestPoints;
                     }else if(item.teamShortName == matchData.team2Short){
-                        team2points += item.betPoints;
+                        team2points += item.contestPoints;
                     }
                 });
                 // console.log(team1points + ' ' + team2points);
                 setTeam1BetPoints(team1points);
                 setTeam2BetPoints(team2points);
+            }else{
+                console.log('Error 2');
+                console.log(error);
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
             }
-            setLoading(false);
-            setRefreshing(false);
-            setWaiting(false);
         })
         .catch((error) => {
             setLoading(false);
             setRefreshing(false);
             setWaiting(false);
-            showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        });     
+            console.log('Error 2');
+            console.log(error);
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        });
     }
 
     // Matches Data
     const fetchMatchData = (token) => {
-        // console.log("MatchId : " + matchId);
-        fetch(baseurl+'/matches/'+matchId, {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 404){
-                setMatchData([]);
-            }else if(json.code == 200){
-                setMatchData(json.data);
-                fetchData(token, json.data);
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        };
+        axios.get(baseurl+'/matches/'+matchId, {headers})
+        .then((response) => {
+            if(response.status == 200){
+                setMatchData(response.data);
+                fetchData(token, response.data);
             }else{
                 setMatchData([]);
             }
         })
         .catch((error) => {
-            showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        });        
+            console.log('Error 3');
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })    
     }
     // User data
     const fetchUserData = (userId, token) => {
-        // console.log('userId : ' + userId);
-        fetch(baseurl+'/user/'+userId, {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200){
-                setAvailablePoints(json.data.availablePoints);
-                setTempAvailablePoints(json.data.availablePoints);
-                // console.log('Type : ' + typeof(json.data.availablePoints));
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        };
+        axios.get(baseurl+'/users/'+userId, {headers})
+        .then((response) => {
+            if(response.status == 200){
+                setAvailablePoints(response.data.availablePoints);
+                setTempAvailablePoints(response.data.availablePoints);
             }else{
                 showSweetAlert('warning', 'Unable to fetch data!', 'Unable to fetch User\'s available points. Please try again after sometime.');
             }
         })
         .catch((error) => {
-            showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        });
+            console.log('Error 4');
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })    
     }
 
     const onRefresh = React.useCallback(() => {
@@ -236,8 +231,8 @@ const ContestScreen = (props) => {
         else if(points != parseInt(points)){
             showSweetAlert('warning', 'Invalid Contest Points', "Contest points must be an integer value.");
         }
-        else if(points < matchData.minimumBet){
-            showSweetAlert('warning', 'Invalid Contest Points', "Please enter Contest points greater than minimum limit of "+matchData.minimumBet);
+        else if(points < matchData.minimumPoints){
+            showSweetAlert('warning', 'Invalid Contest Points', "Please enter Contest points greater than minimum limit of "+matchData.minimumPoints);
         }
         else if(match_date < current_datetime){
             showSweetAlert('warning', 'Match time out', "Sorry, the match has already started, so the contests for this match are closed now.");
@@ -252,36 +247,32 @@ const ContestScreen = (props) => {
             setWaiting(true);
             // console.log(parseInt(points));
             if(option == 'insert'){
-                // console.log('insert');
+                console.log('insert');
                 // console.log('Type before insert : ' + typeof(points));
                 if(parseInt(points) > parseInt(availablePoints)){
                     setWaiting(false);
                     showSweetAlert('warning', 'Insufficient Points', "Your have only " + parseInt(availablePoints) + " available points.");
                 }
                 else{
-                    // console.log('Placing contest : ' + token);
-                    fetch(baseurl+'/contest', {
-                        method: 'POST',
-                        headers: {
-                            Accept: 'application/json',
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + token
-                        },
-                        body: JSON.stringify({
-                            userId: userId,
-                            matchId: matchId,
-                            teamId: selectedTeamId,
-                            betPoints: parseInt(points),
-                            winningPoints: 0
-                        })
-                    })
-                    .then((response) => response.json())
-                    .then((json) => {
-                        if(json.code == 201){
+                    const reqData = {
+                        userId: userId,
+                        matchId: matchId,
+                        teamId: selectedTeamId,
+                        contestPoints: parseInt(points),
+                        winningPoints: 0
+                    };
+                    console.log(reqData);
+                    const headers = {
+                        'Authorization': 'Bearer ' + token
+                    };
+                    axios.post(baseurl+'/contest', reqData, {headers})
+                    .then((response) => {
+                        setWaiting(false);
+                        if(response.status == 201){
                             setAvailablePoints((availablePoints) => parseInt(availablePoints) - parseInt(points));
                             setOldPoints(parseInt(points));
-                            setBetTeamId(json.data.betTeamId);
-                            // console.log('Insert success : BetTeamId = ' + json.data.betTeamId);
+                            setContestId(response.data.contestId);
+                            // console.log('Insert success : BetTeamId = ' + json.data.contestId);
                             // console.log('Insert : ' + typeof(points));
                             fetchData(token, matchData);
                             // fetchMatchData(token);
@@ -290,79 +281,59 @@ const ContestScreen = (props) => {
                             showSweetAlert('success', 'Contest placed successfully', "Your contest for " + parseInt(points) + " points is placed successfully.");
                         }
                         else{
+                            console.log(response.status);
                             showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
                         }
-                        setWaiting(false);
                     })
                     .catch((error) => {
-                        // showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
-                        showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
-                        // console.log(error);
                         setWaiting(false);
+                        console.log(error);
+                        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
                     });
                 } 
             }
             else if(option == 'update'){
-                // console.log('update');
-                // console.log(availablePoints);
-                // console.log(oldPoints);
-                // console.log(points);
-                // console.log('On Update : ');
-                // console.log('BetTeamId : ' + betTeamId);
-                // console.log('userId : ' + userId);
-                // console.log('matchId : ' + matchId);
-                // console.log('selectedTeamId : ' + selectedTeamId);
-                // console.log('points : ' + points);
-                // console.log('token : ' + token);
+                console.log('update');
                 let balance = parseInt(availablePoints) + parseInt(oldPoints);
                 if(parseInt(points) > balance){
                     setWaiting(false);
                     showSweetAlert('warning', 'Insufficient Points', "Your have only " + (balance) + " available points.");
                 }
                 else{
-                    // console.log(betTeamId + ' ' + userId + ' ' + matchId + ' ' + selectedTeamId + ' ' + points);
-                    // console.log('Token : ' + token);
-                    fetch(baseurl+'/contest/update/'+betTeamId, {
-                        method: 'PUT',
-                        headers: {
-                            Accept: 'application/json',
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + token
-                        },
-                        body: JSON.stringify({
-                            userId: userId,
+                    const reqData = {
+                        userId: userId,
                             matchId: matchId,
                             teamId: selectedTeamId,
-                            betPoints: parseInt(points),
+                            contestPoints: parseInt(points),
                             winningPoints: 0
-                        })
-                    })
-                    .then((response) => response.json())
-                    .then((json) => {
-                        // console.log('JSON : ' + json);
-                        // console.log('Code : ' + json.code);
-                        if(json.code == 201){
+                    };
+                    console.log(reqData);
+                    const headers = {
+                        'Authorization': 'Bearer ' + token
+                    };
+                    axios.put(baseurl+'/contest/'+contestId, reqData, {headers})
+                    .then((response) => {
+                        setWaiting(false);
+                        if(response.status == 200){
                             setAvailablePoints((availablePoints) => parseInt(availablePoints) + parseInt(oldPoints) - parseInt(points));
                             // console.log('After update : ' + typeof(oldPoints));
                             setOldPoints(points);
-                            setBetTeamId(json.data.betTeamId);
-                            // console.log('Update success : BetTeamId = ' + json.data.betTeamId);
+                            setContestId(response.data.contestId);
+                            // console.log('Update success : BetTeamId = ' + json.data.contestId);
                             fetchData(token, matchData);
                             fetchUserData(userId, token);
                             // showSweetAlert('success', 'Contest updated successfully', "Your contest is updated from " + oldPoints + " points to " + points + " points.");
                             showSweetAlert('success', 'Contest updated successfully', "Your contest is updated to " + parseInt(points) + " points.");
                         }
                         else{
-                            // console.log('code : ' + json.code);
-                            // console.log('Data : ' + json.data);
+                            console.log(request.status);
                             showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
                         }
-                        setWaiting(false);
                     })
                     .catch((error) => {
+                        console.log(error);
                         setWaiting(false);
-                        // showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
-                        showSweetAlert('warning', 'Network Error', 'Something went wrong. Please check your internet connection or try again after sometime...');
+                        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
                     });
                 }
             }
@@ -386,9 +357,9 @@ const ContestScreen = (props) => {
         >
             <View style={{display: 'flex', justifyContent: 'space-between', flexDirection: 'row'}}>
                 <Text>Available Points : {availablePoints}</Text>
-                <Text>Minimum Points : {matchData.minimumBet}</Text>
+                <Text>Minimum Points : {matchData.minimumPoints}</Text>
             </View>
-            {/* <Text>Minimum Contest Points : {matchData.minimumBet}</Text> */}
+            {/* <Text>Minimum Contest Points : {matchData.minimumPoints}</Text> */}
             <View style={styles.action}>
                 <TouchableOpacity
                     style={styles.radioCircle}
@@ -439,17 +410,17 @@ const ContestScreen = (props) => {
                     onChangeText={(val) => {
                         setPoints(val)
                         // console.log(val);
-                        let betPoints = 0;
+                        let contestPoints = 0;
                         if(val == '')
-                            betPoints = 0;
+                            contestPoints = 0;
                         else{
-                            betPoints = parseInt(val);
-                            if(isNaN(betPoints) || betPoints < 0){
-                                betPoints = 0;
+                            contestPoints = parseInt(val);
+                            if(isNaN(contestPoints) || contestPoints < 0){
+                                contestPoints = 0;
                             }   
                         }
-                        setTempAvailablePoints(parseInt(availablePoints) + parseInt(oldPoints) - betPoints);
-                        // console.log(betPoints);
+                        setTempAvailablePoints(parseInt(availablePoints) + parseInt(oldPoints) - contestPoints);
+                        // console.log(contestPoints);
                     }}
                     value={points.toString()}
                 />
@@ -477,7 +448,7 @@ const ContestScreen = (props) => {
                     {/* console.log(item.username + ' ' + userId); */}
                     const mystyle = item.username == username ? styles.bgDark : styles.bgLight;
                     return(
-                        <View style={[styles.card, mystyle]} key={item.betTeamId}>
+                        <View style={[styles.card, mystyle]} key={item.contestId}>
                             <View style={styles.cardlist}>  
                                 {/* <Card.Image style={styles.ellipse1} source={{uri: item.profilePicture}} /> */}
                                 <View style={styles.ellipse1}>
@@ -487,7 +458,7 @@ const ContestScreen = (props) => {
                                 </View>
                                 <Text style={[styles.carditem, {width: '53%', fontSize: 17}]}>{item.firstName + " " + item.lastName}</Text>
                                 <Text style={[styles.carditem, {width: '17%'}]}>{item.teamShortName}</Text>
-                                <Text style={[styles.carditem, {width: '15%'}]}>{item.betPoints}</Text>
+                                <Text style={[styles.carditem, {width: '15%'}]}>{item.contestPoints}</Text>
                             </View>
                         </View>
                     )

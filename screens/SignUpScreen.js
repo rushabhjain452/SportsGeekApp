@@ -17,6 +17,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import SweetAlert from 'react-native-sweet-alert';
 import {baseurl} from '../config';
 import Spinner from 'react-native-loading-spinner-overlay';
+import axios from 'axios';
 
 const SignUpScreen = ({navigation}) => {
 
@@ -35,7 +36,7 @@ const SignUpScreen = ({navigation}) => {
     const [secureTextEntry, setSecureTextEntry] = useState(true);
     const [confirmSecureTextEntry, setConfirmSecureTextEntry] = useState(true);
     const [valid, setValid] = useState(true);
-    const [waiting, setWaiting] = React.useState(false);
+    const [oading, setLoading] = React.useState(false);
     const [success, setSuccess] = useState(false);
 
     const [genderData, setGenderData] = useState([]);
@@ -45,16 +46,16 @@ const SignUpScreen = ({navigation}) => {
     const name_regex = /^[a-zA-Z]+$/;
 
     useEffect(() => {
-        fetch(baseurl+'/gender')
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200)
-                setGenderData(json.data);
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching gender data. Please try again...');
+        axios.get(baseurl+'/genders')
+        .then((response) => {
+            if(response.status == 200){
+                setGenderData(response.data);
+            }else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
         })
         .catch((error) => {
-            showSweetAlert('error', 'Error', 'Error in fetching gender data. Please try again...');
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
         });
     }, []);
 
@@ -68,7 +69,7 @@ const SignUpScreen = ({navigation}) => {
                 cancellable: true
             },
             () => {
-                setWaiting(false);
+                setLoading(false);
                 if(success == true){
                     setSuccess(false);
                     navigation.goBack();
@@ -107,58 +108,43 @@ const SignUpScreen = ({navigation}) => {
             showSweetAlert('warning', 'Invalid Input!', 'Password and confirm password didn\'t match.');
         }
         else{
-            // check username if already present
-            // fetch(baseurl+'/user/username/'+username)
-            // .then((response) => response.json())
-            // .then((json) => {
-            //     if(json.code == 200){
-            //         showSweetAlert('warning', 'Username already exits.', 'Please change username..!');
-            //     }
-            //     else{
-            //         // ...
-            //     }
-            // })
-            // .catch((error) => {
-            //     showSweetAlert('error', 'Error 500', 'Error in fetching data. Please try again...');
-            // });
-            setWaiting(true);
-            fetch(baseurl+'/users/add-user', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json' 
-                },
-                body: JSON.stringify({
-                    firstName: firstName,
-                    lastName: lastName,
-                    email: email,
-                    mobileNumber: mobileNumber,
-                    genderId: genderId,
-                    username: username,
-                    password: password,
-                    status: false,
-                    roleId: 2,
-                    profilePicture: '',
-                    availablePoints: 500
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                setWaiting(false);
-                if(json.code == 201){
+            setLoading(true);
+            const reqData = {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                mobileNumber: mobileNumber,
+                genderId: genderId,
+                username: username,
+                password: password,
+                status: false,
+                roleId: 2,
+                profilePicture: '',
+                availablePoints: 500
+            };
+            axios.post(baseurl+'/users/register', reqData)
+            .then((response) => {
+                setLoading(false);
+                if(response.status == 201){
                     showSweetAlert('success', 'Registration Success', 'You are registered. Please wait until admin approves your account. You will receive an email, when admin will approve your account.');
                     setSuccess(true);
                     // navigation.goBack();
                     // navigator.navigate('SignInScreen');
-                }else if(json.code == 404){
-                    showSweetAlert('warning', 'Username already exits.', 'Please change your username..!');
-                }else if(json.code == 400){
-                    showSweetAlert('warning', 'Email already exits.', 'Please change your email..!');
+                }else{
+                    showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
                 }
             })
             .catch((error) => {
-                setWaiting(false);
-                showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
+                console.log(error.response.status);
+                console.log(error.response.data);
+                setLoading(false);
+                if(error.response.status == 404){
+                    showSweetAlert('warning', 'Username already exits.', 'Please change your username..!');
+                }else if(error.response.status == 400){
+                    showSweetAlert('warning', 'Email already exits.', 'Please change your email..!');
+                }else{
+                    showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+                }
             });
         }
     }
@@ -166,7 +152,7 @@ const SignUpScreen = ({navigation}) => {
     return (
       <View style={styles.container}>
         <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
-        <Spinner visible={waiting} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
+        <Spinner visible={oading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
         <View style={styles.header}>
             <Text style={styles.text_header}>Register Now!</Text>
         </View>
@@ -264,7 +250,7 @@ const SignUpScreen = ({navigation}) => {
                     autoCapitalize="none"
                     onChangeText={(val) => {
                         setEmail(val);
-                        if(val.match(email_regex) && val.includes("bbd.co.za"))
+                        if(val.match(email_regex) && val.includes("@bbd.co.za"))
                             setValidEmail(true);
                         else
                             setValidEmail(false);

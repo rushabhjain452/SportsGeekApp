@@ -7,8 +7,9 @@ import {
 import AsyncStorage from '@react-native-community/async-storage';
 import SweetAlert from 'react-native-sweet-alert';
 import showSweetAlert from '../helpers/showSweetAlert';
-import {baseurl} from '../config';
+import {baseurl, errorMessage} from '../config';
 import { Card} from 'react-native-elements';
+import axios from 'axios';
 
 function ResultWithUsersScreen(props) {
 
@@ -22,8 +23,8 @@ function ResultWithUsersScreen(props) {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState('');
 
-  const [team1BetPoints, setTeam1BetPoints] = useState(0);
-  const [team2BetPoints, setTeam2BetPoints] = useState(0);
+  const [team1ContestPoints, setTeam1ContestPoints] = useState(0);
+  const [team2ContestPoints, setTeam2ContestPoints] = useState(0);
 
   useEffect(async() => {
     const token = await AsyncStorage.getItem('token');
@@ -39,75 +40,60 @@ function ResultWithUsersScreen(props) {
   }, []);
 
   const fetchMatchData = (token) => {
-    fetch(baseurl+'/matches/'+matchId, {
-      headers: {
-        'Authorization': 'Bearer ' + token
-      }
-    })
-    .then((response) => response.json())
-    .then((json) => {
-      // setLoading(false);
-      // setRefreshing(false);
-      if(json.code == 200){
-        setMatchData(json.data);
+    const headers = {
+      'Authorization': 'Bearer ' + token
+    };
+    axios.get(baseurl+'/matches/'+matchId, {headers})
+    .then((response) => {
+      if(response.status == 200){
+        setMatchData(response.data);
         // setMatchData([]);
-        const matchData = json.data;
+        const matchData = response.data;
         if(matchData.winnerTeamId == matchData.team1Id)
           setWinnerTeam(matchData.team1Short);
         else if(matchData.winnerTeamId == matchData.team2Id)
           setWinnerTeam(matchData.team2Short);
         fetchData(token, matchData);
-        // console.log(matchData);
       }else{
-        showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        setMatchData([]);
       }
     })
     .catch((error) => {
       setMatchData([]);
-      // setLoading(false);
-      // setRefreshing(false);
-      showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-      // console.log(error);
+      showSweetAlert('error', errorMessage);
     });
   }
 
   const fetchData = (token, matchData) => {
-    // console.log('MatchId : ' + matchId);
-    // console.log('MatchData : ' + matchData);
-    fetch(baseurl+'/contest/contestResult/'+matchId,{
-      headers: {
-        'Authorization': 'Bearer ' + token
+    const headers = {'Authorization': 'Bearer ' + token};
+    axios.get(baseurl+'/matches/'+matchId+'/contest', {headers})
+    .then((response) => {
+      setLoading(false);
+      setRefreshing(false);
+      if(response.status == 200){
+        setData(response.data);
+        let records = response.data;
+        let team1points=0, team2points=0;
+        records.forEach((item, index) => {
+          if(item.teamShortName == matchData.team1Short){
+            team1points += item.contestPoints;
+          }else if(item.teamShortName == matchData.team2Short){
+            team2points += item.contestPoints;
+          }
+        });
+        setTeam1ContestPoints(team1points);
+        setTeam2ContestPoints(team2points);
+      }else{
+          console.log(error);
+          showSweetAlert('error', 'Network Error', errorMessage);
       }
     })
-    .then((response) => response.json())
-    .then((json) => {
-        if(json.code == 200){
-          // console.log('Contest data : ' + json.data);
-          setData(json.data);
-          let records = json.data;
-          let team1points=0, team2points=0;
-          records.forEach((item, index) => {
-            if(item.teamShortName == matchData.team1Short){
-                team1points += item.betPoints;
-            }else if(item.teamShortName == matchData.team2Short){
-                team2points += item.betPoints;
-            }
-          });
-          setTeam1BetPoints(team1points);
-          setTeam2BetPoints(team2points);
-        }
-        else{
-          setData([]);
-          showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        }
-        setLoading(false);
-        setRefreshing(false);
-    })
     .catch((error) => {
-        showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
         setLoading(false);
         setRefreshing(false);
-    });     
+        console.log(error);
+        showSweetAlert('error', 'Network Error', errorMessage);
+    });  
   }
 
   const formatDate = (str) => {
@@ -155,8 +141,8 @@ function ResultWithUsersScreen(props) {
         </View>
           <Card.Divider/>
           <View style={{display: "flex", flexDirection: 'row', justifyContent: 'space-between',width:'100%'}}>
-            <Text style={{textAlign: 'left',fontSize:18,paddingLeft:20,fontWeight:'bold'}}>{team1BetPoints}</Text>
-            <Text style={{textAlign: 'right',fontSize:18,paddingRight:20,fontWeight:'bold'}}>{team2BetPoints}</Text>
+            <Text style={{textAlign: 'left',fontSize:18,paddingLeft:20,fontWeight:'bold'}}>{team1ContestPoints}</Text>
+            <Text style={{textAlign: 'right',fontSize:18,paddingRight:20,fontWeight:'bold'}}>{team2ContestPoints}</Text>
           </View>
           {
             matchData.resultStatus == 1 ? 
@@ -168,8 +154,8 @@ function ResultWithUsersScreen(props) {
         <View style={styles.rect3}>
           <View style={styles.rankRow}>
             <Text style={styles.col1}>User</Text>
-            <Text style={styles.col2}>Bet Team</Text>
-            <Text style={styles.col3}>Bet Points</Text>
+            <Text style={styles.col2}>Contest Team</Text>
+            <Text style={styles.col3}>Points</Text>
             <Text style={styles.col4}>Winning</Text>
           </View>
         </View>
@@ -177,14 +163,14 @@ function ResultWithUsersScreen(props) {
             data.map((item, index) => {
               const mystyle = item.username == username ? styles.bgDark : styles.bgLight;
               return (
-                <View style={[styles.card, mystyle]} key={item.betTeamId}>
+                <View style={[styles.card, mystyle]} key={item.contestId}>
                     <View style={styles.cardlist}>  
                         <View style={styles.ellipse1}>
                             <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>{item.firstName.substr(0,1) + item.lastName.substr(0,1)}</Text>
                         </View>
                         <Text style={[styles.carditem, {width: '42%', fontSize: 17}]}>{item.firstName +" "+ item.lastName}</Text>
                         <Text style={[styles.carditem, {width: '15%'}]}>{item.teamShortName}</Text>
-                        <Text style={[styles.carditem, {width: '15%'}]}>{item.betPoints}</Text>
+                        <Text style={[styles.carditem, {width: '15%'}]}>{item.contestPoints}</Text>
                         <Text style={[styles.carditem, {width: '15%'}]}>{item.winningPoints}</Text>
                     </View>
                 </View>
