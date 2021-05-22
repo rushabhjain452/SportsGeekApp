@@ -115,7 +115,7 @@ const MainTabScreen = () => {
           ),
         }}
       />
-      {/* <Tab.Screen
+      <Tab.Screen
         name="Chats"
         component={ChatStackScreen}
         options={{
@@ -125,7 +125,7 @@ const MainTabScreen = () => {
             <Icon name="chatbubbles" color={color} size={26} />
           ),
         }}
-      /> */}
+      />
       <Tab.Screen
         name="LeaderBoard"
         component={LeaderStackScreen}
@@ -148,7 +148,7 @@ const MainTabScreen = () => {
           ),
         }}
       />
-        <Tab.Screen
+        {/* <Tab.Screen
         name="My Account"
         component={ProfileStackScreen}
         options={{
@@ -158,7 +158,7 @@ const MainTabScreen = () => {
             <Icon name="person-circle" color={color} size={26} />
           ),
         }}
-      />
+      /> */}
     </Tab.Navigator> 
 )};
 export default MainTabScreen;
@@ -175,7 +175,10 @@ const HomeStackScreen = ({navigation}) => (
         }
     }}>
         <HomeStack.Screen name="Home" component={HomeScreen} options={{
-        title:'SportsGeek'
+        title:'SportsGeek',
+          headerLeft: () => (
+              <Icon.Button name="person-circle" size={43} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
+          )
         }} />
 </HomeStack.Navigator>
 );
@@ -190,7 +193,10 @@ const AdminStackScreen = ({navigation}) => (
           }
       }}>
           <AdminStack.Screen name="Home" component={AdminScreen} options={{
-          title:'SportsGeek'
+          title:'SportsGeek',
+          headerLeft: () => (
+              <Icon.Button name="person-circle" size={43} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
+          )
           }} />
   </AdminStack.Navigator>
   );
@@ -208,6 +214,9 @@ const FantasyStackScreen = ({navigation}) => (
           title:'Fantasy',
           headerRight: () => (
               <Icon.Button name="information-circle-outline" size={30} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('HelpScreen')}></Icon.Button>
+          ),
+          headerLeft: () => (
+              <Icon.Button name="person-circle" size={43} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
           )
         }} />
 </FantasyStack.Navigator>
@@ -226,7 +235,10 @@ const ChatStackScreen = ({navigation}) => (
         title:'Chats',
         headerRight: () => (
             <Icon.Button name="search-outline" size={25} backgroundColor="#19398A" iconStyle={{marginRight:0}}  onPress={() => navigation.navigate('HelpScreen')}></Icon.Button>
-        )
+        ),
+          headerLeft: () => (
+              <Icon.Button name="person-circle" size={43} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
+          )
         }} />
 </ChatStack.Navigator>
 );
@@ -241,7 +253,10 @@ const LeaderStackScreen = ({navigation}) => (
         }
     }}>
         <LeaderStack.Screen name="LeaderBoard" component={LeaderBoardScreen} options={{
-        title:'LeaderBoard'
+        title:'LeaderBoard',
+          headerLeft: () => (
+              <Icon.Button name="person-circle" size={43} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
+          )
         }} />
 </LeaderStack.Navigator>
 );
@@ -256,7 +271,10 @@ const MyMatchesStackScreen = ({navigation}) => (
         }
     }}>
         <MyMatchesStack.Screen name="My Matches" component={MyMatchesScreen} options={{
-        title:'My Matches'
+        title:'My Matches',
+          headerLeft: () => (
+              <Icon.Button name="person-circle" size={43} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
+          )
         }} />
 </MyMatchesStack.Navigator>
 );

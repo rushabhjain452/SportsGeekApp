@@ -64,6 +64,11 @@ import ForgetPasswordScreen2 from './screens/ForgetPasswordScreen2';
 import UpdateMatchMinBet from './screens/admin/UpdateMatchMinBet';
 import UpdateMatchMinBetSchedule from './screens/admin/UpdateMatchMinBetSchedule';
 import UsersContestsForLiveMatch from './screens/UsersContestsForLiveMatch';
+import UpdateActiveTournamentScreen from './screens/admin/UpdateActiveTournamentScreen';
+import MatchesScheduleScreenForUpdate from './screens/admin/MatchesScheduleScreenForUpdate';
+import ProfileScreen from './screens/ProfileScreen';
+import ChatHomeScreen from './screens/ChatHomeScreen';
+import RoomScreen from './screens/RoomScreen';
 // const baseurl = 'localhost:8080';
 
 const Drawer = createDrawerNavigator();
@@ -315,6 +320,11 @@ const App: () => Node = () => {
                 <Stack.Screen name="ScheduleScreen" component={ScheduleScreen} />
                 <Stack.Screen name="UpdateMatchMinBet" component={UpdateMatchMinBet} />
                 <Stack.Screen name="UsersContestForLiveMatch" component={UsersContestsForLiveMatch} />
+                <Stack.Screen name="UpdateActiveTournamentScreen" component={UpdateActiveTournamentScreen} />
+                <Stack.Screen name="MatchesScheduleScreenForUpdate" component={MatchesScheduleScreenForUpdate} />
+                <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+                <Stack.Screen name="ChatHomeScreen" component={ChatHomeScreen} />
+                <Stack.Screen name="RoomScreen" component={RoomScreen} />
               </Stack.Navigator>
             )
           :

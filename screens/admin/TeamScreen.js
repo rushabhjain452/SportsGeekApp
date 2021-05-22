@@ -10,7 +10,8 @@ import {
     StyleSheet,
     ScrollView,
     StatusBar,
-    LogBox
+    LogBox,
+    RefreshControl
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -20,8 +21,11 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
 import { Card} from 'react-native-elements';
+import axios from 'axios';
+import AsyncStorage from '@react-native-community/async-storage';
+import Spinner from 'react-native-loading-spinner-overlay';
 
-const VenueScreen = ({navigation}) => {
+const TeamScreen = ({navigation}) => {
 
     LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
@@ -30,26 +34,43 @@ const VenueScreen = ({navigation}) => {
     const [teamId, setTeamId] = useState(0);
     const [shortName, setShortName] = useState('');
     const [teamLogo, setTeamLogo] = useState('');
+    const [token, setToken] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
-    useEffect(() => {
-        displayTeam();
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+    }, []);
+
+    useEffect(async() => {
+        const token = await AsyncStorage.getItem('token');
+        setToken(token);
+        displayTeam(token);
         setTeam('');
         setTeamLogo('');
         setShortName('');
-    }, []);
+    }, [refreshing]);
 
-    const displayTeam = () => {
-        fetch(baseurl+'/team')
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200)
-                setData(json.data);
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+    const displayTeam = (token) => {
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/teams', {headers})
+        .then(response => {
+            setLoading(false);
+            setRefreshing(false);
+            if(response.status == 200){
+                setData(response.data);
+            }
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
         })
-        .catch((error) => {
-            showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-        });
+        .catch(error => {
+            setLoading(false);
+            setRefreshing(false);
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
     }
 
     const addTeam = () => {
@@ -87,24 +108,46 @@ const VenueScreen = ({navigation}) => {
     }
 
     const deleteTeam = (id) => {
-        fetch(baseurl+'/team/'+id, {
-            method: 'DELETE'
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200){
+        // fetch(baseurl+'/team/'+id, {
+        //     method: 'DELETE'
+        // })
+        // .then((response) => response.json())
+        // .then((json) => {
+        //     if(json.code == 200){
+        //         showSweetAlert('success', 'Success', 'Team deleted successfully.');
+        //         displayTeam();
+        //     }
+        //     else
+        //         showSweetAlert('error', 'Error', 'Failed to delete Team. Please try again...');
+        //         setTeam('');
+        //         setTeamLogo('');
+        //         setShortName('');
+        // })
+        // .catch((error) => {
+        //     showSweetAlert('error', 'Error', 'Failed to delete Team. Please try again...');
+        // });
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.delete(baseurl+'/teams/'+id, {headers})
+        .then((response) => {
+            setLoading(false);
+            if(response.status == 200){
                 showSweetAlert('success', 'Success', 'Team deleted successfully.');
-                displayTeam();
+                displayTeam(token);
             }
-            else
+            else {
                 showSweetAlert('error', 'Error', 'Failed to delete Team. Please try again...');
-                setTeam('');
-                setTeamLogo('');
-                setShortName('');
+            }              
+            setTeam('');
+            setTeamLogo('');
+            setShortName('');
         })
         .catch((error) => {
+            console.log(error);
+            setLoading(false);
             showSweetAlert('error', 'Error', 'Failed to delete Team. Please try again...');
-        });
+        })
     }
 
     const editVenue = (teamId, name,shortName,teamLogo) => {
@@ -216,28 +259,30 @@ const VenueScreen = ({navigation}) => {
             </View>
             <Text style={[styles.text_footer, {marginTop: 35}]}>Team Logo</Text>
             <View style={styles.action}>
-            <View style={{marginLeft:'33%'}}>
-                 <View style={styles.button}>
-                    <TouchableOpacity
-                    onPress={() => {}}
-                        style={[styles.signIn, {
-                            borderColor: '#19398A',
-                            borderWidth: 1,
-                            marginTop: 15
-                        }]}
-                    >
-                        <Text style={[styles.textSign, {
-                            color:'#19398A',
-                            // paddingLeft:10
-                        }]}>
-                        <FontAwesome
-                    name="picture-o"
+                <FontAwesome 
+                    name="camera-retro"
                     color="#05375a"
                     size={20}
-                />Upload Image</Text>
-                    </TouchableOpacity>
-                 </View>
-                 </View>
+                />
+                <TextInput 
+                    placeholder="Uploaded File Name"
+                    style={styles.textInput}
+                    autoCapitalize="none"
+                    onChangeText={(val) => setTeamLogo(val)}
+                    value={teamLogo}
+                    maxLength={20}
+                />
+                 <TouchableOpacity >
+                 <Animatable.View
+                    animation="bounceIn"
+                >
+                    <Feather 
+                        name="camera"
+                        color="#19398A"
+                        size={35}
+                    />
+                </Animatable.View>
+                </TouchableOpacity>
             </View>
             <View style={styles.button}>
             <TouchableOpacity
@@ -290,7 +335,7 @@ const VenueScreen = ({navigation}) => {
     );
 };
 
-export default VenueScreen;
+export default TeamScreen;
 
 const styles = StyleSheet.create({
     container: {

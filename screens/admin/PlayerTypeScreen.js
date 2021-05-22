@@ -9,7 +9,9 @@ import {
     Platform,
     StyleSheet,
     ScrollView,
-    StatusBar
+    StatusBar,
+    RefreshControl,
+    Alert
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -19,6 +21,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
 import AsyncStorage from '@react-native-community/async-storage';
+import axios from 'axios';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 const PlayerTypeScreen = ({navigation}) => {
 
@@ -28,75 +32,91 @@ const PlayerTypeScreen = ({navigation}) => {
     const [btnText, setBtnText] = useState('Add');
     const [playerTypeId, setPlayerTypeId] = useState(0);
     const [token, setToken] = useState('');
-    
-    useEffect(() => {
-        displayPlayerType();
-        setPlayerType('');
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
     }, []);
 
-    const displayPlayerType = () => {
-        fetch(baseurl+'/playertype')
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200)
-                setData(json.data);
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
+    useEffect(async() => {
+        const token = await AsyncStorage.getItem('token');
+        setToken(token);
+        displayPlayerType(token);
+        setPlayerType('');
+    }, [refreshing]);
+
+    const displayPlayerType = (token) => {
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/player-types', {headers})
+        .then(response => {
+            setLoading(false);
+            setRefreshing(false);
+            if(response.status == 200){
+                setData(response.data);
+            }
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
         })
-        .catch((error) => {
-            showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-        });
+        .catch(error => {
+            setLoading(false);
+            setRefreshing(false);
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
     }
 
     const addPlayerType = () => {
-        // console.log(data.gender);
-        // console.log(baseurl+'/gender');
         if(playerType != ''){
-            fetch(baseurl+'/playertype', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json' 
-                },
-                body: JSON.stringify({
-                    typeName: playerType
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                if(json.code == 201){
+            const reqData = {
+                typeName: playerType
+            };
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.post(baseurl+'/player-types', reqData, {headers})
+            .then((response) => {
+                setLoading(false);
+                if(response.status == 201){
                     showSweetAlert('success', 'Success', 'PlayerType added successfully.');
-                    displayPlayerType();
+                    displayPlayerType(token);
                 }
-                else
+                else {
                     showSweetAlert('error', 'Error', 'Failed to add PlayerType. Please try again...');
-                    setPlayerType('');
+                }              
+                setPlayerType('');
             })
             .catch((error) => {
+                setLoading(false);
                 showSweetAlert('error', 'Error', 'Failed to add PlayerType. Please try again...');
-            });
+            })
         }else{
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for PlayerType.');
         }
     }
 
     const deletePlayerType = (id) => {
-        fetch(baseurl+'/playertype/'+id, {
-            method: 'DELETE'
-        })
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200){
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.delete(baseurl+'/player-types/'+id, {headers})
+        .then((response) => {
+            setLoading(false);
+            if(response.status == 200){
                 showSweetAlert('success', 'Success', 'PlayerType deleted successfully.');
-                displayPlayerType();
+                displayPlayerType(token);
             }
-            else
+            else {
                 showSweetAlert('error', 'Error', 'Failed to delete PlayerType. Please try again...');
-                setPlayerType('');
+            }              
+            setPlayerType('');
         })
         .catch((error) => {
+            setLoading(false);
             showSweetAlert('error', 'Error', 'Failed to delete PlayerType. Please try again...');
-        });
+        })
     }
 
     const editPlayerType = (playerTypeId, typeName) => {
@@ -107,38 +127,77 @@ const PlayerTypeScreen = ({navigation}) => {
 
     const updatePlayerType = () => {
         if(playerType != ''){
-            fetch(baseurl+'/playertype/'+playerTypeId, {
-                method: 'PUT',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json' 
-                },
-                body: JSON.stringify({
-                    typeName: playerType
-                })
-            })
-            .then((response) => response.json())
-            .then((json) => {
-                if(json.code == 201){
-                    showSweetAlert('success', 'Success', 'PlayerType updated successfully.');
-                    displayPlayerType();
-                }
-                else
-                    showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
-                setPlayerType('');
-                setBtnText('Add');
-                // setGenderId(0);
-            })
-            .catch((error) => {
+            // fetch(baseurl+'/playertype/'+playerTypeId, {
+            //     method: 'PUT',
+            //     headers: {
+            //         Accept: 'application/json',
+            //         'Content-Type': 'application/json' 
+            //     },
+            //     body: JSON.stringify({
+            //         typeName: playerType
+            //     })
+            // })
+            // .then((response) => response.json())
+            // .then((json) => {
+            //     if(json.code == 201){
+            //         showSweetAlert('success', 'Success', 'PlayerType updated successfully.');
+            //         displayPlayerType();
+            //     }
+            //     else
+            //         showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
+            //     setPlayerType('');
+            //     setBtnText('Add');
+            //     // setGenderId(0);
+            // })
+            // .catch((error) => {
+            //     showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
+            // });
+            const reqData = {
+                typeName: playerType
+            };
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.put(baseurl+'/player-types/'+playerTypeId, reqData, {headers})
+        .then((response) => {
+            setLoading(false);
+            if(response.status == 200){
+                showSweetAlert('success', 'Success', 'PlayerType updated successfully..');
+                displayPlayerType(token);
+            }
+            else {
                 showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
-            });
+            }              
+            setPlayerType('');
+            setBtnText('Add');
+        })
+        .catch((error) => {
+            setLoading(false);
+            showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
+        })
         }else{
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for PlayerType.');
         }
     }
 
+    const getConfirmation = (playerTypeId) =>
+    Alert.alert(
+    "Delete Confirmation",
+    "Do you really want to delete the Player Type ?",
+    [
+        {
+            text: "Cancel"
+        },
+        { 
+            text: "OK", 
+            onPress: () => {deletePlayerType(playerTypeId)}
+        }
+    ]
+);
+
    return (
       <View style={styles.container}>
+       <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
           <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
         <View style={styles.header}>
             <Text style={styles.text_header}>PlayerType Details</Text>
@@ -147,7 +206,7 @@ const PlayerTypeScreen = ({navigation}) => {
             animation="fadeInUpBig"
             style={styles.footer}
         >
-            <ScrollView keyboardShouldPersistTaps='handled'>
+            <ScrollView keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
             <Text style={[styles.text_footer, {marginTop: 35}]}>PlayerType Name</Text>
             <View style={styles.action}>
                 <FontAwesome 
@@ -212,7 +271,7 @@ const PlayerTypeScreen = ({navigation}) => {
                             </View>
                             <Text style={[styles.carditem, {width: '65%',paddingLeft:20}]}>{item.typeName}</Text>
                            <TouchableOpacity onPress={() => {editPlayerType(item.playerTypeId, item.typeName)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="circle-edit-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                           <TouchableOpacity onPress={() => {deletePlayerType(item.playerTypeId)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
+                           <TouchableOpacity onPress={() => {getConfirmation(item.playerTypeId)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
                         </View>
                         </View>
                 ))

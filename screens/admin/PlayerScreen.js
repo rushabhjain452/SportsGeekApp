@@ -21,35 +21,95 @@ import SwipeList from 'react-native-smooth-swipe-list';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
+import AsyncStorage from '@react-native-community/async-storage';
+import Spinner from 'react-native-loading-spinner-overlay';
+import axios from 'axios';
 
 const PlayerScreen = ({navigation}) => {
 
     // LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
-    const [playerType, setPlayerType] = useState('');
-    const [btnText, setBtnText] = useState('Add');
+    const [teamData, setTeamData] = useState([]);
+    const [teamId, setTeamId] = useState(0);
+    const [playerTypeData, setPlayerTypeData] = useState([]);
+    const [playerName, setPlayerName] = useState('');
     const [playerTypeId, setPlayerTypeId] = useState(0);
+    const [btnText, setBtnText] = useState('Add');
     const [valueSS, setValueSS] = useState('');
+    const [token, setToken] = useState('');
 
-    useEffect(() => {
-        displayTeam();
+    useEffect(async() => {
+        const token = await AsyncStorage.getItem('token');
+        setToken(token);
+        displayTeam(token);
+        displayPlayerType(token);
         // setPlayerType('');
     }, []);
 
-    const displayTeam = () => {
-        fetch(baseurl+'/team')
-        .then((response) => response.json())
-        .then((json) => {
-            if(json.code == 200)
-            {
-                setData(json.data);
+    const displayTeam = (token) => {
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/teams', {headers})
+        .then(response => {
+            // setLoading(false);
+            // setRefreshing(false);
+            if(response.status == 200){
+                setData(response.data);
+                // console.log(json.data);
+                let dt = response.data;
+                // console.log(dt.length);
+                let arr = [];
+                for(let i=0; i<dt.length; i++){
+                    arr.push({
+                        value: dt[i].teamId,
+                        label: dt[i].shortName
+                    });
+                }
+                setTeamData(arr);
             }
-            else
-                showSweetAlert('error', 'Error', 'Error in fetching Team data. Please try again...');
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
         })
-        .catch((error) => {
-            showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-        });
+        .catch(error => {
+            // setLoading(false);
+            // setRefreshing(false);
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
+    }
+
+    const displayPlayerType = (token) => {
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/player-types', {headers})
+        .then(response => {
+            // setLoading(false);
+            // setRefreshing(false);
+            if(response.status == 200){
+                setData(response.data);
+                // console.log(json.data);
+                let dt = response.data;
+                // console.log(dt.length);
+                let arr = [];
+                for(let i=0; i<dt.length; i++){
+                    arr.push({
+                        value: dt[i].playerTypeId,
+                        label: dt[i].typeName
+                    });
+                }
+                setPlayerTypeData(arr);
+            }
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
+        })
+        .catch(error => {
+            // setLoading(false);
+            // setRefreshing(false);
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
     }
 
     // const addPlayerType = () => {
@@ -140,7 +200,12 @@ const PlayerScreen = ({navigation}) => {
     //         showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for PlayerType.');
     //     }
     // }
-
+    const onChangeSS = (value) => {
+        setTeamId(value);
+    };
+    const onPlayerSS = (value) => {
+        setTeamId(value);
+    };
    return (
       <View style={styles.container}>
           <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
@@ -161,10 +226,10 @@ const PlayerScreen = ({navigation}) => {
                 /> */}
                 <Dropdown
                     label="Team Name"
-                    data={data.name}
+                    data={teamData}
                     enableSearch
-                    value={valueSS}
-                    // onChange={onChangeSS}
+                    value={teamId}
+                    onChange={onChangeSS}
                 />
             </View>
             <Text style={[styles.text_footer, {marginTop: 35}]}>Player Name</Text>
@@ -178,11 +243,11 @@ const PlayerScreen = ({navigation}) => {
                     placeholder="Enter Player Name"
                     style={styles.textInput}
                     autoCapitalize="none"
-                    onChangeText={(val) => setPlayerType(val)}
-                    value={playerType}
+                    onChangeText={(val) => setPlayerName(val)}
+                    value={playerName}
                     maxLength={20}
                 />
-                { (playerType != '') ? 
+                { (playerName != '') ? 
                 <Animatable.View
                     animation="bounceIn"
                 >
@@ -203,36 +268,38 @@ const PlayerScreen = ({navigation}) => {
                 /> */}
                 <Dropdown
                     label="Player Type"
-                    // data={data}
+                    data={playerTypeData}
                     enableSearch
-                    // value={valueSS}
-                    // onChange={onChangeSS}
+                    value={playerTypeId}
+                    onChange={onPlayerSS}
                 />
             </View>
              <Text style={[styles.text_footer, {marginTop: 35}]}>Profile Picture</Text>
-            <View style={styles.action}>
+             <View style={styles.action}>
                 <FontAwesome 
                     name="camera-retro"
                     color="#05375a"
                     size={20}
                 />
-                <TouchableOpacity
-                    style={styles.buttonStyle}
-                    activeOpacity={0.5}
-                    onPress={() => {photoUploadHandler()}}>
-                <Text style={styles.buttonTextStyle}>Upload Photo</Text>
-                </TouchableOpacity>
-                {data.check_textInputChange ? 
-                <Animatable.View
+                <TextInput 
+                    placeholder="Uploaded File Name"
+                    style={styles.textInput}
+                    autoCapitalize="none"
+                    // onChangeText={(val) => (val)}
+                    // value={teamLogo}
+                    maxLength={20}
+                />
+                 <TouchableOpacity >
+                 <Animatable.View
                     animation="bounceIn"
                 >
                     <Feather 
-                        name="check-circle"
-                        color="green"
-                        size={20}
+                        name="camera"
+                        color="#19398A"
+                        size={35}
                     />
                 </Animatable.View>
-                : null}
+                </TouchableOpacity>
             </View>
             <View style={styles.button}>
             <TouchableOpacity
@@ -247,6 +314,21 @@ const PlayerScreen = ({navigation}) => {
                     <Text style={[styles.textSign, {
                         color:'#19398A'
                     }]}>{btnText}</Text>
+                </TouchableOpacity>
+            </View>
+            <View style={styles.button1}>
+            <TouchableOpacity
+                // onPress={(btnText=='Add') ? addPlayerType : updatePlayerType}
+                    style={[styles.signIn, {
+                        borderColor: '#19398A',
+                        borderWidth: 1,
+                        // marginTop: 10,
+                        // marginBottom: 20
+                    }]}
+                >
+                    <Text style={[styles.textSign, {
+                        color:'#19398A'
+                    }]}>Search</Text>
                 </TouchableOpacity>
             </View>
             {/* <View style={[styles.card]}>
@@ -344,6 +426,10 @@ const styles = StyleSheet.create({
     button: {
         alignItems: 'center',
         marginTop: 20
+    },
+    button1: {
+        alignItems: 'center',
+        marginTop: 0
     },
     signIn: {
         width: '100%',

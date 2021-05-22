@@ -69,30 +69,6 @@ const AdminScreen = ({navigation}) => {
           <Collapse>
             <CollapseHeader>
                 <View style={styles.menuWrapper}>
-                <TouchableRipple onPress={() => {navigation.navigate('UpdateMatchScheduleScreen')}}>
-                <View style={styles.menuItem}>
-                      <Icon name="scoreboard" color="#19398A" size={25}/>
-                        <Text style={styles.menuItemText}>Update Match Result</Text>
-                </View>
-                </TouchableRipple>
-                  </View>
-              </CollapseHeader>
-            </Collapse>
-            <Collapse>
-            <CollapseHeader>
-                <View style={styles.menuWrapper}>
-                <TouchableRipple onPress={() => {navigation.navigate('UpdateMatchMinBetSchedule')}}>
-                <View style={styles.menuItem}>
-                      <Icon name="wallet" color="#19398A" size={25}/>
-                        <Text style={styles.menuItemText}>Update Match Minimum BetPoints</Text>
-                </View>
-                </TouchableRipple>
-                  </View>
-              </CollapseHeader>
-            </Collapse>
-          <Collapse>
-            <CollapseHeader>
-                <View style={styles.menuWrapper}>
                 <TouchableRipple onPress={() => {navigation.navigate('GenderScreen')}}>
                 <View style={styles.menuItem}>
                       <Icon name="gender-male-female" color="#19398A" size={25}/>
@@ -104,17 +80,31 @@ const AdminScreen = ({navigation}) => {
             </Collapse>
             <Collapse>
             <CollapseHeader>
-                <View style={styles.menuWrapper}>
+            <View style={styles.menuWrapper}>
+            <View style={styles.menuItem}>
+                  <Icon name="tournament" color="#19398A" size={25}/>
+                    <Text style={styles.menuItemText}>Tournaments</Text>
+            </View>
+              </View>
+            </CollapseHeader>
+            <CollapseBody>
+            <View style={styles.menuWrapper1}>
                 <TouchableRipple onPress={() => {navigation.navigate('TournamentScreen')}}>
-                <View style={styles.menuItem}>
-                      <Icon name="tournament" color="#19398A" size={25}/>
-                        <Text style={styles.menuItemText}> Tournament</Text>
-                </View>
-                </TouchableRipple>
+                  <View style={styles.menuItem1}>
+                    <Icon name="tournament" color="#19398A" size={25}/>
+                    <Text style={styles.menuItemText1}>Tournament</Text>
                   </View>
-              </CollapseHeader>
-            </Collapse>
-            {/* <Collapse>
+                </TouchableRipple>
+                <TouchableRipple onPress={() => {navigation.navigate('UpdateActiveTournamentScreen')}}>
+                  <View style={styles.menuItem1}>
+                    <Icon name="account-check" color="#19398A" size={25}/>
+                    <Text style={styles.menuItemText1}>Update Active Tournament</Text>
+                  </View>
+                </TouchableRipple> 
+             </View>
+            </CollapseBody>
+          </Collapse>
+            <Collapse>
             <CollapseHeader>
             <View style={styles.menuWrapper}>
             <View style={styles.menuItem}>
@@ -127,20 +117,20 @@ const AdminScreen = ({navigation}) => {
             <View style={styles.menuWrapper1}>
                 <TouchableRipple onPress={() => {navigation.navigate('PlayerScreen')}}>
                   <View style={styles.menuItem1}>
-                    <Icon name="account-check" color="#19398A" size={25}/>
+                    <Icon name="cricket" color="#19398A" size={25}/>
                     <Text style={styles.menuItemText1}>Player</Text>
                   </View>
                 </TouchableRipple> 
                 <TouchableRipple onPress={() => {navigation.navigate('PlayerTypeSCreen')}}>
                   <View style={styles.menuItem1}>
-                    <Icon name="account-cancel" color="#19398A" size={25}/>
+                    <Icon name="cricket" color="#19398A" size={25}/>
                     <Text style={styles.menuItemText1}>Player-Type</Text>
                   </View>
                 </TouchableRipple>
              </View>
             </CollapseBody>
-          </Collapse> */}
-            {/* <Collapse>
+          </Collapse>
+            <Collapse>
             <CollapseHeader>
                 <View style={styles.menuWrapper}>
                 <TouchableRipple onPress={() => {navigation.navigate('TeamScreen')}}>
@@ -151,7 +141,7 @@ const AdminScreen = ({navigation}) => {
                 </TouchableRipple>
                   </View>
               </CollapseHeader>
-            </Collapse> */}
+            </Collapse>
            
            {/* <Collapse>
             <CollapseHeader>
@@ -165,6 +155,44 @@ const AdminScreen = ({navigation}) => {
                   </View>
               </CollapseHeader>
             </Collapse> */}
+            <Collapse>
+            <CollapseHeader>
+            <View style={styles.menuWrapper}>
+            <View style={styles.menuItem}>
+                  <Icon name="cricket" color="#19398A" size={25}/>
+                    <Text style={styles.menuItemText}> Matches</Text>
+            </View>
+              </View>
+            </CollapseHeader>
+            <CollapseBody>
+            <View style={styles.menuWrapper1}>
+                <TouchableRipple onPress={() => {navigation.navigate('MatchesScreen')}}>
+                  <View style={styles.menuItem1}>
+                    <Icon name="calendar" color="#19398A" size={25}/>
+                    <Text style={styles.menuItemText1}>Add Matches</Text>
+                  </View>
+                </TouchableRipple>
+                <TouchableRipple onPress={() => {navigation.navigate('MatchesScheduleScreenForUpdate')}}>
+                  <View style={styles.menuItem1}>
+                    <Icon name="account-edit" color="#19398A" size={25}/>
+                    <Text style={styles.menuItemText1}>Edit/Delete Matches</Text>
+                  </View>
+                </TouchableRipple>
+                <TouchableRipple onPress={() => {navigation.navigate('UpdateMatchMinBetSchedule')}}>
+                <View style={styles.menuItem1}>
+                      <Icon name="wallet" color="#19398A" size={25}/>
+                        <Text style={styles.menuItemText}>Update Match Minimum BetPoints</Text>
+                </View>
+                </TouchableRipple>
+                <TouchableRipple onPress={() => {navigation.navigate('UpdateMatchScheduleScreen')}}>
+                <View style={styles.menuItem1}>
+                      <Icon name="scoreboard" color="#19398A" size={25}/>
+                        <Text style={styles.menuItemText}>Update Match Result</Text>
+                </View>
+                </TouchableRipple>
+             </View>
+            </CollapseBody>
+          </Collapse>
             <Collapse>
             <CollapseHeader>
                 <View style={styles.menuWrapper}>

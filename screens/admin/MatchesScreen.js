@@ -22,17 +22,36 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import axios from 'axios';
+import AsyncStorage from '@react-native-community/async-storage';
 
 const MatchesScreen = ({navigation}) => {
 
     // LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
-    const [playerType, setPlayerType] = useState('');
+    const [tournamentData, setTournamentData] = useState([]);
+    const [venueData, setVenueData] = useState([]);
+    const [venueId, setVenueId] = useState(0);
+    const [team1Data, setTeam1Data] = useState([]);
+    const [team1Id, setTeam1Id] = useState(0);
+    const [team2Data, setTeam2Data] = useState([]);
+    const [team2Id, setTeam2Id] = useState(0);
+    const [matchId, setMatchId] = useState(0);
+    const [matchName, setMatchName] = useState('');
+    const [startDateTime, setStartDateTime] = useState('');
+    const [contestPoints, setContestPoints] = useState(0);
     const [btnText, setBtnText] = useState('Add');
-    const [playerTypeId, setPlayerTypeId] = useState(0);
+    const [tournamentId, setTournamentId] = useState(0);
     const [valueSS, setValueSS] = useState('');
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    useEffect(() => {
+    const [token, setToken] = useState('');
+
+    useEffect(async() => {
+        const token = await AsyncStorage.getItem('token');
+        setToken(token);
+        displayTournament(token);
+        displayVenue(token);
+        displayTeam(token);
         // displayTeam();
         // setPlayerType('');
     }, []);
@@ -52,6 +71,107 @@ const MatchesScreen = ({navigation}) => {
     //         showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
     //     });
     // }
+    const displayTournament = (token) => {
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/tournaments', {headers})
+        .then(response => {
+            // setLoading(false);
+            //     setRefreshing(false);
+            if(response.status == 200){
+                setData(response.data);
+                // console.log(json.data);
+                let dt = response.data;
+                // console.log(dt.length);
+                let arr = [];
+                for(let i=0; i<dt.length; i++){
+                    arr.push({
+                        value: dt[i].tournamentId,
+                        label: dt[i].name
+                    });
+                }
+                setTournamentData(arr);
+                // console.log(userData);
+            }
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
+        })
+        .catch(error => {
+            // setLoading(false);
+            // setRefreshing(false);
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
+    }
+    const displayVenue = (token) => {
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/venues', {headers})
+        .then(response => {
+            // setLoading(false);
+            // setRefreshing(false);
+            if(response.status == 200){
+                setData(response.data);
+                // console.log(json.data);
+                let dt = response.data;
+                // console.log(dt.length);
+                let arr = [];
+                for(let i=0; i<dt.length; i++){
+                    arr.push({
+                        value: dt[i].venueId,
+                        label: dt[i].name
+                    });
+                }
+                setVenueData(arr);
+            }
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
+        })
+        .catch(error => {
+            // setLoading(false);
+            // setRefreshing(false);
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
+    }
+
+    const displayTeam = (token) => {
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/teams', {headers})
+        .then(response => {
+            // setLoading(false);
+            // setRefreshing(false);
+            if(response.status == 200){
+                setData(response.data);
+                // console.log(json.data);
+                let dt = response.data;
+                // console.log(dt.length);
+                let arr = [];
+                for(let i=0; i<dt.length; i++){
+                    arr.push({
+                        value: dt[i].teamId,
+                        label: dt[i].shortName
+                    });
+                }
+                setTeam1Data(arr);
+                setTeam2Data(arr);
+            }
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
+        })
+        .catch(error => {
+            // setLoading(false);
+            // setRefreshing(false);
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })
+    }
+
+
     const showDatePicker = () => {
         setDatePickerVisibility(true);
       };
@@ -60,7 +180,7 @@ const MatchesScreen = ({navigation}) => {
         setDatePickerVisibility(false);
       };
       const handleConfirm = (date) => {
-        console.warn("A date has been picked: ", date);
+        setStartDateTime(date);
         hideDatePicker();
       };
 
@@ -152,18 +272,52 @@ const MatchesScreen = ({navigation}) => {
     //         showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for PlayerType.');
     //     }
     // }
-
+    const onChangeSS = (value) => {
+        setTournamentId(value);
+    };
+    const onVenueSS = (value) => {
+        setVenueId(value);
+    };
+    const onTeam1SS = (value) => {
+        setTeam1Id(value);
+    };
+    const onTeam2SS = (value) => {
+        setTeam2Id(value);
+    };
    return (
       <View style={styles.container}>
           <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
         <View style={styles.header}>
-            <Text style={styles.text_header}>Match Details</Text>
+            <Text style={styles.text_header}>Add Match</Text>
         </View>
+        
         <Animatable.View 
             animation="fadeInUpBig"
             style={styles.footer}
         >
             <ScrollView keyboardShouldPersistTaps='handled'>
+            <Text style={[styles.text_footer, {marginTop: 35}]}>Match Id</Text>
+            <View style={styles.action}>
+                <TextInput 
+                    placeholder="Enter Match Id"
+                    style={styles.textInput}
+                    autoCapitalize="none"
+                    onChangeText={(val) => setMatchId(val)}
+                    value={matchId}
+                    maxLength={20}
+                />
+                { (matchId != 0) ? 
+                <Animatable.View
+                    animation="bounceIn"
+                >
+                    <Feather 
+                        name="check-circle"
+                        color="green"
+                        size={20}
+                    />
+                </Animatable.View>
+                : null}
+            </View>
             <Text style={[styles.text_footer, {marginTop: 35}]}>Tournament Name</Text>
             <View style={styles.action}>
                 {/* <FontAwesome 
@@ -173,28 +327,23 @@ const MatchesScreen = ({navigation}) => {
                 /> */}
                 <Dropdown
                     label="Tournament Name"
-                    data={data.name}
+                    data={tournamentData}
                     enableSearch
-                    value={valueSS}
-                    // onChange={onChangeSS}
+                    value={tournamentId}
+                    onChange={onChangeSS}
                 />
             </View>
             <Text style={[styles.text_footer, {marginTop: 35}]}>Match Name</Text>
             <View style={styles.action}>
-                <FontAwesome 
-                    name="gamepad"
-                    color="#05375a"
-                    size={20}
-                />
                 <TextInput 
-                    placeholder="Enter Player Name"
+                    placeholder="Enter Match Name"
                     style={styles.textInput}
                     autoCapitalize="none"
-                    onChangeText={(val) => setPlayerType(val)}
-                    value={playerType}
+                    onChangeText={(val) => setMatchName(val)}
+                    value={matchName}
                     maxLength={20}
                 />
-                { (playerType != '') ? 
+                { (matchName != '') ? 
                 <Animatable.View
                     animation="bounceIn"
                 >
@@ -208,12 +357,25 @@ const MatchesScreen = ({navigation}) => {
             </View>
             <Text style={[styles.text_footer, {marginTop: 35}]}>Match Start Date</Text>
             <View style={styles.action}>
-                <FontAwesome 
-                    name="calendar"
-                    color="#05375a"
-                    size={20}
+                <TextInput 
+                    placeholder="Date Time"
+                    style={styles.textInput}
+                    autoCapitalize="none"
+                    onChangeText={(val) => String(setStartDateTime(val))}
+                    value={startDateTime}
+                    maxLength={20}
                 />
-               <Button title="Match Start DateTime" onPress={showDatePicker} />
+                <TouchableOpacity onPress={showDatePicker}>
+                 <Animatable.View
+                    animation="bounceIn"
+                >
+                    <Feather 
+                        name="calendar"
+                        color="#19398A"
+                        size={30}
+                    />
+                </Animatable.View>
+                </TouchableOpacity>
                 <DateTimePickerModal
                     isVisible={isDatePickerVisible}
                     mode="date"
@@ -229,11 +391,11 @@ const MatchesScreen = ({navigation}) => {
                     size={20}
                 /> */}
                 <Dropdown
-                    label="Venue"
-                    // data={data}
+                    label="Venue Name"
+                    data={venueData}
                     enableSearch
-                    // value={valueSS}
-                    // onChange={onChangeSS}
+                    value={venueId}
+                    onChange={onVenueSS}
                 />
             </View>
             <Text style={[styles.text_footer, {marginTop: 35}]}>Team 1</Text>
@@ -244,11 +406,11 @@ const MatchesScreen = ({navigation}) => {
                     size={20}
                 /> */}
                 <Dropdown
-                    label="Team 1"
-                    // data={data}
+                    label="Team1"
+                    data={team1Data}
                     enableSearch
-                    // value={valueSS}
-                    // onChange={onChangeSS}
+                    value={team1Id}
+                    onChange={onTeam1SS}
                 />
             </View>
             <Text style={[styles.text_footer, {marginTop: 35}]}>Team 2</Text>
@@ -259,12 +421,34 @@ const MatchesScreen = ({navigation}) => {
                     size={20}
                 /> */}
                 <Dropdown
-                    label="Team 2"
-                    // data={data}
+                    label="Team1"
+                    data={team2Data}
                     enableSearch
-                    // value={valueSS}
-                    // onChange={onChangeSS}
+                    value={team2Id}
+                    onChange={onTeam2SS}
                 />
+            </View>
+            <Text style={[styles.text_footer, {marginTop: 35}]}>Minimum Contest Points</Text>
+            <View style={styles.action}>
+                <TextInput 
+                    placeholder="Enter Contest Points"
+                    style={styles.textInput}
+                    autoCapitalize="none"
+                    onChangeText={(val) => setContestPoints(val)}
+                    value={contestPoints}
+                    maxLength={20}
+                />
+                { (contestPoints != 0) ? 
+                <Animatable.View
+                    animation="bounceIn"
+                >
+                    <Feather 
+                        name="check-circle"
+                        color="green"
+                        size={20}
+                    />
+                </Animatable.View>
+                : null}
             </View>
             <View style={styles.button}>
             <TouchableOpacity
@@ -281,34 +465,6 @@ const MatchesScreen = ({navigation}) => {
                     }]}>{btnText}</Text>
                 </TouchableOpacity>
             </View>
-            {/* <View style={[styles.card]}>
-            <SwipeList rowData={
-                data.map((item) => ({
-                    id: item.genderId,
-                    rowView: getRowView(item),
-                    leftSubView: getUpdateButton(item.genderId, item.name), //optional
-                    rightSubView: getDeleteButton(item.genderId), //optional
-                    style: styles.row, //optional but recommended to style your rows
-                    useNativeDriver: false 
-                }))
-            }
-             />
-            </View> */}
-                {/* {
-                data.map((item,index) => (
-                    <View style={styles.card} key={item.playerTypeId} >
-                        <View style={styles.cardlist}>  
-                            <View style={styles.ellipse1}>
-                                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>{(item.typeName).substr(0,2)}</Text>
-                            </View>
-                            <Text style={[styles.carditem, {width: '65%',paddingLeft:20}]}>{item.typeName}</Text>
-                           <TouchableOpacity onPress={() => {editPlayerType(item.playerTypeId, item.typeName)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="circle-edit-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                           <TouchableOpacity onPress={() => {deletePlayerType(item.playerTypeId)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                        </View>
-                        </View>
-                ))
-            } */}
-           
             </ScrollView>
         </Animatable.View>
       </View>
