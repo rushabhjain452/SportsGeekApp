@@ -24,10 +24,11 @@ import SwipeList from 'react-native-smooth-swipe-list';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
+import axios from 'axios';
 
+import formatDate from '../../helpers/formatDate';
 import showSweetAlert from '../../helpers/showSweetAlert';
 import {baseurl} from '../../config';
-import axios from 'axios';
 
 const RechargeScreen = ({navigation}) => {
 
@@ -194,23 +195,6 @@ const RechargeScreen = ({navigation}) => {
             showSweetAlert('error', 'Error', 'Failed to update Tournament. Please try again...');
         })
         }
-    }
-
-    const formatDate = (str) => {
-        // let dt = new Date(dateStr);
-        // let str = dt.toString();
-        // // Wed May 26 2021 19:30:00 GMT+0530 (IST)
-        // let day = str.substring(8,10);
-        // let mth = str.substring(4,7);
-        // let yr = str.substring(11,15);
-
-        let day = str.substring(8,10);
-        let mth = str.substring(5,7);
-        let yr = str.substring(0,4);
-        // let hr = str.substring(11,13);
-        // let min = str.substring(14,16);
-          
-        return day + '-' + mth + '-' + yr;
     }
 
     const getConfirmation = (tournamentId) =>

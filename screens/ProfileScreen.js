@@ -21,7 +21,7 @@ const ProfileScreen = ({navigation}) => {
 
   const [data, setData] = useState({});
   const [winningPoints, setWinningPoints] = useState(0);
-  const [loosingPoints, setLoosingPoints] = useState(0);
+  const [losingPoints, setLosingPoints] = useState(0);
   const [userId, setUserId] = useState(0);
   const [shortName, setShortName] = useState('');
   const [refreshing, setRefreshing] = React.useState(false);
@@ -39,13 +39,12 @@ const ProfileScreen = ({navigation}) => {
     // console.log(typeof(userId));
     setUserId(userId);
     displayProfile(userId, token);
-    displayWinningPoints(userId, token);
-    displayLoosingPoints(userId, token);
+    displayWinningAndLosingPoints(userId, token);
   }, [refreshing]);
 
   useEffect(() => {
     displayProfile(userId, token);
-    // displayWinningPoints(userId);
+    // displayWinningAndLosingPoints(userId);
     // displayLoosingPoints(userId);
     if(data.firstName){
       setShortName(data.firstName.substr(0,1) + data.lastName.substr(0,1));
@@ -55,7 +54,7 @@ const ProfileScreen = ({navigation}) => {
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     // displayProfile(userId);
-    // displayWinningPoints(userId);
+    // displayWinningAndLosingPoints(userId);
     // displayLoosingPoints(userId);
   }, []);
 
@@ -77,12 +76,13 @@ const ProfileScreen = ({navigation}) => {
     });
   }
 
-  const displayWinningPoints = (userId, token) => {
+  const displayWinningAndLosingPoints = (userId, token) => {
     const headers = {'Authorization': 'Bearer ' + token};
-    axios.get(baseurl+'/users/'+userId+'/winning-points', {headers})
+    axios.get(baseurl+'/users/'+userId+'/winning-losing-points', {headers})
     .then((response) => {
       if(response.status == 200){
         setWinningPoints(response.data.winningPoints);
+        setLosingPoints(response.data.losingPoints);
       }else{
         showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
       }
@@ -92,24 +92,6 @@ const ProfileScreen = ({navigation}) => {
     });
   }
 
-  const displayLoosingPoints = (userId, token) => {
-    const headers = {'Authorization': 'Bearer ' + token};
-    axios.get(baseurl+'/users/'+userId+'/loosing-points', {headers})
-    .then((response) => {
-      setLoading(false);
-      setRefreshing(false);
-      if(response.status == 200){
-        setLoosingPoints(response.data.loosingPoints);
-      }else{
-        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-      }
-    })
-    .catch((error) => {
-      setLoading(false);
-      setRefreshing(false);
-      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-    });
-  }
   const { signOut } = React.useContext(AuthContext);
 
   return (
@@ -168,7 +150,7 @@ const ProfileScreen = ({navigation}) => {
             <Caption style = {{color: '#30923D'}}>Total Winnings</Caption>
           </View>
           <View style={styles.infoBox}>
-            <Title style = {{color: '#F00', fontWeight: 'bold'}}>{loosingPoints}</Title>
+            <Title style = {{color: '#F00', fontWeight: 'bold'}}>{losingPoints}</Title>
             <Caption style = {{color: '#F00'}}>Total Losing</Caption>
           </View>
       </View>

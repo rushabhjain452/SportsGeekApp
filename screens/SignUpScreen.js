@@ -109,20 +109,59 @@ const SignUpScreen = ({navigation}) => {
         }
         else{
             setLoading(true);
-            const reqData = {
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                mobileNumber: mobileNumber,
-                genderId: genderId,
-                username: username,
-                password: password,
-                status: false,
-                roleId: 2,
-                profilePicture: '',
-                availablePoints: 500
-            };
-            axios.post(baseurl+'/users/register', reqData)
+            // const reqData = {
+            //     firstName: firstName,
+            //     lastName: lastName,
+            //     email: email,
+            //     mobileNumber: mobileNumber,
+            //     genderId: genderId,
+            //     username: username,
+            //     password: password,
+            //     status: false,
+            //     roleId: 2,
+            //     profilePicture: null,
+            //     availablePoints: 500
+            // };
+            // axios.post(baseurl+'/users/register', reqData)
+            // .then((response) => {
+            //     setLoading(false);
+            //     if(response.status == 201){
+            //         showSweetAlert('success', 'Registration Success', 'You are registered. Please wait until admin approves your account. You will receive an email, when admin will approve your account.');
+            //         setSuccess(true);
+            //         // navigation.goBack();
+            //         // navigator.navigate('SignInScreen');
+            //     }else{
+            //         showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            //     }
+            // })
+            // .catch((error) => {
+            //     console.log(error.response.status);
+            //     console.log(error.response.data);
+            //     setLoading(false);
+            //     if(error.response.status == 404){
+            //         showSweetAlert('warning', 'Username already exits.', 'Please change your username..!');
+            //     }else if(error.response.status == 400){
+            //         showSweetAlert('warning', 'Email already exits.', 'Please change your email..!');
+            //     }else{
+            //         showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            //     }
+            // });
+            // Submitting Form Data (with Profile Picture)
+            const formData = new FormData();
+            // const fileField = document.querySelector('profilePicture');
+            formData.append('firstName', firstName);
+            formData.append('lastName', lastName);
+            formData.append('email', email);
+            formData.append('mobileNumber', mobileNumber);
+            formData.append('genderId', genderId);
+            formData.append('username', username);
+            formData.append('password', password);
+            formData.append('availablePoints', 500);
+            formData.append('profilePicture', fileField);
+            const headers = {
+                'Content-Type': 'multipart/form-data'
+            }
+            axios.post(baseurl+'/users/register', formData, {headers})
             .then((response) => {
                 setLoading(false);
                 if(response.status == 201){
