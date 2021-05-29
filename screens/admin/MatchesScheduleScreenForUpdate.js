@@ -145,7 +145,7 @@ function MatchesScheduleScreenForUpdate({navigation}) {
   }
 
   const handleCardClick = (matchId) => {  
-      navigation.navigate('MatchesScreen', {matchId: matchId});
+      navigation.navigate('MatchesScreen', {updateMatchId: matchId});
   }
 
   const onRefresh = React.useCallback(() => {

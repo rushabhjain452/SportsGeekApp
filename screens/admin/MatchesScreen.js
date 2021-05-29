@@ -25,7 +25,9 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import axios from 'axios';
 import AsyncStorage from '@react-native-community/async-storage';
 
-const MatchesScreen = ({navigation}) => {
+const MatchesScreen = (props) => {
+
+    const {updateMatchId} = props.route.params ?? "undefined";
 
     // LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
@@ -46,31 +48,20 @@ const MatchesScreen = ({navigation}) => {
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [token, setToken] = useState('');
 
+
     useEffect(async() => {
         const token = await AsyncStorage.getItem('token');
         setToken(token);
         displayTournament(token);
         displayVenue(token);
         displayTeam(token);
+        if(updateMatchId !=undefined) {
+            fetchMatchData(updateMatchId,token);
+        }
         // displayTeam();
         // setPlayerType('');
     }, []);
 
-    // const displayTeam = () => {
-    //     fetch(baseurl+'/team')
-    //     .then((response) => response.json())
-    //     .then((json) => {
-    //         if(json.code == 200)
-    //         {
-    //             setData(json.data);
-    //         }
-    //         else
-    //             showSweetAlert('error', 'Error', 'Error in fetching Team data. Please try again...');
-    //     })
-    //     .catch((error) => {
-    //         showSweetAlert('error', 'Error', 'Error in fetching data. Please try again...');
-    //     });
-    // }
     const displayTournament = (token) => {
         const headers = {
             'Authorization': 'Bearer ' + token
@@ -171,6 +162,35 @@ const MatchesScreen = ({navigation}) => {
         })
     }
 
+    const fetchMatchData = (matchId,token) => {
+        setBtnText('Update');
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        axios.get(baseurl+'/matches/'+matchId, {headers})
+        .then(response => {
+            // setLoading(false);
+            if(response.status == 200){
+                setContestPoints(response.data.minimumPoints);
+                setMatchId(response.data.matchId);
+                setMatchName(response.data.name);
+                setStartDateTime(response.data.startDatetime);
+                setTeam1Id(response.data.team1Id);
+                setTeam2Id(response.data.team2Id);
+                setVenueId(response.data.venueId);
+                setTournamentId(response.data.tournamentId);
+            }
+            else{
+                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+            }
+        })
+        .catch(error => {
+            // setLoading(false);
+            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        })          
+    }
+
+
 
     const showDatePicker = () => {
         setDatePickerVisibility(true);
@@ -181,97 +201,167 @@ const MatchesScreen = ({navigation}) => {
       };
       const handleConfirm = (date) => {
         setStartDateTime(date);
+        // console.log(startDateTime);
+        // console.log(date);
         hideDatePicker();
       };
 
-    // const addPlayerType = () => {
-    //     // console.log(data.gender);
-    //     // console.log(baseurl+'/gender');
-    //     if(playerType != ''){
-    //         fetch(baseurl+'/playertype', {
-    //             method: 'POST',
-    //             headers: {
-    //                 Accept: 'application/json',
-    //                 'Content-Type': 'application/json' 
-    //             },
-    //             body: JSON.stringify({
-    //                 typeName: playerType
-    //             })
-    //         })
-    //         .then((response) => response.json())
-    //         .then((json) => {
-    //             if(json.code == 201){
-    //                 showSweetAlert('success', 'Success', 'PlayerType added successfully.');
-    //                 displayPlayerType();
-    //             }
-    //             else
-    //                 showSweetAlert('error', 'Error', 'Failed to add PlayerType. Please try again...');
-    //                 setPlayerType('');
-    //         })
-    //         .catch((error) => {
-    //             showSweetAlert('error', 'Error', 'Failed to add PlayerType. Please try again...');
-    //         });
-    //     }else{
-    //         showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for PlayerType.');
-    //     }
-    // }
-
-    // const deletePlayerType = (id) => {
-    //     fetch(baseurl+'/playertype/'+id, {
-    //         method: 'DELETE'
-    //     })
-    //     .then((response) => response.json())
-    //     .then((json) => {
-    //         if(json.code == 200){
-    //             showSweetAlert('success', 'Success', 'PlayerType deleted successfully.');
-    //             displayPlayerType();
-    //         }
-    //         else
-    //             showSweetAlert('error', 'Error', 'Failed to delete PlayerType. Please try again...');
-    //             setPlayerType('');
-    //     })
-    //     .catch((error) => {
-    //         showSweetAlert('error', 'Error', 'Failed to delete PlayerType. Please try again...');
-    //     });
-    // }
-
-    // const editPlayerType = (playerTypeId, typeName) => {
-    //    setPlayerType(typeName);
-    //     setBtnText('Update');
-    //     setPlayerTypeId(playerTypeId);
-    // } 
-
-    // const updatePlayerType = () => {
-    //     if(playerType != ''){
-    //         fetch(baseurl+'/playertype/'+playerTypeId, {
-    //             method: 'PUT',
-    //             headers: {
-    //                 Accept: 'application/json',
-    //                 'Content-Type': 'application/json' 
-    //             },
-    //             body: JSON.stringify({
-    //                 typeName: playerType
-    //             })
-    //         })
-    //         .then((response) => response.json())
-    //         .then((json) => {
-    //             if(json.code == 201){
-    //                 showSweetAlert('success', 'Success', 'PlayerType updated successfully.');
-    //                 displayPlayerType();
-    //             }
-    //             else
-    //                 showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
-    //             setPlayerType('');
-    //             setBtnText('Add');
-    //             // setGenderId(0);
-    //         })
-    //         .catch((error) => {
-    //             showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
-    //         });
-    //     }else{
-    //         showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for PlayerType.');
-    //     }
-    // }
+    const addMatch = () => {
+        // console.log(data.gender);
+        // console.log(baseurl+'/gender');
+        if(matchId == 0){
+            showSweetAlert('warning', 'Invalid Input', 'Please enter valid Match Id.');
+        }
+        else if(tournamentId == 0) {
+            showSweetAlert('warning', 'Invalid Input', 'Please enter valid Tournament Id.');
+        }
+        else if(matchName == '') {
+            showSweetAlert('warning', 'Invalid Input', 'Please Select Match Name.');
+        }
+        else if(venueId == 0) {
+            showSweetAlert('warning', 'Invalid Input', 'Please Select Venue.');
+        }
+        else if(team1Id == 0) {
+            showSweetAlert('warning', 'Invalid Input', 'Please Select Team1.');
+        }
+        else if(team2Id == 0) {
+            showSweetAlert('warning', 'Invalid Input', 'Please Select Team2.');
+        }
+        else if(contestPoints == 0){
+            showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for contest points.');
+        }
+        else if(startDateTime == '') {
+            showSweetAlert('warning', 'Invalid Input', 'Please select match date time.');
+        }
+        else {
+            const reqData = {
+                matchId: matchId,
+                tournamentId: tournamentId,
+                name: matchName,
+                startDatetime: startDateTime,
+                venueId: venueId,
+                team1: team1Id,
+                team2: team2Id,
+                minimumPoints: contestPoints
+            };
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.post(baseurl+'/matches', reqData, {headers})
+            .then((response) => {
+                // setLoading(false);
+                if(response.status == 201){
+                    showSweetAlert('success', 'Success', 'Match added successfully.');
+                }
+                else {
+                    showSweetAlert('error', 'Error', 'Failed to add Match. Please try again...');
+                }              
+                setContestPoints(0);
+                setMatchId(0);
+                setMatchName('');
+                setStartDateTime('');
+                setTeam1Id(0);
+                setTeam2Id(0);
+                setTournamentId(0);
+                setVenueId(0);
+            })
+            .catch((error) => {
+                // setLoading(false);
+                console.log(error);
+                console.log("matchId"+matchId+"to:"+tournamentId+"date:"+startDateTime+"team1:"+team1Id+"team2:"+team2Id+"venue:"+venueId+"name:"+matchName+"points:"+contestPoints);
+                showSweetAlert('error', 'Error', 'Failed to add Match. Please try again...');
+            })
+        }
+    }
+ 
+    const updateMatch = () => {
+        if(matchId == 0){
+            showSweetAlert('warning', 'Invalid Input', 'Please enter valid Match Id.');
+        }
+        else if(tournamentId == 0) {
+            showSweetAlert('warning', 'Invalid Input', 'Please enter valid Tournament Id.');
+        }
+        else if(matchName == '') {
+            showSweetAlert('warning', 'Invalid Input', 'Please Select Match Name.');
+        }
+        else if(venueId == 0) {
+            showSweetAlert('warning', 'Invalid Input', 'Please Select Venue.');
+        }
+        else if(team1Id == 0) {
+            showSweetAlert('warning', 'Invalid Input', 'Please Select Team1.');
+        }
+        else if(team2Id == 0) {
+            showSweetAlert('warning', 'Invalid Input', 'Please Select Team2.');
+        }
+        else if(contestPoints == 0){
+            showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for contest points.');
+        }
+        else if(startDateTime == '') {
+            showSweetAlert('warning', 'Invalid Input', 'Please select match date time.');
+        }
+        else {
+            // fetch(baseurl+'/playertype/'+playerTypeId, {
+            //     method: 'PUT',
+            //     headers: {
+            //         Accept: 'application/json',
+            //         'Content-Type': 'application/json' 
+            //     },
+            //     body: JSON.stringify({
+            //         typeName: playerType
+            //     })
+            // })
+            // .then((response) => response.json())
+            // .then((json) => {
+            //     if(json.code == 201){
+            //         showSweetAlert('success', 'Success', 'PlayerType updated successfully.');
+            //         displayPlayerType();
+            //     }
+            //     else
+            //         showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
+            //     setPlayerType('');
+            //     setBtnText('Add');
+            //     // setGenderId(0);
+            // })
+            // .catch((error) => {
+            //     showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
+            // });
+            const reqData = {
+                tournamentId: tournamentId,
+                name: matchName,
+                startDatetime: startDateTime,
+                venueId: venueId,
+                team1: team1Id,
+                team2: team2Id,
+                minimumPoints: contestPoints
+            };
+            const headers = {
+                'Authorization': 'Bearer ' + token
+            }
+            axios.put(baseurl+'/matches/'+matchId, reqData, {headers})
+        .then((response) => {
+            // setLoading(false);
+            if(response.status == 200){
+                showSweetAlert('success', 'Success', 'Match updated successfully..');
+            }
+            else {
+                showSweetAlert('error', 'Error', 'Failed to update Match. Please try again...');
+            }              
+            setContestPoints(0);
+                setMatchId(0);
+                setMatchName('');
+                setStartDateTime('');
+                setTeam1Id(0);
+                setTeam2Id(0);
+                setTournamentId(0);
+                setVenueId(0);
+            setBtnText('Add');
+        })
+        .catch((error) => {
+            // setLoading(false);
+            showSweetAlert('error', 'Error', 'Failed to update Match. Please try again...');
+        })
+        }
+    }
     const onChangeSS = (value) => {
         setTournamentId(value);
     };
@@ -303,7 +393,7 @@ const MatchesScreen = ({navigation}) => {
                     style={styles.textInput}
                     autoCapitalize="none"
                     onChangeText={(val) => setMatchId(val)}
-                    value={matchId}
+                    value={matchId+""}
                     maxLength={20}
                 />
                 { (matchId != 0) ? 
@@ -341,7 +431,7 @@ const MatchesScreen = ({navigation}) => {
                     autoCapitalize="none"
                     onChangeText={(val) => setMatchName(val)}
                     value={matchName}
-                    maxLength={20}
+                    maxLength={100}
                 />
                 { (matchName != '') ? 
                 <Animatable.View
@@ -361,8 +451,8 @@ const MatchesScreen = ({navigation}) => {
                     placeholder="Date Time"
                     style={styles.textInput}
                     autoCapitalize="none"
-                    onChangeText={(val) => String(setStartDateTime(val))}
-                    value={startDateTime}
+                    onChangeText={(val) => setStartDateTime(val)}
+                    value={startDateTime+""}
                     maxLength={20}
                 />
                 <TouchableOpacity onPress={showDatePicker}>
@@ -435,7 +525,7 @@ const MatchesScreen = ({navigation}) => {
                     style={styles.textInput}
                     autoCapitalize="none"
                     onChangeText={(val) => setContestPoints(val)}
-                    value={contestPoints}
+                    value={contestPoints+""}
                     maxLength={20}
                 />
                 { (contestPoints != 0) ? 
@@ -452,7 +542,7 @@ const MatchesScreen = ({navigation}) => {
             </View>
             <View style={styles.button}>
             <TouchableOpacity
-                // onPress={(btnText=='Add') ? addPlayerType : updatePlayerType}
+                onPress={(btnText=='Add') ? addMatch : updateMatch}
                     style={[styles.signIn, {
                         borderColor: '#19398A',
                         borderWidth: 1,

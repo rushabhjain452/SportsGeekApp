@@ -13,7 +13,6 @@ import axios from 'axios';
 function UsersContestsForLiveMatch(props) {
 
   const {matchId} = props.route.params;
-
   const [matchData, setMatchData] = useState({});
   const [data, setData] = useState([]);
   const [username, setUsername] = useState('');

@@ -39,7 +39,7 @@ function UpdateMatchScheduleScreen({navigation}) {
       const headers = {
         'Authorization': 'Bearer ' + token
     }
-    axios.get(baseurl+'/matches/old-match', {headers})
+    axios.get(baseurl+'/matches/old-matches', {headers})
     .then(response => {
         setLoading(false);
         setRefreshing(false);
