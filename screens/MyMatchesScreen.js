@@ -5,36 +5,13 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Card} from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
-import showSweetAlert from '../helpers/showSweetAlert';
-import {baseurl} from '../config';
-import { Alert } from 'react-native';
 import axios from 'axios';
 
-const Tab = createMaterialTopTabNavigator();
+import formatDate from '../helpers/formatDate';
+import showSweetAlert from '../helpers/showSweetAlert';
+import {baseurl} from '../config';
 
-const formatDate = (dateStr) => {
-  let dt = new Date(dateStr);
-  let str = dt.toString();
-  let day = str.substring(8,10);
-  let mth = str.substring(4,7);
-  let yr = str.substring(11,15);
-  let hr = str.substring(16,18);
-  let min = str.substring(19,21);
-  // let day = str.substring(8,10);
-  // let mth = str.substring(5,7);
-  // let yr = str.substring(0,4);
-  // let hr = str.substring(11,13);
-  // let min = str.substring(14,16);
-  let ampm;
-  if(hr < 12){
-    ampm = 'AM';
-  }
-  else{
-    ampm = 'PM';
-    hr -= 12;
-  }
-  return day + '-' + mth + '-' + yr + '  ' + hr + ':' + min + ' ' + ampm;
-}
+const Tab = createMaterialTopTabNavigator();
 
 function UpcomingMatches() {
   const [data, setData] = useState([]);

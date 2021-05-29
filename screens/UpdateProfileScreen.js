@@ -14,7 +14,7 @@ import {
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
-// import ImagePicker from 'react-native-image-crop-picker';
+import ImagePicker from 'react-native-image-crop-picker';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 import showSweetAlert from '../helpers/showSweetAlert';
@@ -32,6 +32,8 @@ const UpdateProfileScreen = ({navigation}) => {
     const [email, setEmail] = useState('');
     const [validEmail, setValidEmail] = useState(true);
     const [mobileNumber, setMobileNumber] = useState(0);
+    const [isProfilePictureSelected, setIsProfilePictureSelected] = useState(false);
+    const [profilePicture, setProfilePicture] = useState('');
 
     const [genderData, setGenderData] = useState([]);
     const [token, setToken] = useState('');
@@ -86,13 +88,14 @@ const UpdateProfileScreen = ({navigation}) => {
     }
 
     const photoUploadHandler = () => {
-        // ImagePicker.openPicker({
-        //     width: 300,
-        //     height: 400,
-        //     cropping: true
-        // }).then(image => {
-        //     console.log(image);
-        // });
+        ImagePicker.openPicker({
+            width: 300,
+            height: 400,
+            cropping: true
+        }).then(image => {
+            console.log(image);
+
+        });
     }
 
     const updateProfileHandler = () => {
@@ -316,7 +319,7 @@ const UpdateProfileScreen = ({navigation}) => {
             : null
             }
 
-            {/* <Text style={[styles.text_footer, {marginTop: 35}]}>Profile Picture</Text>
+            <Text style={[styles.text_footer, {marginTop: 35}]}>Profile Picture</Text>
             <View style={styles.action}>
                 <FontAwesome 
                     name="camera-retro"
@@ -340,7 +343,7 @@ const UpdateProfileScreen = ({navigation}) => {
                     />
                 </Animatable.View>
                 : null}
-            </View> */}
+            </View>
             <View style={styles.button}>
             <TouchableOpacity
                 onPress={() => {updateProfileHandler()}}

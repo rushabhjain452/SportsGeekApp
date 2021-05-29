@@ -4,11 +4,13 @@ import { ScrollView } from "react-native-gesture-handler";
 import {
   Avatar
 } from 'react-native-paper';
-import showSweetAlert from '../helpers/showSweetAlert';
-import {baseurl, errorMessage} from '../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card} from 'react-native-elements';
 import axios from 'axios';
+
+import formatDate from '../helpers/formatDate';
+import showSweetAlert from '../helpers/showSweetAlert';
+import {baseurl, errorMessage} from '../config';
 
 function UsersContestsForLiveMatch(props) {
 
@@ -89,31 +91,6 @@ function UsersContestsForLiveMatch(props) {
         console.log(error);
         showSweetAlert('error', 'Network Error', errorMessage);
     });
-  }
-
-  const formatDate = (str) => {
-    // 2021-04-05T15:30:00.000+00:00
-    // 2021-04-06T06:00:00.000+00:00
-    // console.log('Date : ' + str);
-    // console.log('Type : ' + typeof(str));
-    if(str){
-      let day = str.substring(8,10);
-      let mth = str.substring(5,7);
-      let yr = str.substring(0,4);
-      let hr = str.substring(11,13);
-      let min = str.substring(14,16);
-      let ampm;
-      if(hr < 12){
-        ampm = 'AM';
-      }
-      else{
-        ampm = 'PM';
-        hr -= 12;
-      }
-      return day + '-' + mth + '-' + yr + '  ' + hr + ':' + min + ' ' + ampm;
-    }else{
-      return str;
-    }
   }
 
   return (

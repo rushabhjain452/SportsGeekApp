@@ -42,7 +42,7 @@ function ScheduleScreen({navigation}) {
   // }
 
   const fetchData = (token) => {
-    axios.get(baseurl+'/matches', {
+    axios.get(baseurl+'/matches/upcoming', {
       headers: {
         'Authorization': 'Bearer ' + token
       }

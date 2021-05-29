@@ -3,10 +3,12 @@ import { StyleSheet, View, Text, ScrollView, Alert, ActivityIndicator, RefreshCo
 import { Card, ListItem, Button, Icon } from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
 // import { useNavigation } from '@react-navigation/native';
-import showSweetAlert from '../../helpers/showSweetAlert';
-import {baseurl} from '../../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import axios from 'axios';
+
+import formatDate from '../../helpers/formatDate';
+import showSweetAlert from '../../helpers/showSweetAlert';
+import {baseurl} from '../../config';
 
 function UpdateMatchScheduleScreen({navigation}) {
 
@@ -55,34 +57,6 @@ function UpdateMatchScheduleScreen({navigation}) {
         setRefreshing(false);
         showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
     })
-  }
-
-  const formatDate = (str) => {
-
-    // let dt = new Date(dateStr);
-    // let str = dt.toString();
-    // // Wed May 26 2021 19:30:00 GMT+0530 (IST)
-    // let day = str.substring(8,10);
-    // let mth = str.substring(4,7);
-    // let yr = str.substring(11,15);
-    // let hr = str.substring(16,18);
-    // let min = str.substring(19,21);
-
-    let day = str.substring(8,10);
-    let mth = str.substring(5,7);
-    let yr = str.substring(0,4);
-    let hr = str.substring(11,13);
-    let min = str.substring(14,16);
-    let ampm;
-    if(hr < 12){
-      ampm = 'AM';
-    }
-    else{
-      ampm = 'PM';
-      hr -= 12;
-    }
-      
-    return day + '-' + mth + '-' + yr + '  ' + hr + ':' + min + ' ' + ampm;
   }
 
   const handleCardClick = (matchId) => {

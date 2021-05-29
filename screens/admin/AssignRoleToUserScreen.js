@@ -122,7 +122,7 @@ const AssignRoleToUserScreen = ({navigation}) => {
             const headers = {
                 'Authorization': 'Bearer ' + token
             }
-            axios.put(baseurl+'/users/'+userId+'/update-user-role/'+roleId, {}, {headers})
+            axios.put(baseurl+'/users/'+userId+'/update-role/'+roleId, {}, {headers})
         .then((response) => {
             setLoading(false);
             if(response.status == 200){

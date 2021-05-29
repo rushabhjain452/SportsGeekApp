@@ -3,11 +3,14 @@ import { StyleSheet, View, Text, ScrollView, Alert, ActivityIndicator, RefreshCo
 import { Card, ListItem, Button, Icon } from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
 // import { useNavigation } from '@react-navigation/native';
-import showSweetAlert from '../../helpers/showSweetAlert';
-import {baseurl} from '../../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import UpdateMatchMinBet from './UpdateMatchMinBet';
 import axios from 'axios';
+
+import formatDate from '../../helpers/formatDate';
+import showSweetAlert from '../../helpers/showSweetAlert';
+import {baseurl} from '../../config';
+
 function UpdateMatchMinBetSchedule({navigation}) {
 
   // const navigation = useNavigation();
@@ -60,7 +63,7 @@ function UpdateMatchMinBetSchedule({navigation}) {
       const headers = {
         'Authorization': 'Bearer ' + token
     }
-    axios.get(baseurl+'/matches', {headers})
+    axios.get(baseurl+'/matches/upcoming', {headers})
     .then(response => {
         setLoading(false);
         setRefreshing(false);
@@ -76,71 +79,6 @@ function UpdateMatchMinBetSchedule({navigation}) {
         setRefreshing(false);
         showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
     })
-  }
-
-  const formatDate = (str) => {
-    // let day = str.substring(8,10);
-    // let mth = str.substring(5,7);
-    // let yr = str.substring(0,4);
-    // let hr = str.substring(11,13);
-    // let min = str.substring(14,16);
-    // let ampm;
-    // if(hr < 12){
-    //   ampm = 'AM';
-    // }
-    // else{
-    //   ampm = 'PM';
-    //   hr -= 12;
-    // }
-
-    // let dt = new Date(dateStr);
-    // let str = dt.toString();
-    // console.log(str);
-    // // Wed May 26 2021 19:30:00 GMT+0530 (IST)
-    // let day = str.substring(8,10);
-    // let mth = str.substring(4,7);
-    // let yr = str.substring(11,15);
-    // let hr = str.substring(16,18);
-    // let min = str.substring(19,21);
-    // let ampm;
-    // if(hr < 12){
-    //   ampm = 'AM';
-    // }
-    // else{
-    //   ampm = 'PM';
-    //   hr -= 12;
-    // }
-      
-    // return day + '-' + mth + '-' + yr + '  ' + hr + ':' + min + ' ' + ampm;
-
-    // let current_timestamp = new Date();
-    // console.log(current_timestamp < str);
-
-    // console.log('--------------------------------------------');
-    // console.log('Current date : ' + current_timestamp.toString());
-    // console.log('Current milliseconds : ' + current_timestamp.getMilliseconds());
-    // console.log('Original Date : ' + str);
-    // let dt = new Date(str);
-    // let dt2 = new Date(dt.toISOString());
-    // console.log('Formatted date : ' + dt2.toString());
-    // console.log('Match milliseconds : ' + dt2.getMilliseconds());
-
-    // 2021-04-05T15:30:00.000+00:00
-    let day = str.substring(8,10);
-    let mth = str.substring(5,7);
-    let yr = str.substring(0,4);
-    let hr = str.substring(11,13);
-    let min = str.substring(14,16);
-    let ampm;
-    if(hr < 12){
-      ampm = 'AM';
-    }
-    else{
-      ampm = 'PM';
-      hr -= 12;
-    }
-      
-    return day + '-' + mth + '-' + yr + '  ' + hr + ':' + min + ' ' + ampm;
   }
 
   const handleCardClick = (startDatetime, matchId) => {
