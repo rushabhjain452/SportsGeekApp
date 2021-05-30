@@ -170,8 +170,10 @@ const SignUpScreen = ({ navigation }) => {
                 formData.append('profilePicture', null);
             } else {
                 let picturePath = profilePicture.path;
+                let pathParts = picturePath.split('/');
                 formData.append('profilePicture', {
-                    name: picturePath.substr(picturePath.lastIndexOf('/') + 1),
+                    // name: picturePath.substr(picturePath.lastIndexOf('/') + 1),
+                    name: pathParts[pathParts.length - 1],
                     type: profilePicture.mime,
                     uri: profilePicture.path
                 });
