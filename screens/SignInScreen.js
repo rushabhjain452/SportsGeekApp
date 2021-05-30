@@ -8,7 +8,8 @@ import {
     StyleSheet ,
     StatusBar,
     Alert,
-    Dimensions
+    Dimensions,
+    ScrollView
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 // import LinearGradient from 'react-native-linear-gradient';
@@ -19,10 +20,11 @@ import { useTheme } from 'react-native-paper';
 import {baseurl} from '../config';
 import showSweetAlert from '../helpers/showSweetAlert';
 import Spinner from 'react-native-loading-spinner-overlay';
-import AsyncStorage from '@react-native-community/async-storage';
+// import AsyncStorage from '@react-native-community/async-storage';
 import axios from 'axios';
 
 import { AuthContext } from '../components/context';
+// import { ScrollView } from 'react-native-gesture-handler';
 
 const SignInScreen = ({navigation}) => {
 
@@ -94,7 +96,7 @@ const SignInScreen = ({navigation}) => {
         }
     }
 
-    const loginHandle = (userName, password) => {
+    const loginHandle = () => {
 
         if ( data.username.length == 0 || data.password.length == 0 ) {
             // Alert.alert('Wrong Input!', 'Username or password field cannot be empty.', [
@@ -141,6 +143,7 @@ const SignInScreen = ({navigation}) => {
                 backgroundColor: colors.background
             }]}
         >
+        <ScrollView>
             <Text style={[styles.text_footer, {
                 color: colors.text
             }]}>Username</Text>
@@ -225,7 +228,7 @@ const SignInScreen = ({navigation}) => {
             </Animatable.View>
             }
             <TouchableOpacity onPress={() => navigation.navigate('ForgetPasswordScreen')}>
-                <Text style={{color: '#19398A', marginTop:15}}>Forget password?</Text>
+                <Text style={{color: '#19398A', marginTop:15, fontSize: 16, textDecorationLine: 'underline'}}>Forget password?</Text>
             </TouchableOpacity>
             <View style={styles.button}>
                 <TouchableOpacity
@@ -233,15 +236,19 @@ const SignInScreen = ({navigation}) => {
                     style={[styles.signIn, {
                         borderColor: '#19398A',
                         borderWidth: 1,
-                        marginTop: 15
+                        marginTop: 10
                     }]}
                 >
                     <Text style={[styles.textSign, {
                         color:'#19398A'
-                    }]}>Sign In</Text>
+                    }]}>Login</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
+                <TouchableOpacity style={styles.linkStyle} onPress={() => navigation.navigate('SignUpScreen')}>
+                    <Text style={{color: '#19398A', marginTop:15, fontSize: 16, textDecorationLine: 'underline'}}>Don't have an account? Sign Up</Text>
+                </TouchableOpacity>
+
+                {/* <TouchableOpacity
                     onPress={() => navigation.navigate('SignUpScreen')}
                     style={[styles.signIn, {
                         borderColor: '#19398A',
@@ -252,8 +259,10 @@ const SignInScreen = ({navigation}) => {
                     <Text style={[styles.textSign, {
                         color: '#19398A'
                     }]}>Sign Up</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
+            <View style={{marginTop: 50}}></View>
+        </ScrollView>
         </Animatable.View>
       </View>
     );
@@ -261,7 +270,7 @@ const SignInScreen = ({navigation}) => {
 
 export default SignInScreen;
 
-const {height} = Dimensions.get("screen");
+// const {height} = Dimensions.get("screen");
 const styles = StyleSheet.create({
     container: {
         width: '100%',
@@ -317,7 +326,7 @@ const styles = StyleSheet.create({
     },
     button: {
         alignItems: 'center',
-        marginTop: 50
+        marginTop: 30
     },
     signIn: {
         width: '100%',
@@ -337,5 +346,8 @@ const styles = StyleSheet.create({
     },
     spinnerTextStyle: {
         color: '#FFF'
+    }, 
+    linkStyle: {
+        marginTop: 20
     }
   });

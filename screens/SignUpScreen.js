@@ -14,12 +14,21 @@ import {
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
+import { Avatar } from "react-native-elements";
 import SweetAlert from 'react-native-sweet-alert';
-import {baseurl} from '../config';
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
+import ImagePicker from 'react-native-image-crop-picker';
+
+import {baseurl, errorMessage} from '../config';
 
 const SignUpScreen = ({navigation}) => {
+
+    // const userAvatarLogo = 'https://firebasestorage.googleapis.com/v0/b/sportsgeek-74e1e.appspot.com/o/4190b851-0e15-454d-84f3-1387c972555b.jpg?alt=media&token=e9924ea4-c2d9-4782-bc2d-0fe734431c86'; 
+    const userAvatarLogo = 'https://firebasestorage.googleapis.com/v0/b/sportsgeek-74e1e.appspot.com/o/69bba4a0-c114-4379-9854-e4381a3130bc.png?alt=media&token=e9924ea4-c2d9-4782-bc2d-0fe734431c86'; 
+
+    // Initial points for User
+    const availablePoints = 500;
 
     const [firstName, setFirstName] = useState('');
     const [validFirstName, setValidFirstName] = useState(false);
@@ -35,8 +44,10 @@ const SignUpScreen = ({navigation}) => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [secureTextEntry, setSecureTextEntry] = useState(true);
     const [confirmSecureTextEntry, setConfirmSecureTextEntry] = useState(true);
+    const [avatarPath, setAvatarPath] = useState(userAvatarLogo);
+    const [profilePicture, setProfilePicture] = useState(null);
     const [valid, setValid] = useState(true);
-    const [oading, setLoading] = React.useState(false);
+    const [loading, setLoading] = React.useState(false);
     const [success, setSuccess] = useState(false);
 
     const [genderData, setGenderData] = useState([]);
@@ -78,8 +89,44 @@ const SignUpScreen = ({navigation}) => {
         );
     }
 
+    const photoSelectHandler = () => {
+        ImagePicker.openPicker({
+            width: 300,
+            height: 300,
+            cropping: true
+        }).then((image) => {
+            if(validateImage(image)){
+                setAvatarPath(image.path);
+                setProfilePicture(image);
+            }
+        }).catch((error) => {
+            showSweetAlert('warning', 'Image not selected', 'Image not selected for Profile Picture.');
+        });
+    }
+
+    const validateImage = (image) => {
+        let result = true;
+        if(image.height != image.width){
+            result = false;
+            showSweetAlert('warning', 'Image validation failed!', 'Please select a square image.');
+        }
+        else if(image.mime != "image/jpeg" && image.mime != "image/png" && image.mime != "image/gif"){
+            result = false;
+            showSweetAlert('warning', 'Image validation failed!', 'Please select image of proper format. Only jpg, png and gif images are allowed.');
+        }
+        else if(image.size > 10485760){
+            result = false;
+            showSweetAlert('warning', 'Image validation failed!', 'Please select image having size less than 10 MB.');
+        }
+        return result;
+    }
+
+    const photoRemoveHandler = () => {
+        setAvatarPath(userAvatarLogo);
+        setProfilePicture(null);
+    };
+
     const signupHandler = () => {
-        console.log('Sign Up');
         if (firstName.length < 3) {
             showSweetAlert('warning', 'Invalid Input!', 'Please enter first name greater than 3 characters to proceed.');
         }
@@ -109,46 +156,8 @@ const SignUpScreen = ({navigation}) => {
         }
         else{
             setLoading(true);
-            // const reqData = {
-            //     firstName: firstName,
-            //     lastName: lastName,
-            //     email: email,
-            //     mobileNumber: mobileNumber,
-            //     genderId: genderId,
-            //     username: username,
-            //     password: password,
-            //     status: false,
-            //     roleId: 2,
-            //     profilePicture: null,
-            //     availablePoints: 500
-            // };
-            // axios.post(baseurl+'/users/register', reqData)
-            // .then((response) => {
-            //     setLoading(false);
-            //     if(response.status == 201){
-            //         showSweetAlert('success', 'Registration Success', 'You are registered. Please wait until admin approves your account. You will receive an email, when admin will approve your account.');
-            //         setSuccess(true);
-            //         // navigation.goBack();
-            //         // navigator.navigate('SignInScreen');
-            //     }else{
-            //         showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            //     }
-            // })
-            // .catch((error) => {
-            //     console.log(error.response.status);
-            //     console.log(error.response.data);
-            //     setLoading(false);
-            //     if(error.response.status == 404){
-            //         showSweetAlert('warning', 'Username already exits.', 'Please change your username..!');
-            //     }else if(error.response.status == 400){
-            //         showSweetAlert('warning', 'Email already exits.', 'Please change your email..!');
-            //     }else{
-            //         showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            //     }
-            // });
             // Submitting Form Data (with Profile Picture)
             const formData = new FormData();
-            // const fileField = document.querySelector('profilePicture');
             formData.append('firstName', firstName);
             formData.append('lastName', lastName);
             formData.append('email', email);
@@ -156,8 +165,17 @@ const SignUpScreen = ({navigation}) => {
             formData.append('genderId', genderId);
             formData.append('username', username);
             formData.append('password', password);
-            formData.append('availablePoints', 500);
-            formData.append('profilePicture', fileField);
+            formData.append('availablePoints', availablePoints);
+            if(profilePicture == null){
+                formData.append('profilePicture', null);    
+            }else{
+                let picturePath = profilePicture.path;
+                formData.append('profilePicture', {
+                    name: picturePath.substr(picturePath.lastIndexOf('/')+1),
+                    type: profilePicture.mime,
+                    uri: profilePicture.path
+                });
+            }
             const headers = {
                 'Content-Type': 'multipart/form-data'
             }
@@ -170,19 +188,26 @@ const SignUpScreen = ({navigation}) => {
                     // navigation.goBack();
                     // navigator.navigate('SignInScreen');
                 }else{
-                    showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+                    showSweetAlert('error', 'Network Error', errorMessage);
                 }
             })
             .catch((error) => {
-                console.log(error.response.status);
-                console.log(error.response.data);
                 setLoading(false);
-                if(error.response.status == 404){
-                    showSweetAlert('warning', 'Username already exits.', 'Please change your username..!');
-                }else if(error.response.status == 400){
-                    showSweetAlert('warning', 'Email already exits.', 'Please change your email..!');
+                console.log(error);
+                if(error.response){
+                    console.log(error.response.status);
+                    console.log(error.response.data);
+                    setLoading(false);
+                    if(error.response.status == 404){
+                        showSweetAlert('warning', 'Username already exits.', 'Please change your username..!');
+                    }else if(error.response.status == 400){
+                        // showSweetAlert('warning', 'Email already exits.', 'Please change your email..!');
+                        showSweetAlert('warning', 'Email already exits.', error.response.message);
+                    }else{
+                        showSweetAlert('error', 'Network Error', errorMessage);
+                    }
                 }else{
-                    showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+                    showSweetAlert('error', 'Network Error', errorMessage);
                 }
             });
         }
@@ -191,7 +216,7 @@ const SignUpScreen = ({navigation}) => {
     return (
       <View style={styles.container}>
         <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
-        <Spinner visible={oading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
+        <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
         <View style={styles.header}>
             <Text style={styles.text_header}>Register Now!</Text>
         </View>
@@ -199,7 +224,29 @@ const SignUpScreen = ({navigation}) => {
             animation="fadeInUpBig"
             style={styles.footer}
         >
-            <ScrollView keyboardShouldPersistTaps='handled'>
+        <ScrollView keyboardShouldPersistTaps='handled'>
+            <View style={styles.avatarContainer}>
+                <Avatar 
+                size="large"
+                rounded
+                source={{
+                    uri: avatarPath
+                }}
+                />
+            </View>
+            <TouchableOpacity
+                    style={styles.buttonStyle}
+                    onPress={() => {photoSelectHandler()}}>
+                <Text style={styles.buttonTextStyle}>
+                    {profilePicture == null ? "Select Profile Picture" : "Change Profile Picture"}
+                </Text>
+            </TouchableOpacity>
+            {profilePicture && 
+            (<TouchableOpacity
+                    style={styles.removeButtonStyle}
+                    onPress={() => {photoRemoveHandler()}}>
+                <Text style={styles.buttonTextStyle}>Remove Profile Picture</Text>
+            </TouchableOpacity>)}
             <Text style={styles.text_footer}>First Name</Text>
             <View style={styles.action}>
                 <FontAwesome 
@@ -520,7 +567,11 @@ const SignUpScreen = ({navigation}) => {
                     }]}>Sign Up</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
+                <TouchableOpacity style={styles.linkStyle} onPress={() => navigation.goBack()}>
+                    <Text style={{color: '#19398A', marginTop:15, fontSize: 16, textDecorationLine: 'underline'}}>Go to Login</Text>
+                </TouchableOpacity>
+
+                {/* <TouchableOpacity
                     onPress={() => navigation.goBack()}
                     style={[styles.signIn, {
                         borderColor: '#19398A',
@@ -531,10 +582,10 @@ const SignUpScreen = ({navigation}) => {
                     <Text style={[styles.textSign, {
                         color: '#19398A'
                     }]}>Sign In</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
-            <View style={{marginTop: 100}}></View>
-            </ScrollView>
+            <View style={{marginTop: 50}}></View>
+        </ScrollView>
         </Animatable.View>
       </View>
     );
@@ -629,5 +680,44 @@ const styles = StyleSheet.create({
     },
     spinnerTextStyle: {
         color: '#FFF'
+    },
+    buttonStyle: {
+        backgroundColor: '#19398A',
+        borderWidth: 0,
+        color: '#FFFFFF',
+        borderColor: '#307ecc',
+        height: 40,
+        alignItems: 'center',
+        borderRadius: 30,
+        width: 200,
+        alignSelf: 'center',
+        // marginLeft: 80,
+        // marginRight: 35,
+        marginTop: 10,
+        marginBottom: 15
+    },
+    removeButtonStyle: {
+        backgroundColor: '#19398A',
+        borderWidth: 0,
+        color: '#FFFFFF',
+        borderColor: '#307ecc',
+        height: 40,
+        alignItems: 'center',
+        borderRadius: 30,
+        width: 200,
+        alignSelf: 'center',
+        marginBottom: 20
+    },
+    buttonTextStyle: {
+        color: '#FFFFFF',
+        paddingVertical: 10,
+        fontSize: 16,
+    },
+    avatarContainer: {
+        display: 'flex',
+        alignItems: 'center'
+    },
+    linkStyle: {
+        marginTop: 20
     }
   });

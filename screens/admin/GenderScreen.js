@@ -113,7 +113,7 @@ const GenderScreen = ({navigation}) => {
                 console.log(error);
                 setLoading(false);
                 showSweetAlert('error', 'Error', 'Failed to add Gender. Please try again...');
-            })
+            });
         }else{
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for Gender.');
         }

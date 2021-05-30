@@ -345,8 +345,8 @@ const UpdateProfileScreen = ({navigation}) => {
                 : null}
             </View>
             <View style={styles.button}>
-            <TouchableOpacity
-                onPress={() => {updateProfileHandler()}}
+                <TouchableOpacity
+                    onPress={() => {updateProfileHandler()}}
                     style={[styles.signIn, {
                         borderColor: '#19398A',
                         borderWidth: 1,
