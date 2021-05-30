@@ -11,6 +11,7 @@ import {
     ScrollView,
     StatusBar
 } from 'react-native';
+import { Card} from 'react-native-elements';
 import {
     Dropdown
   } from 'sharingan-rn-modal-dropdown';
@@ -275,7 +276,7 @@ const PlayerScreen = ({navigation}) => {
                 />
             </View>
              <Text style={[styles.text_footer, {marginTop: 35}]}>Profile Picture</Text>
-             <View style={styles.action}>
+             {/* <View style={styles.action}>
                 <FontAwesome 
                     name="camera-retro"
                     color="#05375a"
@@ -300,7 +301,12 @@ const PlayerScreen = ({navigation}) => {
                     />
                 </Animatable.View>
                 </TouchableOpacity>
-            </View>
+            </View> */}
+            <View style={styles.imageUploadCard}>
+                <TouchableOpacity>
+                      <Card.Image style={styles.imageuploadStyle} source={{uri: "https://firebasestorage.googleapis.com/v0/b/sportsgeek-74e1e.appspot.com/o/49d6ea02-1daf-4844-ad14-740b02a930f1.png?alt=media&token=e9924ea4-c2d9-4782-bc2d-0fe734431c86"}} />
+     </TouchableOpacity>
+            </View> 
             <View style={styles.button}>
             <TouchableOpacity
                 // onPress={(btnText=='Add') ? addPlayerType : updatePlayerType}
@@ -523,5 +529,28 @@ const styles = StyleSheet.create({
       marginRight: 35,
     //   marginTop: 15,
       width: '50%'
+    },
+    imageUploadCard: {
+        width: '100%',
+        height: 120,
+        backgroundColor: "#D5DBDB",
+        borderWidth: 1,
+        borderColor: "#000000",
+        borderRadius: 3,
+        marginTop: 5,
+        // marginLeft: 8,
+        display: "flex",
+         flexDirection: 'row', 
+         justifyContent: 'space-between',
+         marginBottom:3
+    },
+    imageuploadStyle: {
+      width: 100,
+      height: 100,
+      marginTop: 7,
+      borderRadius: 80,
+      marginLeft: '45%',
+      justifyContent: 'center',
+    //   backgroundColor: 'white'
     }
   });

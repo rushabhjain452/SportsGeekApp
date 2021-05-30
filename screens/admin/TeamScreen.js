@@ -11,7 +11,8 @@ import {
     ScrollView,
     StatusBar,
     LogBox,
-    RefreshControl
+    RefreshControl,
+    Image
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -24,8 +25,10 @@ import { Card} from 'react-native-elements';
 import axios from 'axios';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
+import * as ImagePicker from 'react-native-image-picker';
 
 const TeamScreen = ({navigation}) => {
+
 
     LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
@@ -42,6 +45,7 @@ const TeamScreen = ({navigation}) => {
         setRefreshing(true);
     }, []);
 
+  
     useEffect(async() => {
         const token = await AsyncStorage.getItem('token');
         setToken(token);
@@ -108,24 +112,6 @@ const TeamScreen = ({navigation}) => {
     }
 
     const deleteTeam = (id) => {
-        // fetch(baseurl+'/team/'+id, {
-        //     method: 'DELETE'
-        // })
-        // .then((response) => response.json())
-        // .then((json) => {
-        //     if(json.code == 200){
-        //         showSweetAlert('success', 'Success', 'Team deleted successfully.');
-        //         displayTeam();
-        //     }
-        //     else
-        //         showSweetAlert('error', 'Error', 'Failed to delete Team. Please try again...');
-        //         setTeam('');
-        //         setTeamLogo('');
-        //         setShortName('');
-        // })
-        // .catch((error) => {
-        //     showSweetAlert('error', 'Error', 'Failed to delete Team. Please try again...');
-        // });
         const headers = {
             'Authorization': 'Bearer ' + token
         }
@@ -192,6 +178,34 @@ const TeamScreen = ({navigation}) => {
         }
     }
 
+    const launchImageLibrary = () => {
+        let options = {
+          storageOptions: {
+            skipBackup: true,
+            path: 'images',
+          },
+        };
+        ImagePicker.launchImageLibrary(options, (response) => {
+          console.log('Response = ', response);
+    
+          if (response.didCancel) {
+            console.log('User cancelled image picker');
+          } else if (response.error) {
+            console.log('ImagePicker Error: ', response.error);
+          } else if (response.customButton) {
+            console.log('User tapped custom button: ', response.customButton);
+            alert(response.customButton);
+          } else {
+            const source = { uri: response.uri };
+            console.log('response', JSON.stringify(response));
+            this.setState({
+              filePath: response,
+              fileData: response.data,
+              fileUri: response.uri
+            });
+          }
+        });
+    }
    return (
       <View style={styles.container}>
           <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
@@ -258,32 +272,12 @@ const TeamScreen = ({navigation}) => {
                 : null}
             </View>
             <Text style={[styles.text_footer, {marginTop: 35}]}>Team Logo</Text>
-            <View style={styles.action}>
-                <FontAwesome 
-                    name="camera-retro"
-                    color="#05375a"
-                    size={20}
-                />
-                <TextInput 
-                    placeholder="Uploaded File Name"
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => setTeamLogo(val)}
-                    value={teamLogo}
-                    maxLength={20}
-                />
-                 <TouchableOpacity >
-                 <Animatable.View
-                    animation="bounceIn"
-                >
-                    <Feather 
-                        name="camera"
-                        color="#19398A"
-                        size={35}
-                    />
-                </Animatable.View>
-                </TouchableOpacity>
-            </View>
+             <View style={styles.imageUploadCard}>
+                <TouchableOpacity onPress={launchImageLibrary}>
+                      <Card.Image style={styles.imageuploadStyle} source={{uri: "https://firebasestorage.googleapis.com/v0/b/sportsgeek-74e1e.appspot.com/o/49d6ea02-1daf-4844-ad14-740b02a930f1.png?alt=media&token=e9924ea4-c2d9-4782-bc2d-0fe734431c86"}} />
+     </TouchableOpacity>
+            </View> 
+            
             <View style={styles.button}>
             <TouchableOpacity
                 onPress={(btnText=='Add') ? addTeam : updateTeam}
@@ -471,5 +465,28 @@ const styles = StyleSheet.create({
     //    backgroundColor:'red'
     //    justifyContent: 'space-between',  
     //    textAlign: 'center'
+    },
+    imageUploadCard: {
+        width: '100%',
+        height: 120,
+        backgroundColor: "#D5DBDB",
+        borderWidth: 1,
+        borderColor: "#000000",
+        borderRadius: 3,
+        marginTop: 5,
+        // marginLeft: 8,
+        display: "flex",
+         flexDirection: 'row', 
+         justifyContent: 'space-between',
+         marginBottom:3
+    },
+    imageuploadStyle: {
+      width: 100,
+      height: 100,
+      marginTop: 7,
+      borderRadius: 80,
+      marginLeft: '45%',
+      justifyContent: 'center',
+    //   backgroundColor: 'white'
     }
   });
