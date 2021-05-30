@@ -1,4 +1,4 @@
-import React, { Component,useState, useEffect} from "react";
+import React, { Component, useState, useEffect } from "react";
 import { StyleSheet, View, Text, ScrollView, Alert, ActivityIndicator, RefreshControl } from "react-native";
 import { Card, ListItem, Button } from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -10,9 +10,9 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import formatDate from '../../helpers/formatDate';
 import showSweetAlert from '../../helpers/showSweetAlert';
-import {baseurl} from '../../config';
+import { baseurl, errorMessage } from '../../config';
 
-function MatchesScheduleScreenForUpdate({navigation}) {
+function MatchesScheduleScreenForUpdate({ navigation }) {
 
   // const navigation = useNavigation();
 
@@ -22,9 +22,9 @@ function MatchesScheduleScreenForUpdate({navigation}) {
 
   const [refreshing, setRefreshing] = React.useState(false);
 
-//   const noOfFutureBets = 5;
+  //   const noOfFutureBets = 5;
 
-  useEffect(async() => {
+  useEffect(async () => {
     const token = await AsyncStorage.getItem('token');
     setToken(token);
     fetchData(token);
@@ -39,51 +39,49 @@ function MatchesScheduleScreenForUpdate({navigation}) {
   // });
 
   // const refreshData = () => {
-    
+
   // }
 
   const fetchData = (token) => {
     // console.log(token);
-      // fetch(baseurl+'/matches', {
-      //   headers: {
-      //     'Authorization': 'Bearer ' + token
-      //   }
-      // })
-      // .then((response) => response.json())
-      // .then((json) => {
-      //   // console.log(json.data);
-      //   setData(json.data);
-      //   setLoading(false);
-      //   setRefreshing(false);
-      // })
-      // .catch((error) => {
-      //   showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-      //   setLoading(false);
-      //   setRefreshing(false);
-      // });
-      const headers = {
-        'Authorization': 'Bearer ' + token
-    }
-    axios.get(baseurl+'/matches', {headers})
-    .then(response => {
+    // fetch(baseurl+'/matches', {
+    //   headers: {
+    //     'Authorization': 'Bearer ' + token
+    //   }
+    // })
+    // .then((response) => response.json())
+    // .then((json) => {
+    //   // console.log(json.data);
+    //   setData(json.data);
+    //   setLoading(false);
+    //   setRefreshing(false);
+    // })
+    // .catch((error) => {
+    //   showSweetAlert('error', 'Network Error!', errorMessage);
+    //   setLoading(false);
+    //   setRefreshing(false);
+    // });
+    const headers = { 'Authorization': 'Bearer ' + token }
+    axios.get(baseurl + '/matches', { headers })
+      .then(response => {
         setLoading(false);
         setRefreshing(false);
-        if(response.status == 200){
-            setData(response.data);
+        if (response.status == 200) {
+          setData(response.data);
         }
-        else{
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        else {
+          showSweetAlert('error', 'Network Error', errorMessage);
         }
-    })
-    .catch(error => {
+      })
+      .catch(error => {
         setLoading(false);
         setRefreshing(false);
-        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-    })
+        showSweetAlert('error', 'Network Error', errorMessage);
+      })
   }
 
-  const handleCardClick = (matchId) => {  
-      navigation.navigate('MatchesScreen', {updateMatchId: matchId});
+  const handleCardClick = (matchId) => {
+    navigation.navigate('MatchesScreen', { updateMatchId: matchId });
   }
 
   const onRefresh = React.useCallback(() => {
@@ -95,75 +93,73 @@ function MatchesScheduleScreenForUpdate({navigation}) {
 
   const deleteMatch = (id) => {
     setLoading(true);
-    const headers = {
-        'Authorization': 'Bearer ' + token
-    }
-    axios.delete(baseurl+'/matches/'+id, {headers})
-    .then((response) => {
+    const headers = { 'Authorization': 'Bearer ' + token }
+    axios.delete(baseurl + '/matches/' + id, { headers })
+      .then((response) => {
         setLoading(false);
-        if(response.status == 200){
-            showSweetAlert('success', 'Success', 'Match deleted successfully.');
-            fetchData(token);
+        if (response.status == 200) {
+          showSweetAlert('success', 'Success', 'Match deleted successfully.');
+          fetchData(token);
         }
         else {
-            showSweetAlert('error', 'Error', 'Failed to delete Match. Please try again...');
-        }              
-    })
-    .catch((error) => {
+          showSweetAlert('error', 'Error', 'Failed to delete Match. Please try again...');
+        }
+      })
+      .catch((error) => {
         setLoading(false);
         showSweetAlert('error', 'Error', 'Failed to delete Match. Please try again...');
-    })
-}
+      })
+  }
 
 
   const getConfirmation = (matchId) =>
-  Alert.alert(
-  "Delete Confirmation",
-  "Do you really want to delete the Match ?",
-  [
-      {
+    Alert.alert(
+      "Delete Confirmation",
+      "Do you really want to delete the Match ?",
+      [
+        {
           text: "Cancel"
-      },
-      { 
-          text: "OK", 
-          onPress: () => {deleteMatch(matchId)}
-      }
-  ]
-);
+        },
+        {
+          text: "OK",
+          onPress: () => { deleteMatch(matchId) }
+        }
+      ]
+    );
 
   return (
-    <ScrollView keyboardShouldPersistTaps='handled' style={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}> 
-    <Text style={styles.text_header}>Matches Schedule</Text>
-    {loading == true  && (<ActivityIndicator size="large" color="#19398A" />)}
+    <ScrollView keyboardShouldPersistTaps='handled' style={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+      <Text style={styles.text_header}>Matches Schedule</Text>
+      {loading == true && (<ActivityIndicator size="large" color="#19398A" />)}
       {
         data && data.map((item, index) => (
           <View style={styles.rect} key={item.matchId}>
-          <View style={{display: "flex", flexDirection: 'row', justifyContent: 'space-between'}}>
-          <Text style={styles.date}>{formatDate(item.startDatetime)}</Text>
-          <TouchableOpacity onPress={() => {getConfirmation(item.matchId)}} style={{textAlign:'right'}} ><Text ><Icon name="delete-circle-outline" color="#19398A" size={40}/></Text></TouchableOpacity> 
-          </View>
-          <TouchableOpacity onPress={() => {handleCardClick(item.matchId)}} >
-            <View style={{display: "flex", flexDirection: 'row', justifyContent: 'space-between'}}>
-              <View style={styles.ellipseRow}>  
-                <Card.Image style={styles.ellipse} source={{uri: item.team1Logo}} />
-                <Text style={styles.mI}>{item.team1Short}</Text>
-              </View>
-              <View style={styles.loremIpsumColumn}>
-                <Text style={styles.vs}>VS</Text>
-              </View>
-              <View style={styles.rightteam}>
-                <Text style={styles.eng}>{item.team2Short}</Text>
-                <Card.Image style={styles.ellipse1} source={{uri: item.team2Logo}} />
-              </View>
+            <View style={{ display: "flex", flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={styles.date}>{formatDate(item.startDatetime)}</Text>
+              <TouchableOpacity onPress={() => { getConfirmation(item.matchId) }} style={{ textAlign: 'right' }} ><Text ><Icon name="delete-circle-outline" color="#19398A" size={40} /></Text></TouchableOpacity>
             </View>
-            <View style={{height:40}}>
-                <Text style={{textAlign: 'center',fontSize:16}}>{item.venue}</Text>
+            <TouchableOpacity onPress={() => { handleCardClick(item.matchId) }} >
+              <View style={{ display: "flex", flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View style={styles.ellipseRow}>
+                  <Card.Image style={styles.ellipse} source={{ uri: item.team1Logo }} />
+                  <Text style={styles.mI}>{item.team1Short}</Text>
+                </View>
+                <View style={styles.loremIpsumColumn}>
+                  <Text style={styles.vs}>VS</Text>
+                </View>
+                <View style={styles.rightteam}>
+                  <Text style={styles.eng}>{item.team2Short}</Text>
+                  <Card.Image style={styles.ellipse1} source={{ uri: item.team2Logo }} />
+                </View>
               </View>
-              </TouchableOpacity>
+              <View style={{ height: 40 }}>
+                <Text style={{ textAlign: 'center', fontSize: 16 }}>{item.venue}</Text>
+              </View>
+            </TouchableOpacity>
           </View>
         ))
       }
-      <View style={{height: 20}}></View>
+      <View style={{ height: 20 }}></View>
     </ScrollView>
   );
 }
@@ -198,7 +194,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: 11,
     marginTop: 20,
-     fontWeight: "bold"
+    fontWeight: "bold"
   },
   date: {
     fontFamily: "roboto-regular",
@@ -206,7 +202,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
     paddingTop: 7,
-    paddingLeft:'30%'
+    paddingLeft: '30%'
   },
   vs: {
     fontFamily: "roboto-regular",
@@ -240,16 +236,16 @@ const styles = StyleSheet.create({
     fontFamily: "roboto-regular",
     color: "#121212",
     fontSize: 20,
-    marginLeft:20,
+    marginLeft: 20,
     marginTop: 20,
-     fontWeight: "bold"
+    fontWeight: "bold"
   },
   ellipse1: {
     width: 61,
     height: 61,
     marginLeft: 18,
     marginTop: 0,
-    borderRadius:30
+    borderRadius: 30
   },
   ellipseRow: {
     // height: 95,
@@ -282,7 +278,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 11,
     marginTop: 37,
-     fontWeight: "bold"
+    fontWeight: "bold"
   },
   loremIpsum3: {
     fontFamily: "roboto-regular",
@@ -312,7 +308,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 20,
     marginTop: 37,
-  fontWeight: "bold"
+    fontWeight: "bold"
   },
   ellipse3: {
     width: 61,
@@ -352,10 +348,10 @@ const styles = StyleSheet.create({
     padding: 10
   },
   text_header: {
-      color: '#000',
-      fontWeight: 'bold',
-      fontSize: 20,
-      textAlign: "center",
+    color: '#000',
+    fontWeight: 'bold',
+    fontSize: 20,
+    textAlign: "center",
   }
 });
 

@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import {TouchableOpacity} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { TouchableOpacity } from 'react-native';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -29,7 +29,7 @@ const MainTabScreen = () => {
 
   const [role, setRole] = useState('');
 
-  useEffect(async() => {
+  useEffect(async () => {
     const role = await AsyncStorage.getItem('role');
     console.log(role);
     setRole(role);
@@ -74,13 +74,13 @@ const MainTabScreen = () => {
   //   }
   //   return <></>;
   // }
-  
-  return(
+
+  return (
     <Tab.Navigator
       initialRouteName="Home"
       activeColor="#fff"
     >
-    { (role == 'Admin') ? 
+      { (role == 'Admin') ?
         (<Tab.Screen
           name="Admin Panel"
           component={AdminStackScreen}
@@ -91,7 +91,7 @@ const MainTabScreen = () => {
               <Icon name="ios-home" color={color} size={26} />
             ),
           }}
-        />) : 
+        />) :
         (<Tab.Screen
           name="Home"
           component={HomeStackScreen}
@@ -103,7 +103,7 @@ const MainTabScreen = () => {
             ),
           }}
         />)
-     }
+      }
       <Tab.Screen
         name="Fantasy"
         component={FantasyStackScreen}
@@ -148,7 +148,7 @@ const MainTabScreen = () => {
           ),
         }}
       />
-        {/* <Tab.Screen
+      {/* <Tab.Screen
         name="My Account"
         component={ProfileStackScreen}
         options={{
@@ -159,137 +159,138 @@ const MainTabScreen = () => {
           ),
         }}
       /> */}
-    </Tab.Navigator> 
-)};
+    </Tab.Navigator>
+  )
+};
 export default MainTabScreen;
 
 
-const HomeStackScreen = ({navigation}) => (
-<HomeStack.Navigator screenOptions={{
-        headerStyle: {
-        backgroundColor: '#19398A',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-        fontWeight: 'bold'
-        }
-    }}>
-        <HomeStack.Screen name="Home" component={HomeScreen} options={{
-        title:'SportsGeek',
-          headerLeft: () => (
-              <Icon.Button name="person-circle" size={43} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
-          )
-        }} />
-</HomeStack.Navigator>
+const HomeStackScreen = ({ navigation }) => (
+  <HomeStack.Navigator screenOptions={{
+    headerStyle: {
+      backgroundColor: '#19398A',
+    },
+    headerTintColor: '#fff',
+    headerTitleStyle: {
+      fontWeight: 'bold'
+    }
+  }}>
+    <HomeStack.Screen name="Home" component={HomeScreen} options={{
+      title: 'SportsGeek',
+      headerLeft: () => (
+        <Icon.Button name="person-circle" size={43} iconStyle={{ marginRight: 0 }} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
+      )
+    }} />
+  </HomeStack.Navigator>
 );
-const AdminStackScreen = ({navigation}) => (
+const AdminStackScreen = ({ navigation }) => (
   <AdminStack.Navigator screenOptions={{
-          headerStyle: {
-          backgroundColor: '#19398A',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-          fontWeight: 'bold'
-          }
-      }}>
-          <AdminStack.Screen name="Home" component={AdminScreen} options={{
-          title:'SportsGeek',
-          headerLeft: () => (
-              <Icon.Button name="person-circle" size={43} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
-          )
-          }} />
+    headerStyle: {
+      backgroundColor: '#19398A',
+    },
+    headerTintColor: '#fff',
+    headerTitleStyle: {
+      fontWeight: 'bold'
+    }
+  }}>
+    <AdminStack.Screen name="Home" component={AdminScreen} options={{
+      title: 'SportsGeek',
+      headerLeft: () => (
+        <Icon.Button name="person-circle" size={43} iconStyle={{ marginRight: 0 }} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
+      )
+    }} />
   </AdminStack.Navigator>
-  );
-const FantasyStackScreen = ({navigation}) => (
-<FantasyStack.Navigator screenOptions={{
-        headerStyle: {
-        backgroundColor: '#19398A',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-        fontWeight: 'bold'
-        }
-    }}>
-        <FantasyStack.Screen name="Fantasy" component={ScheduleScreen} options={{
-          title:'Fantasy',
-          headerRight: () => (
-              <Icon.Button name="information-circle-outline" size={30} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('HelpScreen')}></Icon.Button>
-          ),
-          headerLeft: () => (
-              <Icon.Button name="person-circle" size={43} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
-          )
-        }} />
-</FantasyStack.Navigator>
 );
-const ChatStackScreen = ({navigation}) => (
-<ChatStack.Navigator screenOptions={{
-        headerStyle: {
-        backgroundColor: '#19398A',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-        fontWeight: 'bold'
-        }
-    }}>
-        <ChatStack.Screen name="Chat" component={ChatScreen} options={{
-        title:'Chats',
-        headerRight: () => (
-            <Icon.Button name="search-outline" size={25} backgroundColor="#19398A" iconStyle={{marginRight:0}}  onPress={() => navigation.navigate('HelpScreen')}></Icon.Button>
-        ),
-          headerLeft: () => (
-              <Icon.Button name="person-circle" size={43} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
-          )
-        }} />
-</ChatStack.Navigator>
+const FantasyStackScreen = ({ navigation }) => (
+  <FantasyStack.Navigator screenOptions={{
+    headerStyle: {
+      backgroundColor: '#19398A',
+    },
+    headerTintColor: '#fff',
+    headerTitleStyle: {
+      fontWeight: 'bold'
+    }
+  }}>
+    <FantasyStack.Screen name="Fantasy" component={ScheduleScreen} options={{
+      title: 'Fantasy',
+      headerRight: () => (
+        <Icon.Button name="information-circle-outline" size={30} iconStyle={{ marginRight: 0 }} backgroundColor="#19398A" onPress={() => navigation.navigate('HelpScreen')}></Icon.Button>
+      ),
+      headerLeft: () => (
+        <Icon.Button name="person-circle" size={43} iconStyle={{ marginRight: 0 }} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
+      )
+    }} />
+  </FantasyStack.Navigator>
 );
-const LeaderStackScreen = ({navigation}) => (
-<LeaderStack.Navigator screenOptions={{
-        headerStyle: {
-        backgroundColor: '#19398A',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-        fontWeight: 'bold' 
-        }
-    }}>
-        <LeaderStack.Screen name="LeaderBoard" component={LeaderBoardScreen} options={{
-        title:'LeaderBoard',
-          headerLeft: () => (
-              <Icon.Button name="person-circle" size={43} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
-          )
-        }} />
-</LeaderStack.Navigator>
+const ChatStackScreen = ({ navigation }) => (
+  <ChatStack.Navigator screenOptions={{
+    headerStyle: {
+      backgroundColor: '#19398A',
+    },
+    headerTintColor: '#fff',
+    headerTitleStyle: {
+      fontWeight: 'bold'
+    }
+  }}>
+    <ChatStack.Screen name="Chat" component={ChatScreen} options={{
+      title: 'Chats',
+      headerRight: () => (
+        <Icon.Button name="search-outline" size={25} backgroundColor="#19398A" iconStyle={{ marginRight: 0 }} onPress={() => navigation.navigate('HelpScreen')}></Icon.Button>
+      ),
+      headerLeft: () => (
+        <Icon.Button name="person-circle" size={43} iconStyle={{ marginRight: 0 }} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
+      )
+    }} />
+  </ChatStack.Navigator>
 );
-const MyMatchesStackScreen = ({navigation}) => (
-<MyMatchesStack.Navigator screenOptions={{
-        headerStyle: {
-        backgroundColor: '#19398A',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-        fontWeight: 'bold'
-        }
-    }}>
-        <MyMatchesStack.Screen name="My Matches" component={MyMatchesScreen} options={{
-        title:'My Matches',
-          headerLeft: () => (
-              <Icon.Button name="person-circle" size={43} iconStyle={{marginRight:0}} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
-          )
-        }} />
-</MyMatchesStack.Navigator>
+const LeaderStackScreen = ({ navigation }) => (
+  <LeaderStack.Navigator screenOptions={{
+    headerStyle: {
+      backgroundColor: '#19398A',
+    },
+    headerTintColor: '#fff',
+    headerTitleStyle: {
+      fontWeight: 'bold'
+    }
+  }}>
+    <LeaderStack.Screen name="LeaderBoard" component={LeaderBoardScreen} options={{
+      title: 'LeaderBoard',
+      headerLeft: () => (
+        <Icon.Button name="person-circle" size={43} iconStyle={{ marginRight: 0 }} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
+      )
+    }} />
+  </LeaderStack.Navigator>
 );
-const ProfileStackScreen = ({navigation}) => (
+const MyMatchesStackScreen = ({ navigation }) => (
+  <MyMatchesStack.Navigator screenOptions={{
+    headerStyle: {
+      backgroundColor: '#19398A',
+    },
+    headerTintColor: '#fff',
+    headerTitleStyle: {
+      fontWeight: 'bold'
+    }
+  }}>
+    <MyMatchesStack.Screen name="My Matches" component={MyMatchesScreen} options={{
+      title: 'My Matches',
+      headerLeft: () => (
+        <Icon.Button name="person-circle" size={43} iconStyle={{ marginRight: 0 }} backgroundColor="#19398A" onPress={() => navigation.navigate('ProfileScreen')}></Icon.Button>
+      )
+    }} />
+  </MyMatchesStack.Navigator>
+);
+const ProfileStackScreen = ({ navigation }) => (
   <ProfileStack.Navigator screenOptions={{
-          headerStyle: {
-          backgroundColor: '#19398A',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-          fontWeight: 'bold'
-          }
-      }}>
-          <ProfileStack.Screen name="Profile" component={ProfileScreen} options={{
-          title:'Profile'
-          }} />
+    headerStyle: {
+      backgroundColor: '#19398A',
+    },
+    headerTintColor: '#fff',
+    headerTitleStyle: {
+      fontWeight: 'bold'
+    }
+  }}>
+    <ProfileStack.Screen name="Profile" component={ProfileScreen} options={{
+      title: 'Profile'
+    }} />
   </ProfileStack.Navigator>
-  );
+);

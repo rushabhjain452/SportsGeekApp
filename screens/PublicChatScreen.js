@@ -29,7 +29,7 @@ const PublicChatScreen = () => {
     fetchMessages(token);
     // Refresh message at some interval
     intervalRef.current = setInterval(() => {
-      if(token){
+      if (token) {
         fetchMessages(token);
       }
     }, chatRefreshDelay);
@@ -92,10 +92,10 @@ const PublicChatScreen = () => {
     setMessages(previousMessages => GiftedChat.append(previousMessages, newMessage));
   }
 
-  if(userId != 0){
+  if (userId != 0) {
     return (
       <>
-        {loading == true  && (<ActivityIndicator size="large" color="#19398A" />)}
+        {loading == true && (<ActivityIndicator size="large" color="#19398A" />)}
         <GiftedChat
           messages={messages}
           onSend={newMessage => handleSend(newMessage[0])}
@@ -103,11 +103,11 @@ const PublicChatScreen = () => {
           renderUsernameOnMessage={true}
           showAvatarForEveryMessage={true}
           maxInputLength={1000}
-          // scrollToBottom={true}
+        // scrollToBottom={true}
         />
       </>
     );
-  }else{
+  } else {
     // return (<Text>Loading...</Text>);
     return null;
   }

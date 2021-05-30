@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import { 
-    View, 
-    Text, 
-    Button, 
-    TouchableOpacity, 
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    Button,
+    TouchableOpacity,
     Dimensions,
     TextInput,
     Platform,
@@ -21,13 +21,13 @@ import Feather from 'react-native-vector-icons/Feather';
 import SwipeList from 'react-native-smooth-swipe-list';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import showSweetAlert from '../../helpers/showSweetAlert';
-import {baseurl} from '../../config';
-import { Card} from 'react-native-elements';
+import { baseurl, errorMessage } from '../../config';
+import { Card } from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
 
-const UserAccountApproval = ({navigation}) => {
+const UserAccountApproval = ({ navigation }) => {
 
     const [data, setData] = useState([]);
     const [token, setToken] = useState('');
@@ -35,7 +35,7 @@ const UserAccountApproval = ({navigation}) => {
     const [loading, setLoading] = useState(true);
     const [waiting, setWaiting] = React.useState(false);
 
-    useEffect(async() => {
+    useEffect(async () => {
         const token = await AsyncStorage.getItem('token');
         setToken(token);
         displayUser(token);
@@ -48,83 +48,79 @@ const UserAccountApproval = ({navigation}) => {
     }, []);
 
     const displayUser = (token) => {
-        let userStatus =0;
+        let userStatus = 0;
         setWaiting(true);
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.get(baseurl+'/users/user-with-status/'+userStatus, {headers})
-        .then(response => {
-            setWaiting(false);
-            if(response.status == 200){
-                setData(response.data);
-            }
-            else{
-                setData([]);
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-            setRefreshing(false);
-        })
-        .catch(error => {
-            setWaiting(false);
-            setRefreshing(false);
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.get(baseurl + '/users/user-with-status/' + userStatus, { headers })
+            .then(response => {
+                setWaiting(false);
+                if (response.status == 200) {
+                    setData(response.data);
+                }
+                else {
+                    setData([]);
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+                setRefreshing(false);
+            })
+            .catch(error => {
+                setWaiting(false);
+                setRefreshing(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
- 
+
     const updateUser = (userId) => {
-        let userStatus =true;
+        let userStatus = true;
         setWaiting(true);
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.put(baseurl+'/users/'+userId+'/update-status/true', {}, {headers})
-    .then((response) => {
-        setWaiting(false);
-        if(response.status == 200){
-            showSweetAlert('success', 'Success', 'User Approved');
-            displayUser(token);
-        }
-        else {
-            showSweetAlert('error', 'Error', 'Failed to update Status. Please try again...');
-        }              
-    })
-    .catch((error) => {
-        setWaiting(false);
-        console.log(error)
-        showSweetAlert('error', 'Error', 'Failed to update Status. Please try again...');
-    })
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.put(baseurl + '/users/' + userId + '/update-status/true', {}, { headers })
+            .then((response) => {
+                setWaiting(false);
+                if (response.status == 200) {
+                    showSweetAlert('success', 'Success', 'User Approved');
+                    displayUser(token);
+                }
+                else {
+                    showSweetAlert('error', 'Error', 'Failed to update Status. Please try again...');
+                }
+            })
+            .catch((error) => {
+                setWaiting(false);
+                console.log(error)
+                showSweetAlert('error', 'Error', 'Failed to update Status. Please try again...');
+            })
     }
 
     const getConfirmation = (userId, username) =>
         Alert.alert(
-        "Account Approval Confirmation",
-        "Do you really want to activate the account of " + username + "  ?",
-        [
-            {
-                text: "Cancel"
-            },
-            { 
-                text: "OK", 
-                onPress: () => {updateUser(userId)}
-            }
-        ]
-    );
+            "Account Approval Confirmation",
+            "Do you really want to activate the account of " + username + "  ?",
+            [
+                {
+                    text: "Cancel"
+                },
+                {
+                    text: "OK",
+                    onPress: () => { updateUser(userId) }
+                }
+            ]
+        );
 
     return (
-      <ScrollView keyboardShouldPersistTaps='handled' style={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-        <Spinner visible={waiting} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
-        {loading == true  && (<ActivityIndicator size="large" color="#19398A" />)}
-        <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
-        <View style={styles.header}>
-            <Text style={styles.text_header}>User Approval</Text>
-        </View>
-        <Animatable.View 
-            animation="fadeInUpBig"
-            style={styles.footer}
-        >
-            <ScrollView>
-            {/* <View style={[styles.card]}>
+        <ScrollView keyboardShouldPersistTaps='handled' style={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+            <Spinner visible={waiting} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
+            {loading == true && (<ActivityIndicator size="large" color="#19398A" />)}
+            <StatusBar backgroundColor='#19398A' barStyle="light-content" />
+            <View style={styles.header}>
+                <Text style={styles.text_header}>User Approval</Text>
+            </View>
+            <Animatable.View
+                animation="fadeInUpBig"
+                style={styles.footer}
+            >
+                <ScrollView>
+                    {/* <View style={[styles.card]}>
             <SwipeList rowData={
                 data.map((item) => ({
                     id: item.genderId,
@@ -137,26 +133,26 @@ const UserAccountApproval = ({navigation}) => {
             }
              />
             </View> */}
-                {data.length == 0 && (<Text style={{fontSize:20, fontWeight:'bold'}}>No users approval pending...</Text>)}
-                {
-                data.length > 0 && data.map((item,index) => (
-                    <View style={styles.card} key={item.userId} >
-                        <View style={styles.cardlist}>  
-                        <View style={styles.ellipse1}>
-                                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>{item.firstName.substr(0,1) + item.lastName.substr(0,1)}</Text>
+                    {data.length == 0 && (<Text style={{ fontSize: 20, fontWeight: 'bold' }}>No users approval pending...</Text>)}
+                    {
+                        data.length > 0 && data.map((item, index) => (
+                            <View style={styles.card} key={item.userId} >
+                                <View style={styles.cardlist}>
+                                    <View style={styles.ellipse1}>
+                                        <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18 }}>{item.firstName.substr(0, 1) + item.lastName.substr(0, 1)}</Text>
+                                    </View>
+                                    <Text style={[styles.carditem, { width: '40%', paddingLeft: 20 }]}>{item.firstName + " " + item.lastName}</Text>
+                                    <Text style={[styles.carditem, { width: '35%', paddingLeft: 20 }]}>{item.username}</Text>
+                                    {/* <Text style={[styles.carditem, {width: '50%',paddingLeft:20}]}>{item.email}</Text> */}
+                                    <TouchableOpacity onPress={() => { getConfirmation(item.userId, item.username) }} style={{ width: '10%' }}><Text style={[styles.carditem]}><Icon name="account-check" color="#19398A" size={30} /></Text></TouchableOpacity>
+                                </View>
                             </View>
-                            <Text style={[styles.carditem, {width: '40%',paddingLeft:20}]}>{item.firstName +" "+ item.lastName}</Text>
-                            <Text style={[styles.carditem, {width: '35%',paddingLeft:20}]}>{item.username}</Text>
-                            {/* <Text style={[styles.carditem, {width: '50%',paddingLeft:20}]}>{item.email}</Text> */}
-                           <TouchableOpacity onPress={() => {getConfirmation(item.userId, item.username)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="account-check" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                        </View>
-                        </View>
-                ))
-            }
-           
-            </ScrollView>
-        </Animatable.View>
-      </ScrollView>
+                        ))
+                    }
+
+                </ScrollView>
+            </Animatable.View>
+        </ScrollView>
     );
 };
 
@@ -164,8 +160,8 @@ export default UserAccountApproval;
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1, 
-      backgroundColor: '#19398A',
+        flex: 1,
+        backgroundColor: '#19398A',
     },
     container2: {
         // height:50,
@@ -202,7 +198,7 @@ const styles = StyleSheet.create({
     text_footer: {
         color: '#05375a',
         fontSize: 18,
-        
+
     },
     action: {
         flexDirection: 'row',
@@ -244,10 +240,10 @@ const styles = StyleSheet.create({
     row: {
         alignSelf: 'stretch',
         paddingBottom: 10,
-        paddingTop:5,
+        paddingTop: 5,
         paddingLeft: 20,
         borderBottomWidth: 1,
-        borderBottomColor:'#808080',
+        borderBottomColor: '#808080',
         backgroundColor: '#FFF'
     },
     card: {
@@ -260,16 +256,16 @@ const styles = StyleSheet.create({
         marginTop: 5,
         // marginLeft: 8,
         display: "flex",
-         flexDirection: 'row', 
-         justifyContent: 'space-between',
-         marginBottom:3
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 3
     },
     text_header1: {
         color: '#000',
         fontWeight: 'bold',
         fontSize: 20,
         textAlign: 'center',
-        marginTop:50
+        marginTop: 50
     },
     cardlist: {
         display: "flex",
@@ -280,24 +276,24 @@ const styles = StyleSheet.create({
     ellipse1: {
         width: 40,
         height: 40,
-      //   marginTop: 0,
+        //   marginTop: 0,
         borderRadius: 100,
         marginLeft: 10,
         justifyContent: 'center',
         backgroundColor: '#e9c46a'
     },
     carditem: {
-      color: "#121212",
-      fontSize: 20,
-      marginLeft: 3,
-      marginTop: 5,
-       fontWeight: "bold",
-       display: 'flex',
-    //    backgroundColor:'red'
-    //    justifyContent: 'space-between',  
-    //    textAlign: 'center'
+        color: "#121212",
+        fontSize: 20,
+        marginLeft: 3,
+        marginTop: 5,
+        fontWeight: "bold",
+        display: 'flex',
+        //    backgroundColor:'red'
+        //    justifyContent: 'space-between',  
+        //    textAlign: 'center'
     },
     spinnerTextStyle: {
         color: '#FFF'
     }
-  });
+});

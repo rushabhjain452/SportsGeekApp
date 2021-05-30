@@ -1,20 +1,20 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Text, RefreshControl, ActivityIndicator, TouchableOpacity } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import {
   Avatar
 } from 'react-native-paper';
 import AsyncStorage from '@react-native-community/async-storage';
-import { Card} from 'react-native-elements';
+import { Card } from 'react-native-elements';
 import axios from 'axios';
 
 import formatDate from '../helpers/formatDate';
 import showSweetAlert from '../helpers/showSweetAlert';
-import {baseurl, errorMessage} from '../config';
+import { baseurl, errorMessage } from '../config';
 
 function UsersContestsForLiveMatch(props) {
 
-  const {matchId} = props.route.params;
+  const { matchId } = props.route.params;
   const [matchData, setMatchData] = useState({});
   const [data, setData] = useState([]);
   const [username, setUsername] = useState('');
@@ -25,7 +25,7 @@ function UsersContestsForLiveMatch(props) {
   const [team1ContestPoints, setTeam1ContestPoints] = useState(0);
   const [team2ContestPoints, setTeam2ContestPoints] = useState(0);
 
-  useEffect(async() => {
+  useEffect(async () => {
     const token = await AsyncStorage.getItem('token');
     setToken(token);
     const username = await AsyncStorage.getItem('username');
@@ -39,68 +39,64 @@ function UsersContestsForLiveMatch(props) {
   }, []);
 
   const fetchMatchData = (token) => {
-    const headers = {
-      'Authorization': 'Bearer ' + token
-    };
-    axios.get(baseurl+'/matches/'+matchId, {headers})
-    .then((response) => {
-      if(response.status == 200){
-        setMatchData(response.data);
-        // setMatchData([]);
-        const matchData = response.data;
-        fetchData(token, matchData);
-      }else{
+    const headers = { 'Authorization': 'Bearer ' + token };
+    axios.get(baseurl + '/matches/' + matchId, { headers })
+      .then((response) => {
+        if (response.status == 200) {
+          setMatchData(response.data);
+          // setMatchData([]);
+          const matchData = response.data;
+          fetchData(token, matchData);
+        } else {
           setMatchData([]);
-      }
-    })
-    .catch((error) => {
-      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-    });
+        }
+      })
+      .catch((error) => {
+        showSweetAlert('error', 'Network Error', errorMessage);
+      });
   }
 
   const fetchData = (token, matchData) => {
-    const headers = {
-      'Authorization': 'Bearer ' + token
-    };
-    axios.get(baseurl+'/matches/'+matchId+'/contest', {headers})
-    .then((response) => {
-      setLoading(false);
+    const headers = { 'Authorization': 'Bearer ' + token };
+    axios.get(baseurl + '/matches/' + matchId + '/contest', { headers })
+      .then((response) => {
+        setLoading(false);
         setRefreshing(false);
-        if(response.status == 200){
+        if (response.status == 200) {
           console.log(response.data);
           setData(response.data);
           let records = response.data;
-          let team1points=0, team2points=0;
+          let team1points = 0, team2points = 0;
           records.forEach((item, index) => {
-            if(item.teamShortName == matchData.team1Short){
+            if (item.teamShortName == matchData.team1Short) {
               team1points += item.contestPoints;
-            }else if(item.teamShortName == matchData.team2Short){
+            } else if (item.teamShortName == matchData.team2Short) {
               team2points += item.contestPoints;
             }
           });
           setTeam1ContestPoints(team1points);
           setTeam2ContestPoints(team2points);
-        }else{
-            console.log(error);
-            showSweetAlert('error', 'Network Error', errorMessage);
+        } else {
+          console.log(error);
+          showSweetAlert('error', 'Network Error', errorMessage);
         }
-    })
-    .catch((error) => {
+      })
+      .catch((error) => {
         setLoading(false);
         setRefreshing(false);
         console.log(error);
         showSweetAlert('error', 'Network Error', errorMessage);
-    });
+      });
   }
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}>
-      {loading == true  && (<ActivityIndicator size="large" color="#19398A" />)}
+    <ScrollView style={styles.container} keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+      {loading == true && (<ActivityIndicator size="large" color="#19398A" />)}
       <TouchableOpacity style={styles2.rect}>
         <Text style={styles2.date}>{formatDate(matchData.startDatetime)}</Text>
-        <View style={{display: "flex", flexDirection: 'row', justifyContent: 'space-between'}}>
-          <View style={styles2.ellipseRow}>  
-            <Card.Image style={styles2.ellipse} source={{uri: matchData.team1Logo}}  />
+        <View style={{ display: "flex", flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View style={styles2.ellipseRow}>
+            <Card.Image style={styles2.ellipse} source={{ uri: matchData.team1Logo }} />
             <Text style={styles2.mI}>{matchData.team1Short}</Text>
           </View>
           <View style={styles2.loremIpsumColumn}>
@@ -108,14 +104,14 @@ function UsersContestsForLiveMatch(props) {
           </View>
           <View style={styles2.rightteam}>
             <Text style={styles2.eng}>{matchData.team2Short}</Text>
-            <Card.Image style={styles2.ellipse1} source={{uri: matchData.team2Logo}} />
+            <Card.Image style={styles2.ellipse1} source={{ uri: matchData.team2Logo }} />
           </View>
         </View>
-          <Card.Divider/>
-          <View style={{display: "flex", flexDirection: 'row', justifyContent: 'space-between',width:'100%'}}>
-            <Text style={{textAlign: 'left',fontSize:20,paddingLeft:20,fontWeight:'bold'}}>{team1ContestPoints}</Text>
-            <Text style={{textAlign: 'right',fontSize:20,paddingRight:20,fontWeight:'bold'}}>{team2ContestPoints}</Text>
-          </View>
+        <Card.Divider />
+        <View style={{ display: "flex", flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+          <Text style={{ textAlign: 'left', fontSize: 20, paddingLeft: 20, fontWeight: 'bold' }}>{team1ContestPoints}</Text>
+          <Text style={{ textAlign: 'right', fontSize: 20, paddingRight: 20, fontWeight: 'bold' }}>{team2ContestPoints}</Text>
+        </View>
       </TouchableOpacity>
       <View>
         <View style={styles.rect3}>
@@ -125,25 +121,25 @@ function UsersContestsForLiveMatch(props) {
             <Text style={styles.col3}>Points</Text>
           </View>
         </View>
-          {
-            data.map((item, index) => {
-              const mystyle = item.username == username ? styles.bgDark : styles.bgLight;
-              return (
-                <View style={[styles.card, mystyle]} key={item.contestId}>
-                    <View style={styles.cardlist}>  
-                        <View style={styles.ellipse1}>
-                            <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>{item.firstName.substr(0,1) + item.lastName.substr(0,1)}</Text>
-                        </View>
-                        <Text style={[styles.carditem, {width: '50%', fontSize: 17}]}>{item.firstName +" "+ item.lastName}</Text>
-                        <Text style={[styles.carditem, {width: '15%'}]}>{item.teamShortName}</Text>
-                        <Text style={[styles.carditem, {width: '15%'}]}>{item.contestPoints}</Text>
-                    </View>
+        {
+          data.map((item, index) => {
+            const mystyle = item.username == username ? styles.bgDark : styles.bgLight;
+            return (
+              <View style={[styles.card, mystyle]} key={item.contestId}>
+                <View style={styles.cardlist}>
+                  <View style={styles.ellipse1}>
+                    <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18 }}>{item.firstName.substr(0, 1) + item.lastName.substr(0, 1)}</Text>
+                  </View>
+                  <Text style={[styles.carditem, { width: '50%', fontSize: 17 }]}>{item.firstName + " " + item.lastName}</Text>
+                  <Text style={[styles.carditem, { width: '15%' }]}>{item.teamShortName}</Text>
+                  <Text style={[styles.carditem, { width: '15%' }]}>{item.contestPoints}</Text>
                 </View>
-              )
-            })
-          }
+              </View>
+            )
+          })
+        }
       </View>
-      <View style={{marginTop: 50}}></View>
+      <View style={{ marginTop: 50 }}></View>
     </ScrollView>
   );
 }
@@ -295,27 +291,27 @@ const styles = StyleSheet.create({
   col1: {
     fontFamily: "roboto-regular",
     color: "rgba(255,255,255,1)",
-    width:'55%',
+    width: '55%',
     paddingLeft: 50
   },
   col2: {
     fontFamily: "roboto-regular",
     color: "rgba(255,255,255,1)",
     // marginLeft: 50,
-    width:'20%',
+    width: '20%',
     // marginTop: 1
   },
   col3: {
     fontFamily: "roboto-regular",
     color: "rgba(255,255,255,1)",
     // marginLeft: 127,
-    width:'20%'
+    width: '20%'
   },
   col4: {
     fontFamily: "roboto-regular",
     color: "rgba(255,255,255,1)",
     // marginLeft: 127,
-    width:'20%'
+    width: '20%'
   },
   rankRow: {
     height: 18,
@@ -346,16 +342,16 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     marginRight: 15,
     display: "flex",
-     flexDirection: 'row', 
-     justifyContent: 'space-between',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     //  marginBottom:50
   },
-  bgLight:{
+  bgLight: {
     backgroundColor: "#E6E6E6",
   },
-  bgDark:{
-      // backgroundColor: "#98FB98",
-      backgroundColor: '#87CEFA'
+  bgDark: {
+    // backgroundColor: "#98FB98",
+    backgroundColor: '#87CEFA'
   },
   cardlist: {
     display: "flex",
@@ -366,7 +362,7 @@ const styles = StyleSheet.create({
   ellipse1: {
     width: 40,
     height: 40,
-  //   marginTop: 0,
+    //   marginTop: 0,
     borderRadius: 100,
     marginLeft: 5,
     justifyContent: 'center',
@@ -381,7 +377,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     display: 'flex',
     justifyContent: 'space-between',
-  //    textAlign: 'center'
+    //    textAlign: 'center'
   },
   carditemusername: {
     color: "#121212",
@@ -391,7 +387,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'space-between',
     fontWeight: 'bold'
-  //    textAlign: 'center',
+    //    textAlign: 'center',
     // borderBottomColor: 'green',
     // borderBottomWidth: 2,
     // height: 40,
@@ -428,7 +424,7 @@ const styles2 = StyleSheet.create({
     fontSize: 20,
     marginLeft: 11,
     marginTop: 20,
-     fontWeight: "bold"
+    fontWeight: "bold"
   },
   date: {
     fontFamily: "roboto-regular",
@@ -469,16 +465,16 @@ const styles2 = StyleSheet.create({
     fontFamily: "roboto-regular",
     color: "#121212",
     fontSize: 20,
-    marginLeft:20,
+    marginLeft: 20,
     marginTop: 20,
-     fontWeight: "bold"
+    fontWeight: "bold"
   },
   ellipse1: {
     width: 61,
     height: 61,
     marginLeft: 18,
     marginTop: 0,
-    borderRadius:30
+    borderRadius: 30
   },
   ellipseRow: {
     // height: 95,
@@ -511,7 +507,7 @@ const styles2 = StyleSheet.create({
     fontSize: 18,
     marginLeft: 11,
     marginTop: 37,
-     fontWeight: "bold"
+    fontWeight: "bold"
   },
   loremIpsum3: {
     fontFamily: "roboto-regular",
@@ -541,7 +537,7 @@ const styles2 = StyleSheet.create({
     fontSize: 18,
     marginLeft: 20,
     marginTop: 37,
-  fontWeight: "bold"
+    fontWeight: "bold"
   },
   ellipse3: {
     width: 61,
@@ -581,10 +577,10 @@ const styles2 = StyleSheet.create({
     padding: 10
   },
   text_header: {
-      color: '#000',
-      fontWeight: 'bold',
-      fontSize: 20,
-      textAlign: "center",
+    color: '#000',
+    fontWeight: 'bold',
+    fontSize: 20,
+    textAlign: "center",
   }
 });
 

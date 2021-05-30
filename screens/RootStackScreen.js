@@ -8,11 +8,11 @@ import SignUpScreen from './SignUpScreen';
 import ForgetPasswordScreen from './ForgetPasswordScreen';
 const RootStack = createStackNavigator();
 
-const RootStackScreen = ({navigation}) => (
+const RootStackScreen = ({ navigation }) => (
     <RootStack.Navigator headerMode='none'>
-        <RootStack.Screen name="SplashScreen" component={SplashScreen}/>
-        <RootStack.Screen name="SignInScreen" component={SignInScreen}/>
-        <RootStack.Screen name="SignUpScreen" component={SignUpScreen}/>
+        <RootStack.Screen name="SplashScreen" component={SplashScreen} />
+        <RootStack.Screen name="SignInScreen" component={SignInScreen} />
+        <RootStack.Screen name="SignUpScreen" component={SignUpScreen} />
         <RootStack.Screen name="ForgetPasswordScreen" component={ForgetPasswordScreen} />
     </RootStack.Navigator>
 );

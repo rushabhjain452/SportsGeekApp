@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Text, RefreshControl, ActivityIndicator } from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 // import Svg, { Ellipse } from "react-native-svg";
@@ -6,7 +6,7 @@ import {
   Avatar
 } from 'react-native-paper';
 import showSweetAlert from '../helpers/showSweetAlert';
-import {baseurl} from '../config';
+import { baseurl, errorMessage } from '../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useTheme } from 'react-native-paper';
@@ -22,7 +22,7 @@ function LeaderBoard(props) {
   const [token, setToken] = useState('');
   const { colors } = useTheme();
 
-  useEffect(async() => {
+  useEffect(async () => {
     const token = await AsyncStorage.getItem('token');
     setToken(token);
     const userId = await AsyncStorage.getItem('userId');
@@ -38,43 +38,43 @@ function LeaderBoard(props) {
 
   const fetchData = (token) => {
     console.log('fetchData');
-    const headers = {'Authorization': 'Bearer ' + token};
-    axios.get(baseurl+'/users/statistics', {headers})
-    .then((response) => {
-      if(response.status == 200){
-        setData(response.data);
-        fetchContestData(response.data, token);
-      }else{
-        setData([]);
-        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-      }
-    })
-    .catch((error) => {
-        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-    });
+    const headers = { 'Authorization': 'Bearer ' + token };
+    axios.get(baseurl + '/users/statistics', { headers })
+      .then((response) => {
+        if (response.status == 200) {
+          setData(response.data);
+          fetchContestData(response.data, token);
+        } else {
+          setData([]);
+          showSweetAlert('error', 'Network Error', errorMessage);
+        }
+      })
+      .catch((error) => {
+        showSweetAlert('error', 'Network Error', errorMessage);
+      });
   }
 
   const fetchContestData = (data, token) => {
     console.log('fetchContestData');
-    const headers = {'Authorization': 'Bearer ' + token};
-    axios.get(baseurl+'/users/future-contest', {headers})
-    .then((response) => {
+    const headers = { 'Authorization': 'Bearer ' + token };
+    axios.get(baseurl + '/users/future-contest', { headers })
+      .then((response) => {
         setLoading(false);
         setRefreshing(false);
-        if(response.status == 200){
+        if (response.status == 200) {
           setContestData(response.data);
           let contestData = response.data;
           data.forEach((item) => {
             let obj = contestData.find(o => o.userId == item.userId);
-            if(obj)
+            if (obj)
               item.totalWinningPoints += obj.contestPoints;
           });
           // setData(data);
           data.sort((obj1, obj2) => {
-            if (obj1.totalWinningPoints < obj2.totalWinningPoints){
+            if (obj1.totalWinningPoints < obj2.totalWinningPoints) {
               return 1;
             }
-            else if(obj1.totalWinningPoints > obj2.totalWinningPoints){
+            else if (obj1.totalWinningPoints > obj2.totalWinningPoints) {
               return -1;
             }
             return 0;
@@ -82,94 +82,94 @@ function LeaderBoard(props) {
           console.log(data);
           setData(data);
           console.log('setData');
-        }else{
+        } else {
           setContestData([]);
-          showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+          showSweetAlert('error', 'Network Error', errorMessage);
         }
-    })
-    .catch((error) => {
-      setLoading(false);
-      setRefreshing(false);
-      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-    }); 
+      })
+      .catch((error) => {
+        setLoading(false);
+        setRefreshing(false);
+        showSweetAlert('error', 'Network Error', errorMessage);
+      });
   }
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}>
-      {loading == true  && (<ActivityIndicator size="large" color="#19398A" />)}
-        <View style={styles.rectStackRow}>
-            {
-              data.length >= 2 && 
-              (
-                <View style={styles.rect}>
-                  <View style={styles.ellipse1}>
-                    <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>2</Text>
-                  </View>
-                  <Text style={styles.carditemusername}>{data[1].firstName+" "+ data[1].lastName}</Text>
-                  <Text style={[styles.carditem, {textAlign: 'center'}]}>{data[1].totalWinningPoints}</Text>
-                </View>
-              )
-            }
-            {
-              data.length >= 1 && 
-              (
-                <View style={styles.rect1}>
-                  <View style={styles.ellipse1}>
-                    <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>1</Text>
-                  </View>
-                  <Text style={styles.carditemusername}>{data[0].firstName+" "+ data[0].lastName}</Text>
-                  <Text style={[styles.carditem, {textAlign: 'center'}]}>{data[0].totalWinningPoints}</Text>
-                </View>
-              )
-            }
-            {
-              data.length >= 3 && 
-              (
-                <View style={styles.rect2}>
-                  <View style={styles.ellipse1}>
-                    <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>3</Text>
-                  </View>
-                  <Text style={styles.carditemusername}>{data[2].firstName+" "+ data[2].lastName}</Text>
-                  <Text style={[styles.carditem, {textAlign: 'center'}]}>{data[2].totalWinningPoints}</Text>
-                </View>  
-              )
-            }
-        </View>
-        <View style={{display: 'flex',flexDirection:'row'}}>
-          <Text style={[styles.popular,{width:100}]}>Top Users</Text>
-          <TouchableOpacity style={{marginTop: 15}} onPress={() => setRefreshing(true)}>
-            <FontAwesome  
-                    name="refresh"
-                    color={colors.text}
-                    size={20}
-                />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.rect3}>
-          <View style={styles.rankRow}>
-            <Text style={styles.rank}>Rank</Text>
-            <Text style={styles.user}>User</Text>
-            <Text style={styles.points}>Points</Text>
-          </View>
-        </View>    
+    <ScrollView style={styles.container} keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+      {loading == true && (<ActivityIndicator size="large" color="#19398A" />)}
+      <View style={styles.rectStackRow}>
         {
-            data && data.map((item, index) => {
-              const mystyle = item.userId == userId ? styles.bgDark : styles.bgLight;
-              return(
-                <View style={[styles.card, mystyle]} key={item.userId}>
-                    <View style={styles.cardlist}>
-                        <Text style={[styles.carditem, {marginLeft: 5, width: 30}]}>{index+1}</Text>
-                        <View style={styles.ellipse1}>
-                            <Text style={{textAlign: 'center',fontWeight: 'bold', fontSize: 18}}>{item.firstName.substr(0,1) + item.lastName.substr(0,1)}</Text>
-                        </View>
-                        <Text style={[styles.carditem, {width: '60%', fontSize: 17}]}>{item.firstName +" "+ item.lastName}</Text>
-                        <Text style={[styles.carditem, {width: '20%'}]}>{item.totalWinningPoints}</Text>
-                    </View>
+          data.length >= 2 &&
+          (
+            <View style={styles.rect}>
+              <View style={styles.ellipse1}>
+                <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18 }}>2</Text>
+              </View>
+              <Text style={styles.carditemusername}>{data[1].firstName + " " + data[1].lastName}</Text>
+              <Text style={[styles.carditem, { textAlign: 'center' }]}>{data[1].totalWinningPoints}</Text>
+            </View>
+          )
+        }
+        {
+          data.length >= 1 &&
+          (
+            <View style={styles.rect1}>
+              <View style={styles.ellipse1}>
+                <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18 }}>1</Text>
+              </View>
+              <Text style={styles.carditemusername}>{data[0].firstName + " " + data[0].lastName}</Text>
+              <Text style={[styles.carditem, { textAlign: 'center' }]}>{data[0].totalWinningPoints}</Text>
+            </View>
+          )
+        }
+        {
+          data.length >= 3 &&
+          (
+            <View style={styles.rect2}>
+              <View style={styles.ellipse1}>
+                <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18 }}>3</Text>
+              </View>
+              <Text style={styles.carditemusername}>{data[2].firstName + " " + data[2].lastName}</Text>
+              <Text style={[styles.carditem, { textAlign: 'center' }]}>{data[2].totalWinningPoints}</Text>
+            </View>
+          )
+        }
+      </View>
+      <View style={{ display: 'flex', flexDirection: 'row' }}>
+        <Text style={[styles.popular, { width: 100 }]}>Top Users</Text>
+        <TouchableOpacity style={{ marginTop: 15 }} onPress={() => setRefreshing(true)}>
+          <FontAwesome
+            name="refresh"
+            color={colors.text}
+            size={20}
+          />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.rect3}>
+        <View style={styles.rankRow}>
+          <Text style={styles.rank}>Rank</Text>
+          <Text style={styles.user}>User</Text>
+          <Text style={styles.points}>Points</Text>
+        </View>
+      </View>
+      {
+        data && data.map((item, index) => {
+          const mystyle = item.userId == userId ? styles.bgDark : styles.bgLight;
+          return (
+            <View style={[styles.card, mystyle]} key={item.userId}>
+              <View style={styles.cardlist}>
+                <Text style={[styles.carditem, { marginLeft: 5, width: 30 }]}>{index + 1}</Text>
+                <View style={styles.ellipse1}>
+                  <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18 }}>{item.firstName.substr(0, 1) + item.lastName.substr(0, 1)}</Text>
                 </View>
-              )
-            })
-          }
-      <View style={{marginTop: 50}}></View>
+                <Text style={[styles.carditem, { width: '60%', fontSize: 17 }]}>{item.firstName + " " + item.lastName}</Text>
+                <Text style={[styles.carditem, { width: '20%' }]}>{item.totalWinningPoints}</Text>
+              </View>
+            </View>
+          )
+        })
+      }
+      <View style={{ marginTop: 50 }}></View>
     </ScrollView>
   );
 }
@@ -321,20 +321,20 @@ const styles = StyleSheet.create({
   rank: {
     fontFamily: "roboto-regular",
     color: "rgba(255,255,255,1)",
-    width:'25%'
+    width: '25%'
   },
   user: {
     fontFamily: "roboto-regular",
     color: "rgba(255,255,255,1)",
     // marginLeft: 50,
-    width:'30%'
+    width: '30%'
     // marginTop: 1
   },
   points: {
     fontFamily: "roboto-regular",
     color: "rgba(255,255,255,1)",
     marginLeft: 127,
-    width:'20%'
+    width: '20%'
   },
   rankRow: {
     height: 18,
@@ -365,14 +365,14 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     marginRight: 15,
     display: "flex",
-     flexDirection: 'row', 
-     justifyContent: 'space-between',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     //  marginBottom:50
   },
-  bgLight:{
+  bgLight: {
     backgroundColor: "#E6E6E6",
   },
-  bgDark:{
+  bgDark: {
     // backgroundColor: "#98FB98",
     backgroundColor: '#87CEFA'
   },
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   ellipse1: {
     width: 40,
     height: 40,
-  //   marginTop: 0,
+    //   marginTop: 0,
     borderRadius: 100,
     marginLeft: 5,
     justifyContent: 'center',
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     display: 'flex',
     justifyContent: 'space-between',
-  //    textAlign: 'center'
+    //    textAlign: 'center'
   },
   carditemusername: {
     color: "#121212",
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'space-between',
     fontWeight: 'bold'
-  //    textAlign: 'center',
+    //    textAlign: 'center',
     // borderBottomColor: 'green',
     // borderBottomWidth: 2,
     // height: 40,

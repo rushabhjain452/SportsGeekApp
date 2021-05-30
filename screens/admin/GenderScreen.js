@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import { 
-    View, 
-    Text, 
-    Button, 
-    TouchableOpacity, 
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    Button,
+    TouchableOpacity,
     Dimensions,
     TextInput,
     Platform,
@@ -20,12 +20,12 @@ import Feather from 'react-native-vector-icons/Feather';
 import SwipeList from 'react-native-smooth-swipe-list';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import showSweetAlert from '../../helpers/showSweetAlert';
-import {baseurl} from '../../config';
+import { baseurl, errorMessage } from '../../config';
 import Spinner from 'react-native-loading-spinner-overlay';
 import AsyncStorage from '@react-native-community/async-storage';
 import axios from 'axios';
 
-const GenderScreen = ({navigation}) => {
+const GenderScreen = ({ navigation }) => {
     // LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
     const [gender, setGender] = useState('');
@@ -41,7 +41,7 @@ const GenderScreen = ({navigation}) => {
         setGender('');
     }, []);
 
-    useEffect(async() => {
+    useEffect(async () => {
         const token = await AsyncStorage.getItem('token');
         setToken(token);
         displayGender();
@@ -49,22 +49,23 @@ const GenderScreen = ({navigation}) => {
     }, [refreshing]);
 
     const displayGender = () => {
-        axios.get(baseurl+'/genders')
-        .then(response => {
-            setLoading(false);
-            setRefreshing(false);
-            if(response.status == 200){
-                setData(response.data);
-            }
-            else{
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-        })
-        .catch(error => {
-            setLoading(false);
-            setRefreshing(false);
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })
+        setLoading(true);
+        axios.get(baseurl + '/genders')
+            .then(response => {
+                setLoading(false);
+                setRefreshing(false);
+                if (response.status == 200) {
+                    setData(response.data);
+                }
+                else {
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+            })
+            .catch(error => {
+                setLoading(false);
+                setRefreshing(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
 
     // const [data, setData] = React.useState({
@@ -85,98 +86,92 @@ const GenderScreen = ({navigation}) => {
     //         });
     //     }
     // }
-   
+
     const addGender = () => {
-        if(gender != ''){
+        if (gender != '') {
             setLoading(true);
             // Axios
             const reqData = {
                 name: gender
             };
-            const headers = {
-                'Authorization': 'Bearer ' + token
-            }
+            const headers = { 'Authorization': 'Bearer ' + token }
             axios
-            .post(baseurl+'/genders', reqData, {headers})
-            .then((response) => {
-                setLoading(false);
-                if(response.status == 201){
-                    showSweetAlert('success', 'Success', 'Gender added successfully.');
-                    displayGender();
-                }
-                else {
+                .post(baseurl + '/genders', reqData, { headers })
+                .then((response) => {
+                    setLoading(false);
+                    if (response.status == 201) {
+                        showSweetAlert('success', 'Success', 'Gender added successfully.');
+                        displayGender();
+                    }
+                    else {
+                        showSweetAlert('error', 'Error', 'Failed to add Gender. Please try again...');
+                    }
+                    setGender('');
+                })
+                .catch((error) => {
+                    console.log(error);
+                    setLoading(false);
                     showSweetAlert('error', 'Error', 'Failed to add Gender. Please try again...');
-                }              
-                setGender('');
-            })
-            .catch((error) => {
-                console.log(error);
-                setLoading(false);
-                showSweetAlert('error', 'Error', 'Failed to add Gender. Please try again...');
-            });
-        }else{
+                });
+        } else {
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for Gender.');
         }
     }
 
     const deleteGender = (id) => {
         setLoading(true);
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
+        const headers = { 'Authorization': 'Bearer ' + token }
         // Axios
-        axios.delete(baseurl+'/genders/'+id, {headers})
-        .then((response) => {
-            setLoading(false);
-            if(response.status == 200){
-                showSweetAlert('success', 'Success', 'Gender deleted successfully.');
-                displayGender();
-            }
-            else {
+        axios.delete(baseurl + '/genders/' + id, { headers })
+            .then((response) => {
+                setLoading(false);
+                if (response.status == 200) {
+                    showSweetAlert('success', 'Success', 'Gender deleted successfully.');
+                    displayGender();
+                }
+                else {
+                    showSweetAlert('error', 'Error', 'Failed to delete Gender. Please try again...');
+                }
+                setGender('');
+            })
+            .catch((error) => {
+                console.log(error);
+                setLoading(false);
                 showSweetAlert('error', 'Error', 'Failed to delete Gender. Please try again...');
-            }              
-            setGender('');
-        })
-        .catch((error) => {
-            console.log(error);
-            setLoading(false);
-            showSweetAlert('error', 'Error', 'Failed to delete Gender. Please try again...');
-        })
+            })
     }
 
     const editGender = (genderId, name) => {
         setGender(name);
         setBtnText('Update');
         setGenderId(genderId);
-    } 
+    }
 
     const updateGender = () => {
-        if(gender != ''){
+        if (gender != '') {
             setLoading(true);
             const reqData = {
                 name: gender
             };
-            const headers = {
-                'Authorization': 'Bearer ' + token
-            }
-            axios.put(baseurl+'/genders/'+genderId, reqData, {headers})
-        .then((response) => {
-            setLoading(false);
-            if(response.status == 200){
-                showSweetAlert('success', 'Success', 'Gender updated successfully.');
-                displayGender();
-            }
-            else {
-                showSweetAlert('error', 'Error', 'Failed to update Gender. Please try again...');
-            }              
-            setGender('');
-            setBtnText('Add');
-        })
-        .catch((error) => {
-            setLoading(false);
-            showSweetAlert('error', 'Error', 'Failed to update Gender. Please try again...');
-        })
-        }else{
+            const headers = { 'Authorization': 'Bearer ' + token }
+            axios.put(baseurl + '/genders/' + genderId, reqData, { headers })
+                .then((response) => {
+                    setLoading(false);
+                    if (response.status == 200) {
+                        showSweetAlert('success', 'Success', 'Gender updated successfully.');
+                        displayGender();
+                    }
+                    else {
+                        showSweetAlert('error', 'Error', 'Failed to update Gender. Please try again...');
+                    }
+                    setGender('');
+                    setBtnText('Add');
+                })
+                .catch((error) => {
+                    setLoading(false);
+                    showSweetAlert('error', 'Error', 'Failed to update Gender. Please try again...');
+                })
+        } else {
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for Gender.');
         }
     }
@@ -185,7 +180,7 @@ const GenderScreen = ({navigation}) => {
     //     // return the view that will be the face of the row
     //     return <Text>{item.name}</Text>
     // }
-    
+
     // const getUpdateButton = (genderId, name) => {
     //     // return your touchable view, it can be whatever 
     //     // return <Button onPress={() => {}} style={{color: '#000'}} title="Update" color="#FFF" />
@@ -199,7 +194,7 @@ const GenderScreen = ({navigation}) => {
     //         </TouchableOpacity>
     //     )
     // }
-    
+
     // const getDeleteButton = (genderId) => {
     //     // return <Button onPress={() => {}} style={{color: '#000'}} title="Delete" color="#F00" />
     //     return (
@@ -215,74 +210,74 @@ const GenderScreen = ({navigation}) => {
 
     const getConfirmation = (genderId) =>
         Alert.alert(
-        "Delete Confirmation",
-        "Do you really want to delete the gender ?",
-        [
-            {
-                text: "Cancel"
-            },
-            { 
-                text: "OK", 
-                onPress: () => {deleteGender(genderId)}
-            }
-        ]
-    );
+            "Delete Confirmation",
+            "Do you really want to delete the gender ?",
+            [
+                {
+                    text: "Cancel"
+                },
+                {
+                    text: "OK",
+                    onPress: () => { deleteGender(genderId) }
+                }
+            ]
+        );
 
-   return (
-      <View style={styles.container}>
-        <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
-          <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
-        <View style={styles.header}>
-            <Text style={styles.text_header}>Gender Details</Text>
-        </View>
-        <Animatable.View 
-            animation="fadeInUpBig"
-            style={styles.footer}
-        >
-            <ScrollView keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Gender Name</Text>
-            <View style={styles.action}>
-                <FontAwesome 
-                    name="mars"
-                    color="#05375a"
-                    size={20}
-                />
-                <TextInput 
-                    placeholder="Enter Gender Name"
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => setGender(val)}
-                    value={gender}
-                    maxLength={20}
-                />
-                { (gender != '') ? 
-                <Animatable.View
-                    animation="bounceIn"
-                >
-                    <Feather 
-                        name="check-circle"
-                        color="green"
-                        size={20}
-                    />
-                </Animatable.View>
-                : null}
+    return (
+        <View style={styles.container}>
+            <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
+            <StatusBar backgroundColor='#19398A' barStyle="light-content" />
+            <View style={styles.header}>
+                <Text style={styles.text_header}>Gender Details</Text>
             </View>
-            <View style={styles.button}>
-            <TouchableOpacity
-                onPress={(btnText=='Add') ? addGender : updateGender}
-                    style={[styles.signIn, {
-                        borderColor: '#19398A',
-                        borderWidth: 1,
-                        marginTop: 10,
-                        marginBottom: 20
-                    }]}
-                >
-                    <Text style={[styles.textSign, {
-                        color:'#19398A'
-                    }]}>{btnText}</Text>
-                </TouchableOpacity>
-            </View>
-            {/* <View style={[styles.card]}>
+            <Animatable.View
+                animation="fadeInUpBig"
+                style={styles.footer}
+            >
+                <ScrollView keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} >
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Gender Name</Text>
+                    <View style={styles.action}>
+                        <FontAwesome
+                            name="mars"
+                            color="#05375a"
+                            size={20}
+                        />
+                        <TextInput
+                            placeholder="Enter Gender Name"
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => setGender(val)}
+                            value={gender}
+                            maxLength={20}
+                        />
+                        {(gender != '') ?
+                            <Animatable.View
+                                animation="bounceIn"
+                            >
+                                <Feather
+                                    name="check-circle"
+                                    color="green"
+                                    size={20}
+                                />
+                            </Animatable.View>
+                            : null}
+                    </View>
+                    <View style={styles.button}>
+                        <TouchableOpacity
+                            onPress={(btnText == 'Add') ? addGender : updateGender}
+                            style={[styles.signIn, {
+                                borderColor: '#19398A',
+                                borderWidth: 1,
+                                marginTop: 10,
+                                marginBottom: 20
+                            }]}
+                        >
+                            <Text style={[styles.textSign, {
+                                color: '#19398A'
+                            }]}>{btnText}</Text>
+                        </TouchableOpacity>
+                    </View>
+                    {/* <View style={[styles.card]}>
             <SwipeList rowData={
                 data.map((item) => ({
                     id: item.genderId,
@@ -295,24 +290,24 @@ const GenderScreen = ({navigation}) => {
             }
              />
             </View> */}
-                {
-                data.map((item,index) => (
-                    <View style={styles.card} key={item.genderId} >
-                        <View style={styles.cardlist} >  
-                            <View style={styles.ellipse1}>
-                                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>{(item.name).substr(0,1)}</Text>
+                    {
+                        data.map((item, index) => (
+                            <View style={styles.card} key={item.genderId} >
+                                <View style={styles.cardlist} >
+                                    <View style={styles.ellipse1}>
+                                        <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18 }}>{(item.name).substr(0, 1)}</Text>
+                                    </View>
+                                    <Text style={[styles.carditem, { width: '65%', paddingLeft: 20 }]}>{item.name}</Text>
+                                    <TouchableOpacity onPress={() => { editGender(item.genderId, item.name) }} style={{ width: '10%' }}><Text style={[styles.carditem]}><Icon name="circle-edit-outline" color="#19398A" size={30} /></Text></TouchableOpacity>
+                                    <TouchableOpacity onPress={() => { getConfirmation(item.genderId) }} style={{ width: '10%' }}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30} /></Text></TouchableOpacity>
+                                </View>
                             </View>
-                            <Text style={[styles.carditem, {width: '65%',paddingLeft:20}]}>{item.name}</Text>
-                           <TouchableOpacity onPress={() => {editGender(item.genderId, item.name)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="circle-edit-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                           <TouchableOpacity onPress={() => {getConfirmation(item.genderId)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                        </View>
-                        </View>
-                ))
-            }
-           
-            </ScrollView>
-        </Animatable.View>
-      </View>
+                        ))
+                    }
+
+                </ScrollView>
+            </Animatable.View>
+        </View>
     );
 };
 
@@ -320,8 +315,8 @@ export default GenderScreen;
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1, 
-      backgroundColor: '#19398A',
+        flex: 1,
+        backgroundColor: '#19398A',
     },
     container2: {
         // height:50,
@@ -358,7 +353,7 @@ const styles = StyleSheet.create({
     text_footer: {
         color: '#05375a',
         fontSize: 18,
-        
+
     },
     action: {
         flexDirection: 'row',
@@ -400,10 +395,10 @@ const styles = StyleSheet.create({
     row: {
         alignSelf: 'stretch',
         paddingBottom: 10,
-        paddingTop:5,
+        paddingTop: 5,
         paddingLeft: 20,
         borderBottomWidth: 1,
-        borderBottomColor:'#808080',
+        borderBottomColor: '#808080',
         backgroundColor: '#FFF'
     },
     card: {
@@ -416,44 +411,44 @@ const styles = StyleSheet.create({
         marginTop: 5,
         // marginLeft: 8,
         display: "flex",
-         flexDirection: 'row', 
-         justifyContent: 'space-between',
-         marginBottom:3
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 3
     },
     text_header1: {
         color: '#000',
         fontWeight: 'bold',
         fontSize: 20,
         textAlign: 'center',
-        marginTop:50
+        marginTop: 50
     },
     cardlist: {
         display: "flex",
-      flexDirection: "row",
-      marginTop: 4,
-      justifyContent: "space-between",
+        flexDirection: "row",
+        marginTop: 4,
+        justifyContent: "space-between",
     },
     ellipse1: {
-      width: 40,
-      height: 40,
-    //   marginTop: 0,
-      borderRadius: 100,
-      marginLeft: 10,
-      justifyContent: 'center',
-      backgroundColor: '#e9c46a'
+        width: 40,
+        height: 40,
+        //   marginTop: 0,
+        borderRadius: 100,
+        marginLeft: 10,
+        justifyContent: 'center',
+        backgroundColor: '#e9c46a'
     },
     carditem: {
-      color: "#121212",
-      fontSize: 20,
-      marginLeft: 3,
-      marginTop: 5,
-       fontWeight: "bold",
-       display: 'flex',
-    //    backgroundColor:'red'
-    //    justifyContent: 'space-between',  
-    //    textAlign: 'center'
+        color: "#121212",
+        fontSize: 20,
+        marginLeft: 3,
+        marginTop: 5,
+        fontWeight: "bold",
+        display: 'flex',
+        //    backgroundColor:'red'
+        //    justifyContent: 'space-between',  
+        //    textAlign: 'center'
     },
     spinnerTextStyle: {
         color: '#FFF'
     }
-  });
+});

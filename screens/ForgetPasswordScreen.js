@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import { 
-    View, 
-    Text, 
-    Button, 
-    TouchableOpacity, 
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    Button,
+    TouchableOpacity,
     Dimensions,
     TextInput,
     Platform,
@@ -15,7 +15,7 @@ import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import showSweetAlert from '../helpers/showSweetAlert';
-import {baseurl} from '../config';
+import { baseurl, errorMessage } from '../config';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
@@ -44,41 +44,45 @@ const ForgetPasswordScreen = () => {
     const email_regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
     const ForgetPasswordHandler = () => {
-        if(!validEmail){
+        if (!validEmail) {
             showSweetAlert('warning', 'Invalid Input!', 'Please enter valid email of BBD domain to proceed.');
         }
-        else if(mobileNumber.length < 9){
+        else if (mobileNumber.length < 9) {
             showSweetAlert('warning', 'Invalid Input!', 'Please enter valid mobile number to proceed.');
         }
-        else{
+        else {
             setLoading(true);
             const reqData = {
                 email: email,
                 mobileNumber: mobileNumber
             };
-            axios.post(baseurl+'/users/forget-password', reqData)
-            .then((response) => {
-                setLoading(false);
-                console.log(response.data);
-                if(response.status == 200){
-                    setUserId(response.data.userId);
-                    setEmail('');
-                    setMobileNumber('');
-                    showSweetAlert('success', 'Success', 'OTP sent successfully. Please check your email...!');
-                }else{
-                    showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-                }
-            })
-            .catch((error) => {
-                console.log(error.response.status);
-                console.log(error.response.data);
-                setLoading(false);
-                if(error.response.status == 404){
-                    showSweetAlert('warning', 'Invalid details', 'Email or mobile number is incorrect. Please enter correct email and mobile number to proceed.');
-                }else{
-                    showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-                }
-            });
+            axios.post(baseurl + '/users/forget-password', reqData)
+                .then((response) => {
+                    setLoading(false);
+                    console.log(response.data);
+                    if (response.status == 200) {
+                        setUserId(response.data.userId);
+                        setEmail('');
+                        setMobileNumber('');
+                        showSweetAlert('success', 'Success', 'OTP sent successfully. Please check your email...!');
+                    } else {
+                        showSweetAlert('error', 'Network Error', errorMessage);
+                    }
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        console.log(error.response.status);
+                        console.log(error.response.data);
+                        setLoading(false);
+                        if (error.response.status == 404) {
+                            showSweetAlert('warning', 'Invalid details', 'Email or mobile number is incorrect. Please enter correct email and mobile number to proceed.');
+                        } else {
+                            showSweetAlert('error', 'Network Error', errorMessage);
+                        }
+                    } else {
+                        showSweetAlert('error', 'Network Error', errorMessage);
+                    }
+                });
         }
     }
 
@@ -86,299 +90,303 @@ const ForgetPasswordScreen = () => {
         if (otp.length != 6) {
             showSweetAlert('warning', 'Invalid Input!', 'Please enter valid OTP of 6 digits to proceed.');
         }
-        else if(!validPassword){
+        else if (!validPassword) {
             showSweetAlert('warning', 'Invalid Input!', 'Please enter valid password to proceed.');
         }
-        else if(confirmPassword.length == 0){
+        else if (confirmPassword.length == 0) {
             showSweetAlert('warning', 'Invalid Input!', 'Please enter confirm password to proceed.');
         }
-        else if(password != confirmPassword){
+        else if (password != confirmPassword) {
             showSweetAlert('warning', 'Invalid Input!', 'Password and confirm password didn\'t match.');
         }
-        else{
+        else {
             setLoading(true);
             const reqData = {
                 userId: userId,
                 otp: otp,
                 password: password
             };
-            axios.put(baseurl+'/users/forget-password', reqData)
-            .then((response) => {
-                setLoading(false);
-                console.log(response.data);
-                if(response.status == 200){
-                    setOtp('');
-                    setPassword('');
-                    setConfirmPassword('');
-                    showSweetAlert('success', 'Success', 'Password changed successfully. Now, you can login with new password.');
-                    // navigation.goBack();
-                }else{
-                    showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-                }
-            })
-            .catch((error) => {
-                console.log(error.response.status);
-                console.log(error.response.data);
-                setLoading(false);
-                if(error.response.status == 404){
-                    showSweetAlert('warning', 'Invalid OTP.', 'Please enter correct OTP to proceed');
-                }else{
-                    showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-                }
-            });
+            axios.put(baseurl + '/users/forget-password', reqData)
+                .then((response) => {
+                    setLoading(false);
+                    console.log(response.data);
+                    if (response.status == 200) {
+                        setOtp('');
+                        setPassword('');
+                        setConfirmPassword('');
+                        showSweetAlert('success', 'Success', 'Password changed successfully. Now, you can login with new password.');
+                        // navigation.goBack();
+                    } else {
+                        showSweetAlert('error', 'Network Error', errorMessage);
+                    }
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        console.log(error.response.status);
+                        console.log(error.response.data);
+                        setLoading(false);
+                        if (error.response.status == 404) {
+                            showSweetAlert('warning', 'Invalid OTP.', 'Please enter correct OTP to proceed');
+                        } else {
+                            showSweetAlert('error', 'Network Error', errorMessage);
+                        }
+                    } else {
+                        showSweetAlert('error', 'Network Error', errorMessage);
+                    }
+                });
         }
     }
 
     return (
-      <View style={styles.container}>
-        <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
-        <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
-        <View style={styles.header}>
-            <Text style={styles.text_header}>Forget Password!</Text>
+        <View style={styles.container}>
+            <StatusBar backgroundColor='#19398A' barStyle="light-content" />
+            <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
+            <View style={styles.header}>
+                <Text style={styles.text_header}>Forget Password!</Text>
+            </View>
+            <Animatable.View
+                animation="fadeInUpBig"
+                style={styles.footer}
+            >
+                <ScrollView keyboardShouldPersistTaps='handled'>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Email</Text>
+                    <View style={styles.action}>
+                        <FontAwesome
+                            name="envelope-o"
+                            color="#05375a"
+                            size={20}
+                        />
+                        <TextInput
+                            placeholder="Your Email Address"
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => {
+                                setEmail(val);
+                                if (val.match(email_regex) && val.includes("bbd.co.za"))
+                                    setValidEmail(true);
+                                else
+                                    setValidEmail(false);
+                            }}
+                            keyboardType="email-address"
+                            maxLength={50}
+                            value={email}
+                        />
+                        {validEmail ?
+                            <Animatable.View
+                                animation="bounceIn"
+                            >
+                                <Feather
+                                    name="check-circle"
+                                    color="green"
+                                    size={20}
+                                />
+                            </Animatable.View>
+                            : null}
+                    </View>
+                    {(email.length > 0 && !validEmail) ?
+                        <Animatable.View animation="fadeInLeft" duration={500}>
+                            <Text style={styles.errorMsg}>Please enter valid email of BBD domain only.</Text>
+                        </Animatable.View>
+                        : null
+                    }
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Mobile Number</Text>
+                    <View style={styles.action}>
+                        <FontAwesome
+                            name="mobile"
+                            color="#05375a"
+                            size={20}
+                        />
+
+                        <TextInput
+                            placeholder="Your Mobile Number"
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => setMobileNumber(val)}
+                            keyboardType="number-pad"
+                            maxLength={15}
+                            value={mobileNumber}
+                        />
+                        {mobileNumber.length > 0 && mobileNumber.length == 10 ?
+                            <Animatable.View
+                                animation="bounceIn"
+                            >
+                                <Feather
+                                    name="check-circle"
+                                    color="green"
+                                    size={20}
+                                />
+                            </Animatable.View>
+                            : null}
+                    </View>
+                    {(mobileNumber.length > 0 && mobileNumber.length < 9) ?
+                        <Animatable.View animation="fadeInLeft" duration={500}>
+                            <Text style={styles.errorMsg}>Please enter valid mobile number.</Text>
+                        </Animatable.View>
+                        : null
+                    }
+                    <View style={styles.button}>
+                        <TouchableOpacity
+                            onPress={() => { ForgetPasswordHandler() }}
+                            style={[styles.signIn, {
+                                borderColor: '#19398A',
+                                borderWidth: 1,
+                                marginTop: 15
+                            }]}
+                        >
+                            <Text style={[styles.textSign, {
+                                color: '#19398A'
+                            }]}>Get OTP</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{ marginTop: 50, marginBottom: 20 }}>
+                        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#00f' }}>Update Password after getting OTP</Text>
+                    </View>
+
+                    <Text style={styles.text_footer}>OTP</Text>
+                    <View style={styles.action}>
+                        <FontAwesome
+                            name="user-o"
+                            color="#05375a"
+                            size={20}
+                        />
+                        <TextInput
+                            placeholder="Enter OTP here"
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => { setOtp(val) }}
+                            keyboardType="number-pad"
+                            maxLength={6}
+                            value={otp}
+                        />
+                        {otp.length == 6 ?
+                            <Animatable.View
+                                animation="bounceIn"
+                            >
+                                <Feather
+                                    name="check-circle"
+                                    color="green"
+                                    size={20}
+                                />
+                            </Animatable.View>
+                            : null}
+                    </View>
+                    {(otp.length > 0 && otp.length < 6) ?
+                        <Animatable.View animation="fadeInLeft" duration={500}>
+                            <Text style={styles.errorMsg}>Please enter valid OTP of 6 digits</Text>
+                        </Animatable.View>
+                        : null
+                    }
+                    <Text style={[styles.text_footer, {
+                        marginTop: 35
+                    }]}>New Password</Text>
+                    <View style={styles.action}>
+                        <Feather
+                            name="lock"
+                            color="#05375a"
+                            size={20}
+                        />
+                        <TextInput
+                            placeholder="Your Password"
+                            secureTextEntry={secureTextEntry ? true : false}
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => {
+                                setPassword(val);
+                                if (val.match(password_regex))
+                                    setValidPassword(true);
+                                else
+                                    setValidPassword(false);
+                            }}
+                            maxLength={50}
+                            value={password}
+                        />
+                        <TouchableOpacity
+                            onPress={() => setSecureTextEntry(!secureTextEntry)}
+                        >
+                            {secureTextEntry ?
+                                <Feather
+                                    name="eye-off"
+                                    color="grey"
+                                    size={20}
+                                />
+                                :
+                                <Feather
+                                    name="eye"
+                                    color="grey"
+                                    size={20}
+                                />
+                            }
+                        </TouchableOpacity>
+                    </View>
+                    {(password.length > 0 && !validPassword) ?
+                        <Animatable.View animation="fadeInLeft" duration={500}>
+                            <Text style={styles.errorMsg}>Must contain at least 1 number, 1 special character and 1 uppercase 1 lowercase letter, and at least 8 or more characters.</Text>
+                        </Animatable.View>
+                        : null
+                    }
+
+                    <Text style={[styles.text_footer, {
+                        marginTop: 35
+                    }]}>Confirm New Password</Text>
+                    <View style={styles.action}>
+                        <Feather
+                            name="lock"
+                            color="#05375a"
+                            size={20}
+                        />
+                        <TextInput
+                            placeholder="Confirm Your Password"
+                            secureTextEntry={confirmSecureTextEntry ? true : false}
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => setConfirmPassword(val)}
+                            maxLength={50}
+                            value={confirmPassword}
+                        />
+                        <TouchableOpacity
+                            onPress={() => setConfirmSecureTextEntry(!confirmSecureTextEntry)}
+                        >
+                            {confirmSecureTextEntry ?
+                                <Feather
+                                    name="eye-off"
+                                    color="grey"
+                                    size={20}
+                                />
+                                :
+                                <Feather
+                                    name="eye"
+                                    color="grey"
+                                    size={20}
+                                />
+                            }
+                        </TouchableOpacity>
+                    </View>
+                    {(confirmPassword.length > 0 && password != confirmPassword) ?
+                        <Animatable.View animation="fadeInLeft" duration={500}>
+                            <Text style={styles.errorMsg}>Password and confirm password must match.</Text>
+                        </Animatable.View>
+                        : null
+                    }
+
+                    <View style={styles.button}>
+                        <TouchableOpacity
+                            onPress={() => { updatePasswordHandler() }}
+                            style={[styles.signIn, {
+                                borderColor: '#19398A',
+                                borderWidth: 1,
+                                marginTop: 15
+                            }]}
+                        >
+                            <Text style={[styles.textSign, {
+                                color: '#19398A'
+                            }]}>Update Password</Text>
+                        </TouchableOpacity>
+
+                    </View>
+                    <View style={{ marginTop: 100 }}></View>
+                </ScrollView>
+            </Animatable.View>
         </View>
-        <Animatable.View 
-            animation="fadeInUpBig"
-            style={styles.footer}
-        >
-            <ScrollView keyboardShouldPersistTaps='handled'>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Email</Text>
-            <View style={styles.action}>
-                <FontAwesome 
-                    name="envelope-o"
-                    color="#05375a"
-                    size={20}
-                />
-                <TextInput 
-                    placeholder="Your Email Address"
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => {
-                        setEmail(val);
-                        if(val.match(email_regex) && val.includes("bbd.co.za"))
-                            setValidEmail(true);
-                        else
-                            setValidEmail(false);
-                    }}
-                    keyboardType="email-address"
-                    maxLength={50}
-                    value={email}
-                />
-                {validEmail ? 
-                <Animatable.View
-                    animation="bounceIn"
-                >
-                    <Feather 
-                        name="check-circle"
-                        color="green"
-                        size={20}
-                    />
-                </Animatable.View>
-                : null}
-            </View>
-            { (email.length > 0 && !validEmail) ? 
-            <Animatable.View animation="fadeInLeft" duration={500}>
-            <Text style={styles.errorMsg}>Please enter valid email of BBD domain only.</Text>
-            </Animatable.View> 
-            : null
-            }
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Mobile Number</Text>
-            <View style={styles.action}>
-                <FontAwesome 
-                    name="mobile"
-                    color="#05375a"
-                    size={20}
-                />
-
-                <TextInput 
-                    placeholder="Your Mobile Number"
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => setMobileNumber(val)}
-                    keyboardType="number-pad"
-                    maxLength={15}
-                    value={mobileNumber}
-                />
-                {mobileNumber.length > 0  && mobileNumber.length == 10 ? 
-                <Animatable.View
-                    animation="bounceIn"
-                >
-                    <Feather 
-                        name="check-circle"
-                        color="green"
-                        size={20}
-                    />
-                </Animatable.View>
-                : null}
-            </View>
-            { (mobileNumber.length > 0 && mobileNumber.length < 9) ? 
-            <Animatable.View animation="fadeInLeft" duration={500}>
-            <Text style={styles.errorMsg}>Please enter valid mobile number.</Text>
-            </Animatable.View> 
-            : null
-            }
-            <View style={styles.button}>
-            <TouchableOpacity
-                onPress={() => {ForgetPasswordHandler()}}
-                    style={[styles.signIn, {
-                        borderColor: '#19398A',
-                        borderWidth: 1,
-                        marginTop: 15
-                    }]}
-                >
-                    <Text style={[styles.textSign, {
-                        color:'#19398A'
-                    }]}>Get OTP</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={{marginTop: 50, marginBottom: 20}}>
-                <Text style={{fontSize:20, fontWeight: 'bold', color: '#00f'}}>Update Password after getting OTP</Text>
-            </View>
-
-            <Text style={styles.text_footer}>OTP</Text>
-            <View style={styles.action}>
-                <FontAwesome 
-                    name="user-o"
-                    color="#05375a"
-                    size={20}
-                />
-                <TextInput 
-                    placeholder="Enter OTP here"
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => {setOtp(val)}}
-                    keyboardType="number-pad"
-                    maxLength={6}
-                    value={otp}
-                />
-                {otp.length == 6 ?
-                <Animatable.View
-                    animation="bounceIn"
-                >
-                    <Feather 
-                        name="check-circle"
-                        color="green"
-                        size={20}
-                    />
-                </Animatable.View>
-                : null}
-            </View>
-            { (otp.length > 0 && otp.length < 6) ? 
-            <Animatable.View animation="fadeInLeft" duration={500}>
-            <Text style={styles.errorMsg}>Please enter valid OTP of 6 digits</Text>
-            </Animatable.View> 
-            : null
-            }
-            <Text style={[styles.text_footer, {
-                marginTop: 35
-            }]}>New Password</Text>
-            <View style={styles.action}>
-                <Feather 
-                    name="lock"
-                    color="#05375a"
-                    size={20}
-                />
-                <TextInput 
-                    placeholder="Your Password"
-                    secureTextEntry={secureTextEntry ? true : false}
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => {
-                        setPassword(val);
-                        if(val.match(password_regex))
-                            setValidPassword(true);
-                        else
-                            setValidPassword(false);
-                    }}
-                    maxLength={50}
-                    value={password}
-                />
-                 <TouchableOpacity
-                    onPress={() => setSecureTextEntry(!secureTextEntry)}
-                > 
-                    {secureTextEntry ? 
-                    <Feather 
-                        name="eye-off"
-                        color="grey"
-                        size={20}
-                    />
-                    :
-                    <Feather 
-                        name="eye"
-                        color="grey"
-                        size={20}
-                    />
-                    }
-                 </TouchableOpacity>
-            </View>
-            { (password.length > 0 && !validPassword) ? 
-            <Animatable.View animation="fadeInLeft" duration={500}>
-            <Text style={styles.errorMsg}>Must contain at least 1 number, 1 special character and 1 uppercase 1 lowercase letter, and at least 8 or more characters.</Text>
-            </Animatable.View>
-            : null
-            }
-
-            <Text style={[styles.text_footer, {
-                marginTop: 35
-            }]}>Confirm New Password</Text>
-            <View style={styles.action}>
-                <Feather 
-                    name="lock"
-                    color="#05375a"
-                    size={20}
-                />
-                <TextInput 
-                    placeholder="Confirm Your Password"
-                    secureTextEntry={confirmSecureTextEntry ? true : false}
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => setConfirmPassword(val)}
-                    maxLength={50}
-                    value={confirmPassword}
-                />
-                 <TouchableOpacity
-                    onPress={() => setConfirmSecureTextEntry(!confirmSecureTextEntry)}
-                >
-                    {confirmSecureTextEntry ? 
-                    <Feather 
-                        name="eye-off"
-                        color="grey"
-                        size={20}
-                    />
-                    :
-                    <Feather 
-                        name="eye"
-                        color="grey"
-                        size={20}
-                    />
-                    }
-                 </TouchableOpacity>
-            </View>
-            { (confirmPassword.length > 0 && password != confirmPassword) ?
-            <Animatable.View animation="fadeInLeft" duration={500}>
-            <Text style={styles.errorMsg}>Password and confirm password must match.</Text>
-            </Animatable.View>
-            : null
-            }
-
-            <View style={styles.button}>
-            <TouchableOpacity
-                onPress={() => {updatePasswordHandler( )}}
-                    style={[styles.signIn, {
-                        borderColor: '#19398A',
-                        borderWidth: 1,
-                        marginTop: 15
-                    }]}
-                >
-                    <Text style={[styles.textSign, {
-                        color:'#19398A'
-                    }]}>Update Password</Text>
-                </TouchableOpacity>
-
-            </View>
-            <View style={{marginTop: 100}}></View>
-            </ScrollView>
-        </Animatable.View>
-      </View>
     );
 };
 
@@ -386,8 +394,8 @@ export default ForgetPasswordScreen;
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1, 
-      backgroundColor: '#19398A'
+        flex: 1,
+        backgroundColor: '#19398A'
     },
     header: {
         flex: 1,
@@ -449,21 +457,21 @@ const styles = StyleSheet.create({
     color_textPrivate: {
         color: 'grey'
     },
-	radioCircle: {
-		height: 20,
-		width: 20,
-		borderRadius: 100,
-		borderWidth: 2,
-		borderColor: '#3740ff',
-		alignItems: 'center',
-		justifyContent: 'center',
-        marginLeft:30 
-	},
-	selectedRb: {
-		width: 15,
-		height: 15,
-		borderRadius: 50,
-		backgroundColor: '#19398A',
+    radioCircle: {
+        height: 20,
+        width: 20,
+        borderRadius: 100,
+        borderWidth: 2,
+        borderColor: '#3740ff',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 30
+    },
+    selectedRb: {
+        width: 15,
+        height: 15,
+        borderRadius: 50,
+        backgroundColor: '#19398A',
     },
     errorMsg: {
         color: '#FF0000',
@@ -472,4 +480,4 @@ const styles = StyleSheet.create({
     spinnerTextStyle: {
         color: '#FFF'
     }
-  });
+});

@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import { 
-    View, 
-    Text, 
-    Button, 
-    TouchableOpacity, 
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    Button,
+    TouchableOpacity,
     Dimensions,
     TextInput,
     Platform,
@@ -20,12 +20,12 @@ import Feather from 'react-native-vector-icons/Feather';
 import SwipeList from 'react-native-smooth-swipe-list';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import showSweetAlert from '../../helpers/showSweetAlert';
-import {baseurl} from '../../config';
+import { baseurl, errorMessage } from '../../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
 
-const TournamentScreen = ({navigation}) => {
+const TournamentScreen = ({ navigation }) => {
 
     LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
@@ -40,7 +40,7 @@ const TournamentScreen = ({navigation}) => {
         setRefreshing(true);
     }, []);
 
-    useEffect(async() => {
+    useEffect(async () => {
         const token = await AsyncStorage.getItem('token');
         setToken(token);
         displayTournament(token);
@@ -48,189 +48,181 @@ const TournamentScreen = ({navigation}) => {
     }, [refreshing]);
 
     const displayTournament = (token) => {
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.get(baseurl+'/tournaments', {headers})
-        .then(response => {
-            setLoading(false);
-            setRefreshing(false);
-            if(response.status == 200){
-                setData(response.data);
-            }
-            else{
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-        })
-        .catch(error => {
-            setLoading(false);
-            setRefreshing(false);
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.get(baseurl + '/tournaments', { headers })
+            .then(response => {
+                setLoading(false);
+                setRefreshing(false);
+                if (response.status == 200) {
+                    setData(response.data);
+                }
+                else {
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+            })
+            .catch(error => {
+                setLoading(false);
+                setRefreshing(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
 
     const addTournament = () => {
-        if(tournament != ''){
+        if (tournament != '') {
             setLoading(true);
             const reqData = {
                 name: tournament
             };
-            const headers = {
-                'Authorization': 'Bearer ' + token
-            }
-            axios.post(baseurl+'/tournaments', reqData, {headers})
-            .then((response) => {
-                setLoading(false);
-                if(response.status == 201){
-                    showSweetAlert('success', 'Success', 'Tournament added successfully.');
-                    displayTournament(token);
-                }
-                else {
+            const headers = { 'Authorization': 'Bearer ' + token }
+            axios.post(baseurl + '/tournaments', reqData, { headers })
+                .then((response) => {
+                    setLoading(false);
+                    if (response.status == 201) {
+                        showSweetAlert('success', 'Success', 'Tournament added successfully.');
+                        displayTournament(token);
+                    }
+                    else {
+                        showSweetAlert('error', 'Error', 'Failed to add Tournament. Please try again...');
+                    }
+                    setTournament('');
+                })
+                .catch((error) => {
+                    console.log(error);
+                    setLoading(false);
                     showSweetAlert('error', 'Error', 'Failed to add Tournament. Please try again...');
-                }              
-                setTournament('');
-            })
-            .catch((error) => {
-                console.log(error);
-                setLoading(false);
-                showSweetAlert('error', 'Error', 'Failed to add Tournament. Please try again...');
-            })
-        }else{
+                })
+        } else {
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for Tournament.');
         }
     }
 
     const deleteTournament = (id) => {
         setLoading(true);
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.delete(baseurl+'/tournaments/'+id, {headers})
-        .then((response) => {
-            setLoading(false);
-            if(response.status == 200){
-                showSweetAlert('success', 'Success', 'Tournament deleted successfully.');
-                displayTournament(token);
-            }
-            else {
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.delete(baseurl + '/tournaments/' + id, { headers })
+            .then((response) => {
+                setLoading(false);
+                if (response.status == 200) {
+                    showSweetAlert('success', 'Success', 'Tournament deleted successfully.');
+                    displayTournament(token);
+                }
+                else {
+                    showSweetAlert('error', 'Error', 'Failed to delete Tournament. Please try again...');
+                }
+                setTournament('');
+            })
+            .catch((error) => {
+                console.log(error);
+                setLoading(false);
                 showSweetAlert('error', 'Error', 'Failed to delete Tournament. Please try again...');
-            }              
-            setTournament('');
-        })
-        .catch((error) => {
-            console.log(error);
-            setLoading(false);
-            showSweetAlert('error', 'Error', 'Failed to delete Tournament. Please try again...');
-        })
+            })
     }
 
     const editTournament = (tournamentId, name) => {
         setTournament(name);
         setBtnText('Update');
         setTournamentId(tournamentId);
-    } 
+    }
 
     const updateTournament = () => {
-        if(tournament != ''){
+        if (tournament != '') {
             setLoading(true);
             const reqData = {
                 name: tournament
             };
-            const headers = {
-                'Authorization': 'Bearer ' + token
-            }
-            axios.put(baseurl+'/tournaments/'+tournamentId, reqData, {headers})
-        .then((response) => {
-            setLoading(false);
-            if(response.status == 200){
-                showSweetAlert('success', 'Success', 'Tournament updated successfully..');
-                displayTournament(token);
-            }
-            else {
-                showSweetAlert('error', 'Error', 'Failed to update Tournament. Please try again...');
-            }              
-            setTournament('');
-            setBtnText('Add');
-        })
-        .catch((error) => {
-            setLoading(false);
-            showSweetAlert('error', 'Error', 'Failed to update Tournament. Please try again...');
-        })
-        }else{
+            const headers = { 'Authorization': 'Bearer ' + token }
+            axios.put(baseurl + '/tournaments/' + tournamentId, reqData, { headers })
+                .then((response) => {
+                    setLoading(false);
+                    if (response.status == 200) {
+                        showSweetAlert('success', 'Success', 'Tournament updated successfully..');
+                        displayTournament(token);
+                    }
+                    else {
+                        showSweetAlert('error', 'Error', 'Failed to update Tournament. Please try again...');
+                    }
+                    setTournament('');
+                    setBtnText('Add');
+                })
+                .catch((error) => {
+                    setLoading(false);
+                    showSweetAlert('error', 'Error', 'Failed to update Tournament. Please try again...');
+                })
+        } else {
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for Tournament.');
         }
     }
 
     const getConfirmation = (tournamentId) =>
         Alert.alert(
-        "Delete Confirmation",
-        "Do you really want to delete the tournament ?",
-        [
-            {
-                text: "Cancel"
-            },
-            { 
-                text: "OK", 
-                onPress: () => {deleteTournament(tournamentId)}
-            }
-        ]
-    );
+            "Delete Confirmation",
+            "Do you really want to delete the tournament ?",
+            [
+                {
+                    text: "Cancel"
+                },
+                {
+                    text: "OK",
+                    onPress: () => { deleteTournament(tournamentId) }
+                }
+            ]
+        );
 
-   return (
-      <View style={styles.container}>
-        <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
-          <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
-        <View style={styles.header}>
-            <Text style={styles.text_header}>Tournament Details</Text>
-        </View>
-        <Animatable.View 
-            animation="fadeInUpBig"
-            style={styles.footer}
-        >
-            <ScrollView keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Tournament Name</Text>
-            <View style={styles.action}>
-                <FontAwesome 
-                    name="mars"
-                    color="#05375a"
-                    size={20}
-                />
-                <TextInput 
-                    placeholder="Enter Tournament Name"
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => setTournament(val)}
-                    value={tournament}
-                    maxLength={20}
-                />
-                { (tournament != '') ? 
-                <Animatable.View
-                    animation="bounceIn"
-                >
-                    <Feather 
-                        name="check-circle"
-                        color="green"
-                        size={20}
-                    />
-                </Animatable.View>
-                : null}
+    return (
+        <View style={styles.container}>
+            <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
+            <StatusBar backgroundColor='#19398A' barStyle="light-content" />
+            <View style={styles.header}>
+                <Text style={styles.text_header}>Tournament Details</Text>
             </View>
-            <View style={styles.button}>
-            <TouchableOpacity
-                onPress={(btnText=='Add') ? addTournament : updateTournament}
-                    style={[styles.signIn, {
-                        borderColor: '#19398A',
-                        borderWidth: 1,
-                        marginTop: 10,
-                        marginBottom: 20
-                    }]}
-                >
-                    <Text style={[styles.textSign, {
-                        color:'#19398A'
-                    }]}>{btnText}</Text>
-                </TouchableOpacity>
-            </View>
-            {/* <View style={[styles.card]}>
+            <Animatable.View
+                animation="fadeInUpBig"
+                style={styles.footer}
+            >
+                <ScrollView keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Tournament Name</Text>
+                    <View style={styles.action}>
+                        <FontAwesome
+                            name="mars"
+                            color="#05375a"
+                            size={20}
+                        />
+                        <TextInput
+                            placeholder="Enter Tournament Name"
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => setTournament(val)}
+                            value={tournament}
+                            maxLength={20}
+                        />
+                        {(tournament != '') ?
+                            <Animatable.View
+                                animation="bounceIn"
+                            >
+                                <Feather
+                                    name="check-circle"
+                                    color="green"
+                                    size={20}
+                                />
+                            </Animatable.View>
+                            : null}
+                    </View>
+                    <View style={styles.button}>
+                        <TouchableOpacity
+                            onPress={(btnText == 'Add') ? addTournament : updateTournament}
+                            style={[styles.signIn, {
+                                borderColor: '#19398A',
+                                borderWidth: 1,
+                                marginTop: 10,
+                                marginBottom: 20
+                            }]}
+                        >
+                            <Text style={[styles.textSign, {
+                                color: '#19398A'
+                            }]}>{btnText}</Text>
+                        </TouchableOpacity>
+                    </View>
+                    {/* <View style={[styles.card]}>
             <SwipeList rowData={
                 data.map((item) => ({
                     id: item.genderId,
@@ -243,23 +235,23 @@ const TournamentScreen = ({navigation}) => {
             }
              />
             </View> */}
-                {
-                data.map((item,index) => (
-                    <View style={styles.card} key={item.tournamentId}>
-                        <View style={styles.cardlist}>  
-                            <View style={styles.ellipse1}>
-                                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>{(item.name).substr(0,1)}</Text>
+                    {
+                        data.map((item, index) => (
+                            <View style={styles.card} key={item.tournamentId}>
+                                <View style={styles.cardlist}>
+                                    <View style={styles.ellipse1}>
+                                        <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18 }}>{(item.name).substr(0, 1)}</Text>
+                                    </View>
+                                    <Text style={[styles.carditem, { width: '65%', paddingLeft: 20 }]}>{item.name}</Text>
+                                    <TouchableOpacity onPress={() => { editTournament(item.tournamentId, item.name) }} style={{ width: '10%' }}><Text style={[styles.carditem]}><Icon name="circle-edit-outline" color="#19398A" size={30} /></Text></TouchableOpacity>
+                                    <TouchableOpacity onPress={() => { getConfirmation(item.tournamentId) }} style={{ width: '10%' }}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30} /></Text></TouchableOpacity>
+                                </View>
                             </View>
-                            <Text style={[styles.carditem, {width: '65%',paddingLeft:20}]}>{item.name}</Text>
-                           <TouchableOpacity onPress={() => {editTournament(item.tournamentId, item.name)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="circle-edit-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                           <TouchableOpacity onPress={() => {getConfirmation(item.tournamentId)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                        </View>
-                        </View>
-                ))
-            }
-            </ScrollView>
-        </Animatable.View>
-      </View>
+                        ))
+                    }
+                </ScrollView>
+            </Animatable.View>
+        </View>
     );
 };
 
@@ -267,8 +259,8 @@ export default TournamentScreen;
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1, 
-      backgroundColor: '#19398A',
+        flex: 1,
+        backgroundColor: '#19398A',
     },
     container2: {
         // height:50,
@@ -305,7 +297,7 @@ const styles = StyleSheet.create({
     text_footer: {
         color: '#05375a',
         fontSize: 18,
-        
+
     },
     action: {
         flexDirection: 'row',
@@ -347,10 +339,10 @@ const styles = StyleSheet.create({
     row: {
         alignSelf: 'stretch',
         paddingBottom: 10,
-        paddingTop:5,
+        paddingTop: 5,
         paddingLeft: 20,
         borderBottomWidth: 1,
-        borderBottomColor:'#808080',
+        borderBottomColor: '#808080',
         backgroundColor: '#FFF'
     },
     card: {
@@ -363,44 +355,44 @@ const styles = StyleSheet.create({
         marginTop: 5,
         // marginLeft: 8,
         display: "flex",
-         flexDirection: 'row', 
-         justifyContent: 'space-between',
-         marginBottom:3
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 3
     },
     text_header1: {
         color: '#000',
         fontWeight: 'bold',
         fontSize: 20,
         textAlign: 'center',
-        marginTop:50
+        marginTop: 50
     },
     cardlist: {
         display: "flex",
-      flexDirection: "row",
-      marginTop: 4,
-      justifyContent: "space-between",
+        flexDirection: "row",
+        marginTop: 4,
+        justifyContent: "space-between",
     },
     ellipse1: {
-      width: 40,
-      height: 40,
-    //   marginTop: 0,
-      borderRadius: 100,
-      marginLeft: 10,
-      justifyContent: 'center',
-      backgroundColor: '#e9c46a'
+        width: 40,
+        height: 40,
+        //   marginTop: 0,
+        borderRadius: 100,
+        marginLeft: 10,
+        justifyContent: 'center',
+        backgroundColor: '#e9c46a'
     },
     carditem: {
-      color: "#121212",
-      fontSize: 20,
-      marginLeft: 3,
-      marginTop: 5,
-       fontWeight: "bold",
-       display: 'flex',
-    //    backgroundColor:'red'
-    //    justifyContent: 'space-between',  
-    //    textAlign: 'center'
+        color: "#121212",
+        fontSize: 20,
+        marginLeft: 3,
+        marginTop: 5,
+        fontWeight: "bold",
+        display: 'flex',
+        //    backgroundColor:'red'
+        //    justifyContent: 'space-between',  
+        //    textAlign: 'center'
     },
     spinnerTextStyle: {
         color: '#FFF'
     }
-  });
+});

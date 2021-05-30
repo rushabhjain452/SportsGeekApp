@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import { 
-    View, 
-    Text, 
-    Button, 
-    TouchableOpacity, 
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    Button,
+    TouchableOpacity,
     Dimensions,
     TextInput,
     Platform,
@@ -20,15 +20,15 @@ import Feather from 'react-native-vector-icons/Feather';
 import SwipeList from 'react-native-smooth-swipe-list';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import showSweetAlert from '../../helpers/showSweetAlert';
-import {baseurl} from '../../config';
-import { Card} from 'react-native-elements';
+import { baseurl, errorMessage } from '../../config';
+import { Card } from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
 
-const DeleteScreen = ({navigation}) => {
+const DeleteScreen = ({ navigation }) => {
 
-    const userstatus=1;
+    const userstatus = 1;
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -38,7 +38,7 @@ const DeleteScreen = ({navigation}) => {
         setRefreshing(true);
     }, []);
 
-    useEffect(async() => {
+    useEffect(async () => {
         const token = await AsyncStorage.getItem('token');
         setToken(token);
         displayUser(token);
@@ -67,28 +67,26 @@ const DeleteScreen = ({navigation}) => {
         //     setLoading(false);
         //     setRefreshing(false);
         // });
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.get(baseurl+'/users/user-with-status/'+userStatus, {headers})
-        .then(response => {
-            if(response.status == 200){
-                setData(response.data);
-            }
-            else{
-                setData([]);
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-            setLoading(false);
-            setRefreshing(false);
-        })
-        .catch(error => {
-            setLoading(false);
-            setRefreshing(false);
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.get(baseurl + '/users/user-with-status/' + userStatus, { headers })
+            .then(response => {
+                if (response.status == 200) {
+                    setData(response.data);
+                }
+                else {
+                    setData([]);
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+                setLoading(false);
+                setRefreshing(false);
+            })
+            .catch(error => {
+                setLoading(false);
+                setRefreshing(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
- 
+
     const updateUser = (userId) => {
         setLoading(true);
         // fetch(baseurl+'/users/'+userId, {
@@ -113,56 +111,54 @@ const DeleteScreen = ({navigation}) => {
         //     setRefreshing(false);
         //     showSweetAlert('error', 'Error', 'Failed to update Status. Please try again...');
         // });
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.delete(baseurl+'/users/'+userId, {headers})
-        .then((response) => {
-            setLoading(false);
-            setRefreshing(false);
-            if(response.status == 200){
-                showSweetAlert('success', 'Success', 'User deleted successfully...');
-                displayUser(token);
-            }
-            else {
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.delete(baseurl + '/users/' + userId, { headers })
+            .then((response) => {
+                setLoading(false);
+                setRefreshing(false);
+                if (response.status == 200) {
+                    showSweetAlert('success', 'Success', 'User deleted successfully...');
+                    displayUser(token);
+                }
+                else {
+                    showSweetAlert('error', 'Error', 'Failed to delete User. Please try again...');
+                }
+            })
+            .catch((error) => {
+                setLoading(false);
+                setRefreshing(false);
                 showSweetAlert('error', 'Error', 'Failed to delete User. Please try again...');
-            }              
-        })
-        .catch((error) => {
-            setLoading(false);
-            setRefreshing(false);
-            showSweetAlert('error', 'Error', 'Failed to delete User. Please try again...');
-        })
+            })
     }
 
     const getConfirmation = (userId, username) =>
         Alert.alert(
-        "User Delete Confirmation",
-        "Do you really want to delete the account of " + username + "  ?",
-        [
-            {
-                text: "Cancel"
-            },
-            { 
-                text: "OK", 
-                onPress: () => {updateUser(userId)}
-            }
-        ]
-    );
+            "User Delete Confirmation",
+            "Do you really want to delete the account of " + username + "  ?",
+            [
+                {
+                    text: "Cancel"
+                },
+                {
+                    text: "OK",
+                    onPress: () => { updateUser(userId) }
+                }
+            ]
+        );
 
     return (
-      <ScrollView style={styles.container} keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-        <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
-          <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
-        <View style={styles.header}>
-            <Text style={styles.text_header}>Delete User</Text>
-        </View>
-        <Animatable.View 
-            animation="fadeInUpBig"
-            style={styles.footer}
-        >
-            <ScrollView>
-            {/* <View style={[styles.card]}>
+        <ScrollView style={styles.container} keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+            <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
+            <StatusBar backgroundColor='#19398A' barStyle="light-content" />
+            <View style={styles.header}>
+                <Text style={styles.text_header}>Delete User</Text>
+            </View>
+            <Animatable.View
+                animation="fadeInUpBig"
+                style={styles.footer}
+            >
+                <ScrollView>
+                    {/* <View style={[styles.card]}>
             <SwipeList rowData={
                 data.map((item) => ({
                     id: item.genderId,
@@ -175,25 +171,25 @@ const DeleteScreen = ({navigation}) => {
             }
              />
             </View> */}
-                {
-                data.length > 0 && data.map((item,index) => (
-                    <View style={styles.card} key={item.userId} >
-                        <View style={styles.cardlist}>  
-                        <View style={styles.ellipse1}>
-                                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>{item.firstName.substr(0,1) + item.lastName.substr(0,1)}</Text>
+                    {
+                        data.length > 0 && data.map((item, index) => (
+                            <View style={styles.card} key={item.userId} >
+                                <View style={styles.cardlist}>
+                                    <View style={styles.ellipse1}>
+                                        <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18 }}>{item.firstName.substr(0, 1) + item.lastName.substr(0, 1)}</Text>
+                                    </View>
+                                    <Text style={[styles.carditem, { width: '35%', paddingLeft: 20 }]}>{item.firstName + " " + item.lastName}</Text>
+                                    <Text style={[styles.carditem, { width: '35%', paddingLeft: 20 }]}>{item.username}</Text>
+                                    {/* <Text style={[styles.carditem, {width: '50%',paddingLeft:20}]}>{item.email}</Text> */}
+                                    <TouchableOpacity onPress={() => { getConfirmation(item.userId, item.username) }} style={{ width: '10%' }}><Text style={[styles.carditem]}><Icon name="account-remove" color="#19398A" size={30} /></Text></TouchableOpacity>
+                                </View>
                             </View>
-                            <Text style={[styles.carditem, {width: '35%',paddingLeft:20}]}>{item.firstName +" "+ item.lastName}</Text>
-                            <Text style={[styles.carditem, {width: '35%',paddingLeft:20}]}>{item.username}</Text>
-                            {/* <Text style={[styles.carditem, {width: '50%',paddingLeft:20}]}>{item.email}</Text> */}
-                           <TouchableOpacity onPress={() => {getConfirmation(item.userId, item.username)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="account-remove" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                        </View>
-                        </View>
-                ))
-            }
-           
-            </ScrollView>
-        </Animatable.View>
-      </ScrollView>
+                        ))
+                    }
+
+                </ScrollView>
+            </Animatable.View>
+        </ScrollView>
     );
 };
 
@@ -201,8 +197,8 @@ export default DeleteScreen;
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1, 
-      backgroundColor: '#19398A',
+        flex: 1,
+        backgroundColor: '#19398A',
     },
     container2: {
         // height:50,
@@ -239,7 +235,7 @@ const styles = StyleSheet.create({
     text_footer: {
         color: '#05375a',
         fontSize: 18,
-        
+
     },
     action: {
         flexDirection: 'row',
@@ -281,10 +277,10 @@ const styles = StyleSheet.create({
     row: {
         alignSelf: 'stretch',
         paddingBottom: 10,
-        paddingTop:5,
+        paddingTop: 5,
         paddingLeft: 20,
         borderBottomWidth: 1,
-        borderBottomColor:'#808080',
+        borderBottomColor: '#808080',
         backgroundColor: '#FFF'
     },
     card: {
@@ -297,16 +293,16 @@ const styles = StyleSheet.create({
         marginTop: 5,
         // marginLeft: 8,
         display: "flex",
-         flexDirection: 'row', 
-         justifyContent: 'space-between',
-         marginBottom:3
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 3
     },
     text_header1: {
         color: '#000',
         fontWeight: 'bold',
         fontSize: 20,
         textAlign: 'center',
-        marginTop:50
+        marginTop: 50
     },
     cardlist: {
         display: "flex",
@@ -317,24 +313,24 @@ const styles = StyleSheet.create({
     ellipse1: {
         width: 40,
         height: 40,
-      //   marginTop: 0,
+        //   marginTop: 0,
         borderRadius: 100,
         marginLeft: 10,
         justifyContent: 'center',
         backgroundColor: '#e9c46a'
     },
     carditem: {
-      color: "#121212",
-      fontSize: 16,
-      marginLeft: 3,
-      marginTop: 5,
-       fontWeight: "bold",
-       display: 'flex',
-    //    backgroundColor:'red'
-    //    justifyContent: 'space-between',  
-    //    textAlign: 'center'
+        color: "#121212",
+        fontSize: 16,
+        marginLeft: 3,
+        marginTop: 5,
+        fontWeight: "bold",
+        display: 'flex',
+        //    backgroundColor:'red'
+        //    justifyContent: 'space-between',  
+        //    textAlign: 'center'
     },
     spinnerTextStyle: {
         color: '#FFF'
     }
-  });
+});

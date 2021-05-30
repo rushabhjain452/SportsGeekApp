@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import { 
-    View, 
-    Text, 
-    Button, 
-    TouchableOpacity, 
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    Button,
+    TouchableOpacity,
     Dimensions,
     TextInput,
     Platform,
@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import {
     Dropdown
-  } from 'sharingan-rn-modal-dropdown';
+} from 'sharingan-rn-modal-dropdown';
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
@@ -22,11 +22,11 @@ import SwipeList from 'react-native-smooth-swipe-list';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
-import {baseurl} from '../../config';
+import { baseurl, errorMessage } from '../../config';
 import showSweetAlert from '../../helpers/showSweetAlert';
 import axios from 'axios';
 
-const AssignRoleToUserScreen = ({navigation}) => {
+const AssignRoleToUserScreen = ({ navigation }) => {
 
     // LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
@@ -38,7 +38,7 @@ const AssignRoleToUserScreen = ({navigation}) => {
 
     const [token, setToken] = useState('');
 
-    useEffect(async() => {
+    useEffect(async () => {
         const token = await AsyncStorage.getItem('token');
         setToken(token);
         displayUser(token);
@@ -48,96 +48,89 @@ const AssignRoleToUserScreen = ({navigation}) => {
     }, []);
 
     const displayUser = (token) => {
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.get(baseurl+'/users', {headers})
-        .then(response => {
-            if(response.status == 200){
-                setData(response.data);
-                // console.log(json.data);
-                let dt = response.data;
-                // console.log(dt.length);
-                let arr = [];
-                for(let i=0; i<dt.length; i++){
-                    arr.push({
-                        value: dt[i].userId,
-                        label: dt[i].username
-                    });
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.get(baseurl + '/users', { headers })
+            .then(response => {
+                if (response.status == 200) {
+                    setData(response.data);
+                    // console.log(json.data);
+                    let dt = response.data;
+                    // console.log(dt.length);
+                    let arr = [];
+                    for (let i = 0; i < dt.length; i++) {
+                        arr.push({
+                            value: dt[i].userId,
+                            label: dt[i].username
+                        });
+                    }
+                    setUserData(arr);
+                    // console.log(userData);
                 }
-                setUserData(arr);
-                // console.log(userData);
-            }
-            else{
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-        })
-        .catch(error => {
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })
+                else {
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+            })
+            .catch(error => {
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
 
     const displayRole = (token) => {
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.get(baseurl+'/roles', {headers})
-        .then(response => {
-            setLoading(false);
-            if(response.status == 200){
-                setData(response.data);
-                // console.log(json.data);
-                let dt = response.data;
-                // console.log(dt.length);
-                let arr = [];
-                for(let i=0; i<dt.length; i++){
-                    arr.push({
-                        value: dt[i].roleId,
-                        label: dt[i].name
-                    });
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.get(baseurl + '/roles', { headers })
+            .then(response => {
+                setLoading(false);
+                if (response.status == 200) {
+                    setData(response.data);
+                    // console.log(json.data);
+                    let dt = response.data;
+                    // console.log(dt.length);
+                    let arr = [];
+                    for (let i = 0; i < dt.length; i++) {
+                        arr.push({
+                            value: dt[i].roleId,
+                            label: dt[i].name
+                        });
+                    }
+                    setRoleData(arr);
+                    // console.log(userData);
                 }
-                setRoleData(arr);
-                // console.log(userData);
-            }
-            else{
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-        })
-        .catch(error => {
-            setLoading(false);
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })
+                else {
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+            })
+            .catch(error => {
+                setLoading(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
 
     const assignRoleHandler = () => {
-        if(userId == 0){
+        if (userId == 0) {
             showSweetAlert('warning', 'User not selected', 'Please select User to proceed.');
         }
-        else if(roleId == 0)
-        {
+        else if (roleId == 0) {
             showSweetAlert('warning', 'Role not selected', 'Please select Role to proceed.');
         }
-        else{
+        else {
             setLoading(true);
-            const headers = {
-                'Authorization': 'Bearer ' + token
-            }
-            axios.put(baseurl+'/users/'+userId+'/update-role/'+roleId, {}, {headers})
-        .then((response) => {
-            setLoading(false);
-            if(response.status == 200){
-                showSweetAlert('success', 'Success', 'Role Assigned successfully.');
-            }
-            else {
-                showSweetAlert('error', 'Error', 'Fail to Assign Role.Please try again after sometime.');
-            }      
-            setUserId(0);
-                setRoleId(0);        
-        })
-        .catch((error) => {
-            setLoading(false);
-            showSweetAlert('error', 'Error', 'Fail to Assign Role.Please try again after sometime.');
-        })
+            const headers = { 'Authorization': 'Bearer ' + token }
+            axios.put(baseurl + '/users/' + userId + '/update-role/' + roleId, {}, { headers })
+                .then((response) => {
+                    setLoading(false);
+                    if (response.status == 200) {
+                        showSweetAlert('success', 'Success', 'Role Assigned successfully.');
+                    }
+                    else {
+                        showSweetAlert('error', 'Error', 'Fail to Assign Role.Please try again after sometime.');
+                    }
+                    setUserId(0);
+                    setRoleId(0);
+                })
+                .catch((error) => {
+                    setLoading(false);
+                    showSweetAlert('error', 'Error', 'Fail to Assign Role.Please try again after sometime.');
+                })
         }
     }
 
@@ -150,78 +143,78 @@ const AssignRoleToUserScreen = ({navigation}) => {
     };
 
     const getConfirmation = (tournamentId) =>
-    Alert.alert(
-    "Role Confirmation",
-    "Do you really want to Assign Role for User?",
-    [
-        {
-            text: "Cancel"
-        },
-        { 
-            text: "OK", 
-            onPress: assignRoleHandler
-        }
-    ]
-);
+        Alert.alert(
+            "Role Confirmation",
+            "Do you really want to Assign Role for User?",
+            [
+                {
+                    text: "Cancel"
+                },
+                {
+                    text: "OK",
+                    onPress: assignRoleHandler
+                }
+            ]
+        );
 
-   return (
-    <ScrollView keyboardShouldPersistTaps='handled'>
-    <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
-      <View style={styles.container}>
-          <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
-        <View style={styles.header}>
-            <Text style={styles.text_header}>Assign Role to user</Text>
-        </View>
-        <Animatable.View 
-            animation="fadeInUpBig"
-            style={styles.footer}
-        >
-            <Text style={[styles.text_footer, {marginTop: 35}]}>User Name</Text>
-            <View style={styles.action}>
-                {/* <FontAwesome 
-                    name="mars"
-                    color="#05375a"
-                    size={20}
-                /> */}
-                <Dropdown
-                    label="User Name"
-                    data={userData}
-                    enableSearch
-                    value={userId}
-                    onChange={onChangeSS}
-                />
-            </View>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Role</Text>
-            <View style={styles.action}>
-                {/* <FontAwesome 
-                    name="mars"
-                    color="#05375a"
-                    size={20}
-                /> */}
-                <Dropdown
-                    label="Assign Role"
-                    data={roleData}
-                    enableSearch
-                    value={roleId}
-                    onChange={onChangeRole}
-                />
-            </View>
-            <View style={styles.button}>
-            <TouchableOpacity
-                    onPress={getConfirmation}
-                    style={[styles.signIn, {
-                        borderColor: '#19398A',
-                        borderWidth: 1,
-                        marginTop: 10,
-                        marginBottom: 20
-                    }]}
+    return (
+        <ScrollView keyboardShouldPersistTaps='handled'>
+            <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
+            <View style={styles.container}>
+                <StatusBar backgroundColor='#19398A' barStyle="light-content" />
+                <View style={styles.header}>
+                    <Text style={styles.text_header}>Assign Role to user</Text>
+                </View>
+                <Animatable.View
+                    animation="fadeInUpBig"
+                    style={styles.footer}
                 >
-                    <Text style={[styles.textSign, {
-                        color:'#19398A'
-                    }]}>Assign Role</Text>
-                </TouchableOpacity>
-            </View>
-            {/* <View style={[styles.card]}>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>User Name</Text>
+                    <View style={styles.action}>
+                        {/* <FontAwesome 
+                    name="mars"
+                    color="#05375a"
+                    size={20}
+                /> */}
+                        <Dropdown
+                            label="User Name"
+                            data={userData}
+                            enableSearch
+                            value={userId}
+                            onChange={onChangeSS}
+                        />
+                    </View>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Role</Text>
+                    <View style={styles.action}>
+                        {/* <FontAwesome 
+                    name="mars"
+                    color="#05375a"
+                    size={20}
+                /> */}
+                        <Dropdown
+                            label="Assign Role"
+                            data={roleData}
+                            enableSearch
+                            value={roleId}
+                            onChange={onChangeRole}
+                        />
+                    </View>
+                    <View style={styles.button}>
+                        <TouchableOpacity
+                            onPress={getConfirmation}
+                            style={[styles.signIn, {
+                                borderColor: '#19398A',
+                                borderWidth: 1,
+                                marginTop: 10,
+                                marginBottom: 20
+                            }]}
+                        >
+                            <Text style={[styles.textSign, {
+                                color: '#19398A'
+                            }]}>Assign Role</Text>
+                        </TouchableOpacity>
+                    </View>
+                    {/* <View style={[styles.card]}>
             <SwipeList rowData={
                 data.map((item) => ({
                     id: item.genderId,
@@ -234,7 +227,7 @@ const AssignRoleToUserScreen = ({navigation}) => {
             }
              />
             </View> */}
-                {/* {
+                    {/* {
                 data.map((item,index) => (
                     <View style={styles.card} key={item.playerTypeId} >
                         <View style={styles.cardlist}>  
@@ -248,10 +241,10 @@ const AssignRoleToUserScreen = ({navigation}) => {
                         </View>
                 ))
             } */}
-           
-        </Animatable.View>
-      </View>
-      </ScrollView>
+
+                </Animatable.View>
+            </View>
+        </ScrollView>
     );
 };
 
@@ -259,8 +252,8 @@ export default AssignRoleToUserScreen;
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1, 
-      backgroundColor: '#19398A',
+        flex: 1,
+        backgroundColor: '#19398A',
     },
     container2: {
         // height:50,
@@ -297,7 +290,7 @@ const styles = StyleSheet.create({
     text_footer: {
         color: '#05375a',
         fontSize: 18,
-        
+
     },
     action: {
         flexDirection: 'row',
@@ -339,10 +332,10 @@ const styles = StyleSheet.create({
     row: {
         alignSelf: 'stretch',
         paddingBottom: 10,
-        paddingTop:5,
+        paddingTop: 5,
         paddingLeft: 20,
         borderBottomWidth: 1,
-        borderBottomColor:'#808080',
+        borderBottomColor: '#808080',
         backgroundColor: '#FFF'
     },
     card: {
@@ -355,59 +348,59 @@ const styles = StyleSheet.create({
         marginTop: 5,
         // marginLeft: 8,
         display: "flex",
-         flexDirection: 'row', 
-         justifyContent: 'space-between',
-         marginBottom:3
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 3
     },
     text_header1: {
         color: '#000',
         fontWeight: 'bold',
         fontSize: 20,
         textAlign: 'center',
-        marginTop:50
+        marginTop: 50
     },
     cardlist: {
         display: "flex",
-      flexDirection: "row",
-      marginTop: 4,
-      justifyContent: "space-between",
+        flexDirection: "row",
+        marginTop: 4,
+        justifyContent: "space-between",
     },
     ellipse1: {
-      width: 40,
-      height: 40,
-    //   marginTop: 0,
-      borderRadius: 100,
-      marginLeft: 10,
-      justifyContent: 'center',
-      backgroundColor: '#e9c46a'
+        width: 40,
+        height: 40,
+        //   marginTop: 0,
+        borderRadius: 100,
+        marginLeft: 10,
+        justifyContent: 'center',
+        backgroundColor: '#e9c46a'
     },
     carditem: {
-      color: "#121212",
-      fontSize: 20,
-      marginLeft: 3,
-      marginTop: 5,
-       fontWeight: "bold",
-       display: 'flex',
-    //    backgroundColor:'red'
-    //    justifyContent: 'space-between',  
-    //    textAlign: 'center'
+        color: "#121212",
+        fontSize: 20,
+        marginLeft: 3,
+        marginTop: 5,
+        fontWeight: "bold",
+        display: 'flex',
+        //    backgroundColor:'red'
+        //    justifyContent: 'space-between',  
+        //    textAlign: 'center'
     },
     buttonTextStyle: {
-      color: '#FFFFFF',
-      paddingVertical: 10,
-      fontSize: 16,
+        color: '#FFFFFF',
+        paddingVertical: 10,
+        fontSize: 16,
     },
     buttonStyle: {
-      backgroundColor: '#19398A',
-      borderWidth: 0,
-      color: '#FFFFFF',
-      borderColor: '#307ecc',
-      height: 40,
-      alignItems: 'center',
-      borderRadius: 30,
-      marginLeft: 80,
-      marginRight: 35,
-    //   marginTop: 15,
-      width: '50%'
+        backgroundColor: '#19398A',
+        borderWidth: 0,
+        color: '#FFFFFF',
+        borderColor: '#307ecc',
+        height: 40,
+        alignItems: 'center',
+        borderRadius: 30,
+        marginLeft: 80,
+        marginRight: 35,
+        //   marginTop: 15,
+        width: '50%'
     }
-  });
+});

@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import { 
-    View, 
-    Text, 
-    Button, 
-    TouchableOpacity, 
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    Button,
+    TouchableOpacity,
     Dimensions,
     TextInput,
     Platform,
@@ -13,21 +13,21 @@ import {
 } from 'react-native';
 import {
     Dropdown
-  } from 'sharingan-rn-modal-dropdown';
+} from 'sharingan-rn-modal-dropdown';
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import SwipeList from 'react-native-smooth-swipe-list';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import showSweetAlert from '../../helpers/showSweetAlert';
-import {baseurl} from '../../config';
+import { baseurl, errorMessage } from '../../config';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import axios from 'axios';
 import AsyncStorage from '@react-native-community/async-storage';
 
 const MatchesScreen = (props) => {
 
-    const {updateMatchId} = props.route.params ?? "undefined";
+    const { updateMatchId } = props.route.params ?? "undefined";
 
     // LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
@@ -49,188 +49,180 @@ const MatchesScreen = (props) => {
     const [token, setToken] = useState('');
 
 
-    useEffect(async() => {
+    useEffect(async () => {
         const token = await AsyncStorage.getItem('token');
         setToken(token);
         displayTournament(token);
         displayVenue(token);
         displayTeam(token);
-        if(updateMatchId !=undefined) {
-            fetchMatchData(updateMatchId,token);
+        if (updateMatchId != undefined) {
+            fetchMatchData(updateMatchId, token);
         }
         // displayTeam();
         // setPlayerType('');
     }, []);
 
     const displayTournament = (token) => {
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.get(baseurl+'/tournaments', {headers})
-        .then(response => {
-            // setLoading(false);
-            //     setRefreshing(false);
-            if(response.status == 200){
-                setData(response.data);
-                // console.log(json.data);
-                let dt = response.data;
-                // console.log(dt.length);
-                let arr = [];
-                for(let i=0; i<dt.length; i++){
-                    arr.push({
-                        value: dt[i].tournamentId,
-                        label: dt[i].name
-                    });
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.get(baseurl + '/tournaments', { headers })
+            .then(response => {
+                // setLoading(false);
+                //     setRefreshing(false);
+                if (response.status == 200) {
+                    setData(response.data);
+                    // console.log(json.data);
+                    let dt = response.data;
+                    // console.log(dt.length);
+                    let arr = [];
+                    for (let i = 0; i < dt.length; i++) {
+                        arr.push({
+                            value: dt[i].tournamentId,
+                            label: dt[i].name
+                        });
+                    }
+                    setTournamentData(arr);
+                    // console.log(userData);
                 }
-                setTournamentData(arr);
-                // console.log(userData);
-            }
-            else{
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-        })
-        .catch(error => {
-            // setLoading(false);
-            // setRefreshing(false);
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })
+                else {
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+            })
+            .catch(error => {
+                // setLoading(false);
+                // setRefreshing(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
     const displayVenue = (token) => {
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.get(baseurl+'/venues', {headers})
-        .then(response => {
-            // setLoading(false);
-            // setRefreshing(false);
-            if(response.status == 200){
-                setData(response.data);
-                // console.log(json.data);
-                let dt = response.data;
-                // console.log(dt.length);
-                let arr = [];
-                for(let i=0; i<dt.length; i++){
-                    arr.push({
-                        value: dt[i].venueId,
-                        label: dt[i].name
-                    });
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.get(baseurl + '/venues', { headers })
+            .then(response => {
+                // setLoading(false);
+                // setRefreshing(false);
+                if (response.status == 200) {
+                    setData(response.data);
+                    // console.log(json.data);
+                    let dt = response.data;
+                    // console.log(dt.length);
+                    let arr = [];
+                    for (let i = 0; i < dt.length; i++) {
+                        arr.push({
+                            value: dt[i].venueId,
+                            label: dt[i].name
+                        });
+                    }
+                    setVenueData(arr);
                 }
-                setVenueData(arr);
-            }
-            else{
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-        })
-        .catch(error => {
-            // setLoading(false);
-            // setRefreshing(false);
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })
+                else {
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+            })
+            .catch(error => {
+                // setLoading(false);
+                // setRefreshing(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
 
     const displayTeam = (token) => {
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.get(baseurl+'/teams', {headers})
-        .then(response => {
-            // setLoading(false);
-            // setRefreshing(false);
-            if(response.status == 200){
-                setData(response.data);
-                // console.log(json.data);
-                let dt = response.data;
-                // console.log(dt.length);
-                let arr = [];
-                for(let i=0; i<dt.length; i++){
-                    arr.push({
-                        value: dt[i].teamId,
-                        label: dt[i].shortName
-                    });
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.get(baseurl + '/teams', { headers })
+            .then(response => {
+                // setLoading(false);
+                // setRefreshing(false);
+                if (response.status == 200) {
+                    setData(response.data);
+                    // console.log(json.data);
+                    let dt = response.data;
+                    // console.log(dt.length);
+                    let arr = [];
+                    for (let i = 0; i < dt.length; i++) {
+                        arr.push({
+                            value: dt[i].teamId,
+                            label: dt[i].shortName
+                        });
+                    }
+                    setTeam1Data(arr);
+                    setTeam2Data(arr);
                 }
-                setTeam1Data(arr);
-                setTeam2Data(arr);
-            }
-            else{
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-        })
-        .catch(error => {
-            // setLoading(false);
-            // setRefreshing(false);
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })
+                else {
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+            })
+            .catch(error => {
+                // setLoading(false);
+                // setRefreshing(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
 
-    const fetchMatchData = (matchId,token) => {
+    const fetchMatchData = (matchId, token) => {
         setBtnText('Update');
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.get(baseurl+'/matches/'+matchId, {headers})
-        .then(response => {
-            // setLoading(false);
-            if(response.status == 200){
-                setContestPoints(response.data.minimumPoints);
-                setMatchId(response.data.matchId);
-                setMatchName(response.data.name);
-                setStartDateTime(response.data.startDatetime);
-                setTeam1Id(response.data.team1Id);
-                setTeam2Id(response.data.team2Id);
-                setVenueId(response.data.venueId);
-                setTournamentId(response.data.tournamentId);
-            }
-            else{
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-        })
-        .catch(error => {
-            // setLoading(false);
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })          
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.get(baseurl + '/matches/' + matchId, { headers })
+            .then(response => {
+                // setLoading(false);
+                if (response.status == 200) {
+                    setContestPoints(response.data.minimumPoints);
+                    setMatchId(response.data.matchId);
+                    setMatchName(response.data.name);
+                    setStartDateTime(response.data.startDatetime);
+                    setTeam1Id(response.data.team1Id);
+                    setTeam2Id(response.data.team2Id);
+                    setVenueId(response.data.venueId);
+                    setTournamentId(response.data.tournamentId);
+                }
+                else {
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+            })
+            .catch(error => {
+                // setLoading(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
 
 
 
     const showDatePicker = () => {
         setDatePickerVisibility(true);
-      };
-    
-      const hideDatePicker = () => {
+    };
+
+    const hideDatePicker = () => {
         setDatePickerVisibility(false);
-      };
-      const handleConfirm = (date) => {
+    };
+    const handleConfirm = (date) => {
         setStartDateTime(date);
         // console.log(startDateTime);
         // console.log(date);
         hideDatePicker();
-      };
+    };
 
     const addMatch = () => {
         // console.log(data.gender);
         // console.log(baseurl+'/gender');
-        if(matchId == 0){
+        if (matchId == 0) {
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid Match Id.');
         }
-        else if(tournamentId == 0) {
+        else if (tournamentId == 0) {
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid Tournament Id.');
         }
-        else if(matchName == '') {
+        else if (matchName == '') {
             showSweetAlert('warning', 'Invalid Input', 'Please Select Match Name.');
         }
-        else if(venueId == 0) {
+        else if (venueId == 0) {
             showSweetAlert('warning', 'Invalid Input', 'Please Select Venue.');
         }
-        else if(team1Id == 0) {
+        else if (team1Id == 0) {
             showSweetAlert('warning', 'Invalid Input', 'Please Select Team1.');
         }
-        else if(team2Id == 0) {
+        else if (team2Id == 0) {
             showSweetAlert('warning', 'Invalid Input', 'Please Select Team2.');
         }
-        else if(contestPoints == 0){
+        else if (contestPoints == 0) {
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for contest points.');
         }
-        else if(startDateTime == '') {
+        else if (startDateTime == '') {
             showSweetAlert('warning', 'Invalid Input', 'Please select match date time.');
         }
         else {
@@ -244,59 +236,57 @@ const MatchesScreen = (props) => {
                 team2: team2Id,
                 minimumPoints: contestPoints
             };
-            const headers = {
-                'Authorization': 'Bearer ' + token
-            }
-            axios.post(baseurl+'/matches', reqData, {headers})
-            .then((response) => {
-                // setLoading(false);
-                if(response.status == 201){
-                    showSweetAlert('success', 'Success', 'Match added successfully.');
-                }
-                else {
+            const headers = { 'Authorization': 'Bearer ' + token }
+            axios.post(baseurl + '/matches', reqData, { headers })
+                .then((response) => {
+                    // setLoading(false);
+                    if (response.status == 201) {
+                        showSweetAlert('success', 'Success', 'Match added successfully.');
+                    }
+                    else {
+                        showSweetAlert('error', 'Error', 'Failed to add Match. Please try again...');
+                    }
+                    setContestPoints(0);
+                    setMatchId(0);
+                    setMatchName('');
+                    setStartDateTime('');
+                    setTeam1Id(0);
+                    setTeam2Id(0);
+                    setTournamentId(0);
+                    setVenueId(0);
+                })
+                .catch((error) => {
+                    // setLoading(false);
+                    console.log(error);
+                    console.log("matchId" + matchId + "to:" + tournamentId + "date:" + startDateTime + "team1:" + team1Id + "team2:" + team2Id + "venue:" + venueId + "name:" + matchName + "points:" + contestPoints);
                     showSweetAlert('error', 'Error', 'Failed to add Match. Please try again...');
-                }              
-                setContestPoints(0);
-                setMatchId(0);
-                setMatchName('');
-                setStartDateTime('');
-                setTeam1Id(0);
-                setTeam2Id(0);
-                setTournamentId(0);
-                setVenueId(0);
-            })
-            .catch((error) => {
-                // setLoading(false);
-                console.log(error);
-                console.log("matchId"+matchId+"to:"+tournamentId+"date:"+startDateTime+"team1:"+team1Id+"team2:"+team2Id+"venue:"+venueId+"name:"+matchName+"points:"+contestPoints);
-                showSweetAlert('error', 'Error', 'Failed to add Match. Please try again...');
-            })
+                })
         }
     }
- 
+
     const updateMatch = () => {
-        if(matchId == 0){
+        if (matchId == 0) {
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid Match Id.');
         }
-        else if(tournamentId == 0) {
+        else if (tournamentId == 0) {
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid Tournament Id.');
         }
-        else if(matchName == '') {
+        else if (matchName == '') {
             showSweetAlert('warning', 'Invalid Input', 'Please Select Match Name.');
         }
-        else if(venueId == 0) {
+        else if (venueId == 0) {
             showSweetAlert('warning', 'Invalid Input', 'Please Select Venue.');
         }
-        else if(team1Id == 0) {
+        else if (team1Id == 0) {
             showSweetAlert('warning', 'Invalid Input', 'Please Select Team1.');
         }
-        else if(team2Id == 0) {
+        else if (team2Id == 0) {
             showSweetAlert('warning', 'Invalid Input', 'Please Select Team2.');
         }
-        else if(contestPoints == 0){
+        else if (contestPoints == 0) {
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for contest points.');
         }
-        else if(startDateTime == '') {
+        else if (startDateTime == '') {
             showSweetAlert('warning', 'Invalid Input', 'Please select match date time.');
         }
         else {
@@ -334,32 +324,30 @@ const MatchesScreen = (props) => {
                 team2: team2Id,
                 minimumPoints: contestPoints
             };
-            const headers = {
-                'Authorization': 'Bearer ' + token
-            }
-            axios.put(baseurl+'/matches/'+matchId, reqData, {headers})
-        .then((response) => {
-            // setLoading(false);
-            if(response.status == 200){
-                showSweetAlert('success', 'Success', 'Match updated successfully..');
-            }
-            else {
-                showSweetAlert('error', 'Error', 'Failed to update Match. Please try again...');
-            }              
-            setContestPoints(0);
-                setMatchId(0);
-                setMatchName('');
-                setStartDateTime('');
-                setTeam1Id(0);
-                setTeam2Id(0);
-                setTournamentId(0);
-                setVenueId(0);
-            setBtnText('Add');
-        })
-        .catch((error) => {
-            // setLoading(false);
-            showSweetAlert('error', 'Error', 'Failed to update Match. Please try again...');
-        })
+            const headers = { 'Authorization': 'Bearer ' + token }
+            axios.put(baseurl + '/matches/' + matchId, reqData, { headers })
+                .then((response) => {
+                    // setLoading(false);
+                    if (response.status == 200) {
+                        showSweetAlert('success', 'Success', 'Match updated successfully..');
+                    }
+                    else {
+                        showSweetAlert('error', 'Error', 'Failed to update Match. Please try again...');
+                    }
+                    setContestPoints(0);
+                    setMatchId(0);
+                    setMatchName('');
+                    setStartDateTime('');
+                    setTeam1Id(0);
+                    setTeam2Id(0);
+                    setTournamentId(0);
+                    setVenueId(0);
+                    setBtnText('Add');
+                })
+                .catch((error) => {
+                    // setLoading(false);
+                    showSweetAlert('error', 'Error', 'Failed to update Match. Please try again...');
+                })
         }
     }
     const onChangeSS = (value) => {
@@ -374,190 +362,190 @@ const MatchesScreen = (props) => {
     const onTeam2SS = (value) => {
         setTeam2Id(value);
     };
-   return (
-      <View style={styles.container}>
-          <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
-        <View style={styles.header}>
-            <Text style={styles.text_header}>Add Match</Text>
+    return (
+        <View style={styles.container}>
+            <StatusBar backgroundColor='#19398A' barStyle="light-content" />
+            <View style={styles.header}>
+                <Text style={styles.text_header}>Add Match</Text>
+            </View>
+
+            <Animatable.View
+                animation="fadeInUpBig"
+                style={styles.footer}
+            >
+                <ScrollView keyboardShouldPersistTaps='handled'>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Match Id</Text>
+                    <View style={styles.action}>
+                        <TextInput
+                            placeholder="Enter Match Id"
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => setMatchId(val)}
+                            value={matchId + ""}
+                            maxLength={20}
+                        />
+                        {(matchId != 0) ?
+                            <Animatable.View
+                                animation="bounceIn"
+                            >
+                                <Feather
+                                    name="check-circle"
+                                    color="green"
+                                    size={20}
+                                />
+                            </Animatable.View>
+                            : null}
+                    </View>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Tournament Name</Text>
+                    <View style={styles.action}>
+                        {/* <FontAwesome 
+                    name="mars"
+                    color="#05375a"
+                    size={20}
+                /> */}
+                        <Dropdown
+                            label="Tournament Name"
+                            data={tournamentData}
+                            enableSearch
+                            value={tournamentId}
+                            onChange={onChangeSS}
+                        />
+                    </View>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Match Name</Text>
+                    <View style={styles.action}>
+                        <TextInput
+                            placeholder="Enter Match Name"
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => setMatchName(val)}
+                            value={matchName}
+                            maxLength={100}
+                        />
+                        {(matchName != '') ?
+                            <Animatable.View
+                                animation="bounceIn"
+                            >
+                                <Feather
+                                    name="check-circle"
+                                    color="green"
+                                    size={20}
+                                />
+                            </Animatable.View>
+                            : null}
+                    </View>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Match Start Date</Text>
+                    <View style={styles.action}>
+                        <TextInput
+                            placeholder="Date Time"
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => setStartDateTime(val)}
+                            value={startDateTime + ""}
+                            maxLength={20}
+                        />
+                        <TouchableOpacity onPress={showDatePicker}>
+                            <Animatable.View
+                                animation="bounceIn"
+                            >
+                                <Feather
+                                    name="calendar"
+                                    color="#19398A"
+                                    size={30}
+                                />
+                            </Animatable.View>
+                        </TouchableOpacity>
+                        <DateTimePickerModal
+                            isVisible={isDatePickerVisible}
+                            mode="date"
+                            onConfirm={handleConfirm}
+                            onCancel={hideDatePicker}
+                        />
+                    </View>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Venue</Text>
+                    <View style={styles.action}>
+                        {/* <FontAwesome 
+                    name="mars"
+                    color="#05375a"
+                    size={20}
+                /> */}
+                        <Dropdown
+                            label="Venue Name"
+                            data={venueData}
+                            enableSearch
+                            value={venueId}
+                            onChange={onVenueSS}
+                        />
+                    </View>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Team 1</Text>
+                    <View style={styles.action}>
+                        {/* <FontAwesome 
+                    name="mars"
+                    color="#05375a"
+                    size={20}
+                /> */}
+                        <Dropdown
+                            label="Team1"
+                            data={team1Data}
+                            enableSearch
+                            value={team1Id}
+                            onChange={onTeam1SS}
+                        />
+                    </View>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Team 2</Text>
+                    <View style={styles.action}>
+                        {/* <FontAwesome 
+                    name="mars"
+                    color="#05375a"
+                    size={20}
+                /> */}
+                        <Dropdown
+                            label="Team1"
+                            data={team2Data}
+                            enableSearch
+                            value={team2Id}
+                            onChange={onTeam2SS}
+                        />
+                    </View>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Minimum Contest Points</Text>
+                    <View style={styles.action}>
+                        <TextInput
+                            placeholder="Enter Contest Points"
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => setContestPoints(val)}
+                            value={contestPoints + ""}
+                            maxLength={20}
+                        />
+                        {(contestPoints != 0) ?
+                            <Animatable.View
+                                animation="bounceIn"
+                            >
+                                <Feather
+                                    name="check-circle"
+                                    color="green"
+                                    size={20}
+                                />
+                            </Animatable.View>
+                            : null}
+                    </View>
+                    <View style={styles.button}>
+                        <TouchableOpacity
+                            onPress={(btnText == 'Add') ? addMatch : updateMatch}
+                            style={[styles.signIn, {
+                                borderColor: '#19398A',
+                                borderWidth: 1,
+                                marginTop: 10,
+                                marginBottom: 20
+                            }]}
+                        >
+                            <Text style={[styles.textSign, {
+                                color: '#19398A'
+                            }]}>{btnText}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </Animatable.View>
         </View>
-        
-        <Animatable.View 
-            animation="fadeInUpBig"
-            style={styles.footer}
-        >
-            <ScrollView keyboardShouldPersistTaps='handled'>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Match Id</Text>
-            <View style={styles.action}>
-                <TextInput 
-                    placeholder="Enter Match Id"
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => setMatchId(val)}
-                    value={matchId+""}
-                    maxLength={20}
-                />
-                { (matchId != 0) ? 
-                <Animatable.View
-                    animation="bounceIn"
-                >
-                    <Feather 
-                        name="check-circle"
-                        color="green"
-                        size={20}
-                    />
-                </Animatable.View>
-                : null}
-            </View>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Tournament Name</Text>
-            <View style={styles.action}>
-                {/* <FontAwesome 
-                    name="mars"
-                    color="#05375a"
-                    size={20}
-                /> */}
-                <Dropdown
-                    label="Tournament Name"
-                    data={tournamentData}
-                    enableSearch
-                    value={tournamentId}
-                    onChange={onChangeSS}
-                />
-            </View>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Match Name</Text>
-            <View style={styles.action}>
-                <TextInput 
-                    placeholder="Enter Match Name"
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => setMatchName(val)}
-                    value={matchName}
-                    maxLength={100}
-                />
-                { (matchName != '') ? 
-                <Animatable.View
-                    animation="bounceIn"
-                >
-                    <Feather 
-                        name="check-circle"
-                        color="green"
-                        size={20}
-                    />
-                </Animatable.View>
-                : null}
-            </View>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Match Start Date</Text>
-            <View style={styles.action}>
-                <TextInput 
-                    placeholder="Date Time"
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => setStartDateTime(val)}
-                    value={startDateTime+""}
-                    maxLength={20}
-                />
-                <TouchableOpacity onPress={showDatePicker}>
-                 <Animatable.View
-                    animation="bounceIn"
-                >
-                    <Feather 
-                        name="calendar"
-                        color="#19398A"
-                        size={30}
-                    />
-                </Animatable.View>
-                </TouchableOpacity>
-                <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
-                    mode="date"
-                    onConfirm={handleConfirm}
-                    onCancel={hideDatePicker}
-                />
-            </View>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Venue</Text>
-            <View style={styles.action}>
-                {/* <FontAwesome 
-                    name="mars"
-                    color="#05375a"
-                    size={20}
-                /> */}
-                <Dropdown
-                    label="Venue Name"
-                    data={venueData}
-                    enableSearch
-                    value={venueId}
-                    onChange={onVenueSS}
-                />
-            </View>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Team 1</Text>
-            <View style={styles.action}>
-                {/* <FontAwesome 
-                    name="mars"
-                    color="#05375a"
-                    size={20}
-                /> */}
-                <Dropdown
-                    label="Team1"
-                    data={team1Data}
-                    enableSearch
-                    value={team1Id}
-                    onChange={onTeam1SS}
-                />
-            </View>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Team 2</Text>
-            <View style={styles.action}>
-                {/* <FontAwesome 
-                    name="mars"
-                    color="#05375a"
-                    size={20}
-                /> */}
-                <Dropdown
-                    label="Team1"
-                    data={team2Data}
-                    enableSearch
-                    value={team2Id}
-                    onChange={onTeam2SS}
-                />
-            </View>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Minimum Contest Points</Text>
-            <View style={styles.action}>
-                <TextInput 
-                    placeholder="Enter Contest Points"
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => setContestPoints(val)}
-                    value={contestPoints+""}
-                    maxLength={20}
-                />
-                { (contestPoints != 0) ? 
-                <Animatable.View
-                    animation="bounceIn"
-                >
-                    <Feather 
-                        name="check-circle"
-                        color="green"
-                        size={20}
-                    />
-                </Animatable.View>
-                : null}
-            </View>
-            <View style={styles.button}>
-            <TouchableOpacity
-                onPress={(btnText=='Add') ? addMatch : updateMatch}
-                    style={[styles.signIn, {
-                        borderColor: '#19398A',
-                        borderWidth: 1,
-                        marginTop: 10,
-                        marginBottom: 20
-                    }]}
-                >
-                    <Text style={[styles.textSign, {
-                        color:'#19398A'
-                    }]}>{btnText}</Text>
-                </TouchableOpacity>
-            </View>
-            </ScrollView>
-        </Animatable.View>
-      </View>
     );
 };
 
@@ -565,8 +553,8 @@ export default MatchesScreen;
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1, 
-      backgroundColor: '#19398A',
+        flex: 1,
+        backgroundColor: '#19398A',
     },
     container2: {
         // height:50,
@@ -603,7 +591,7 @@ const styles = StyleSheet.create({
     text_footer: {
         color: '#05375a',
         fontSize: 18,
-        
+
     },
     action: {
         flexDirection: 'row',
@@ -645,10 +633,10 @@ const styles = StyleSheet.create({
     row: {
         alignSelf: 'stretch',
         paddingBottom: 10,
-        paddingTop:5,
+        paddingTop: 5,
         paddingLeft: 20,
         borderBottomWidth: 1,
-        borderBottomColor:'#808080',
+        borderBottomColor: '#808080',
         backgroundColor: '#FFF'
     },
     card: {
@@ -661,59 +649,59 @@ const styles = StyleSheet.create({
         marginTop: 5,
         // marginLeft: 8,
         display: "flex",
-         flexDirection: 'row', 
-         justifyContent: 'space-between',
-         marginBottom:3
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 3
     },
     text_header1: {
         color: '#000',
         fontWeight: 'bold',
         fontSize: 20,
         textAlign: 'center',
-        marginTop:50
+        marginTop: 50
     },
     cardlist: {
         display: "flex",
-      flexDirection: "row",
-      marginTop: 4,
-      justifyContent: "space-between",
+        flexDirection: "row",
+        marginTop: 4,
+        justifyContent: "space-between",
     },
     ellipse1: {
-      width: 40,
-      height: 40,
-    //   marginTop: 0,
-      borderRadius: 100,
-      marginLeft: 10,
-      justifyContent: 'center',
-      backgroundColor: '#e9c46a'
+        width: 40,
+        height: 40,
+        //   marginTop: 0,
+        borderRadius: 100,
+        marginLeft: 10,
+        justifyContent: 'center',
+        backgroundColor: '#e9c46a'
     },
     carditem: {
-      color: "#121212",
-      fontSize: 20,
-      marginLeft: 3,
-      marginTop: 5,
-       fontWeight: "bold",
-       display: 'flex',
-    //    backgroundColor:'red'
-    //    justifyContent: 'space-between',  
-    //    textAlign: 'center'
+        color: "#121212",
+        fontSize: 20,
+        marginLeft: 3,
+        marginTop: 5,
+        fontWeight: "bold",
+        display: 'flex',
+        //    backgroundColor:'red'
+        //    justifyContent: 'space-between',  
+        //    textAlign: 'center'
     },
     buttonTextStyle: {
-      color: '#FFFFFF',
-      paddingVertical: 10,
-      fontSize: 16,
+        color: '#FFFFFF',
+        paddingVertical: 10,
+        fontSize: 16,
     },
     buttonStyle: {
-      backgroundColor: '#19398A',
-      borderWidth: 0,
-      color: '#FFFFFF',
-      borderColor: '#307ecc',
-      height: 40,
-      alignItems: 'center',
-      borderRadius: 30,
-      marginLeft: 80,
-      marginRight: 35,
-    //   marginTop: 15,
-      width: '50%'
+        backgroundColor: '#19398A',
+        borderWidth: 0,
+        color: '#FFFFFF',
+        borderColor: '#307ecc',
+        height: 40,
+        alignItems: 'center',
+        borderRadius: 30,
+        marginLeft: 80,
+        marginRight: 35,
+        //   marginTop: 15,
+        width: '50%'
     }
-  });
+});

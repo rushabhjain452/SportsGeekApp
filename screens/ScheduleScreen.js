@@ -1,4 +1,4 @@
- import React, { Component,useState, useEffect} from "react";
+import React, { Component, useState, useEffect } from "react";
 import { StyleSheet, View, Text, ScrollView, Alert, ActivityIndicator, RefreshControl } from "react-native";
 import { Card, ListItem, Button, Icon } from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -9,9 +9,9 @@ import axios from 'axios';
 
 import showSweetAlert from '../helpers/showSweetAlert';
 import formatDate from '../helpers/formatDate';
-import {baseurl} from '../config';
+import { baseurl, errorMessage } from '../config';
 
-function ScheduleScreen({navigation}) {
+function ScheduleScreen({ navigation }) {
 
   // const navigation = useNavigation();
 
@@ -23,7 +23,7 @@ function ScheduleScreen({navigation}) {
 
   const noOfFutureBets = 5;
 
-  useEffect(async() => {
+  useEffect(async () => {
     const token = await AsyncStorage.getItem('token');
     setToken(token);
     fetchData(token);
@@ -38,30 +38,30 @@ function ScheduleScreen({navigation}) {
   // });
 
   // const refreshData = () => {
-    
+
   // }
 
   const fetchData = (token) => {
-    axios.get(baseurl+'/matches/upcoming', {
+    axios.get(baseurl + '/matches/upcoming', {
       headers: {
         'Authorization': 'Bearer ' + token
       }
     })
-    .then((response) => {
-      setLoading(false);
-      setRefreshing(false);
-      if(response.status == 200){
-        setData(response.data);
-      }else{
-        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-      }
-    })
-    .catch((error) => {
-      setLoading(false);
-      setRefreshing(false);
-      // const response = error.message;
-      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-    });
+      .then((response) => {
+        setLoading(false);
+        setRefreshing(false);
+        if (response.status == 200) {
+          setData(response.data);
+        } else {
+          showSweetAlert('error', 'Network Error', errorMessage);
+        }
+      })
+      .catch((error) => {
+        setLoading(false);
+        setRefreshing(false);
+        // const response = error.message;
+        showSweetAlert('error', 'Network Error', errorMessage);
+      });
   }
 
   const handleCardClick = (index, startDatetime, matchId) => {
@@ -73,17 +73,17 @@ function ScheduleScreen({navigation}) {
     let dt = new Date();
     // console.log("Current Timestamp : " + dt.toLocaleString());
     // console.log(dt > startTimestamp);
-    if(index > noOfFutureBets){
+    if (index > noOfFutureBets) {
       showSweetAlert('warning', 'Out of Schedule', 'Sorry, Contests for this match are not opened yet.');
     }
-    else if(dt > startTimestamp){
+    else if (dt > startTimestamp) {
       showSweetAlert('warning', 'Timeout', 'Sorry, Contests for this match has been closed.');
       fetchData(token);
     }
-    else{
+    else {
       // showSweetAlert('success', 'Success', 'You can play this match.');
       // props.setMatchId(matchId);      
-      navigation.navigate('ContestScreen', {matchId: matchId});
+      navigation.navigate('ContestScreen', { matchId: matchId });
     }
   }
 
@@ -95,16 +95,16 @@ function ScheduleScreen({navigation}) {
   }, []);
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}> 
-    <Text style={styles.text_header}>Upcoming Matches</Text>
-    {loading == true  && (<ActivityIndicator size="large" color="#19398A" />)}
+    <ScrollView style={styles.container} keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+      <Text style={styles.text_header}>Upcoming Matches</Text>
+      {loading == true && (<ActivityIndicator size="large" color="#19398A" />)}
       {
         data && data.map((item, index) => (
-          <TouchableOpacity style={styles.rect} key={item.matchId} onPress={() => {handleCardClick(index+1, item.startDatetime, item.matchId)}}>
+          <TouchableOpacity style={styles.rect} key={item.matchId} onPress={() => { handleCardClick(index + 1, item.startDatetime, item.matchId) }}>
             <Text style={styles.date}>{formatDate(item.startDatetime)}</Text>
-            <View style={{display: "flex", flexDirection: 'row', justifyContent: 'space-between'}}>
-              <View style={styles.ellipseRow}>  
-                <Card.Image style={styles.ellipse} source={{uri: item.team1Logo}} />
+            <View style={{ display: "flex", flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View style={styles.ellipseRow}>
+                <Card.Image style={styles.ellipse} source={{ uri: item.team1Logo }} />
                 <Text style={styles.mI}>{item.team1Short}</Text>
               </View>
               <View style={styles.loremIpsumColumn}>
@@ -112,16 +112,16 @@ function ScheduleScreen({navigation}) {
               </View>
               <View style={styles.rightteam}>
                 <Text style={styles.eng}>{item.team2Short}</Text>
-                <Card.Image style={styles.ellipse1} source={{uri: item.team2Logo}} />
+                <Card.Image style={styles.ellipse1} source={{ uri: item.team2Logo }} />
               </View>
             </View>
-            <View style={{height:40}}>
-                <Text style={{textAlign: 'center',fontSize:16}}>{item.venue}</Text>
-              </View>
+            <View style={{ height: 40 }}>
+              <Text style={{ textAlign: 'center', fontSize: 16 }}>{item.venue}</Text>
+            </View>
           </TouchableOpacity>
         ))
       }
-      <View style={{height: 20}}></View>
+      <View style={{ height: 20 }}></View>
     </ScrollView>
   );
 }
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: 11,
     marginTop: 20,
-     fontWeight: "bold"
+    fontWeight: "bold"
   },
   date: {
     fontFamily: "roboto-regular",
@@ -197,16 +197,16 @@ const styles = StyleSheet.create({
     fontFamily: "roboto-regular",
     color: "#121212",
     fontSize: 20,
-    marginLeft:20,
+    marginLeft: 20,
     marginTop: 20,
-     fontWeight: "bold"
+    fontWeight: "bold"
   },
   ellipse1: {
     width: 61,
     height: 61,
     marginLeft: 18,
     marginTop: 0,
-    borderRadius:30
+    borderRadius: 30
   },
   ellipseRow: {
     // height: 95,
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 11,
     marginTop: 37,
-     fontWeight: "bold"
+    fontWeight: "bold"
   },
   loremIpsum3: {
     fontFamily: "roboto-regular",
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 20,
     marginTop: 37,
-  fontWeight: "bold"
+    fontWeight: "bold"
   },
   ellipse3: {
     width: 61,
@@ -309,10 +309,10 @@ const styles = StyleSheet.create({
     padding: 10
   },
   text_header: {
-      color: '#000',
-      fontWeight: 'bold',
-      fontSize: 20,
-      textAlign: "center",
+    color: '#000',
+    fontWeight: 'bold',
+    fontSize: 20,
+    textAlign: "center",
   }
 });
 

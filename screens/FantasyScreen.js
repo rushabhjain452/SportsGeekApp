@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, Alert } from "react-native";
 import { NavigationContainer } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -8,26 +8,26 @@ import ContestScreen from './ContestScreen';
 const Tab = createMaterialTopTabNavigator();
 
 const FantasyScreen = (props) => {
-  
+
   const [matchId, setMatchId] = useState(0);
 
-  const FantasyplayScreen = ({navigation}) => {
+  const FantasyplayScreen = ({ navigation }) => {
     return (
-        <ContestScreen navigation={navigation} matchId={matchId} />
+      <ContestScreen navigation={navigation} matchId={matchId} />
     );
   }
 
-  const iplscheduleScreen = ({navigation}) => {
+  const iplscheduleScreen = ({ navigation }) => {
     return (
       <ScheduleScreen navigation={navigation} setMatchId={setMatchId} />
     );
   }
 
   return (
-      <Tab.Navigator style={{color:'#19398A'}}>
-        <Tab.Screen style={{color:'#19398A'}} name="Ipl Schedule"  component={iplscheduleScreen} />
-        <Tab.Screen style={{color:'#19398A'}} name="Fantasy Games" component={FantasyplayScreen} />
-      </Tab.Navigator>
+    <Tab.Navigator style={{ color: '#19398A' }}>
+      <Tab.Screen style={{ color: '#19398A' }} name="Ipl Schedule" component={iplscheduleScreen} />
+      <Tab.Screen style={{ color: '#19398A' }} name="Fantasy Games" component={FantasyplayScreen} />
+    </Tab.Navigator>
   );
 };
 export default FantasyScreen;
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: 11,
     marginTop: 20,
-     fontWeight: "bold"
+    fontWeight: "bold"
   },
   date: {
     fontFamily: "roboto-regular",
@@ -103,16 +103,16 @@ const styles = StyleSheet.create({
     fontFamily: "roboto-regular",
     color: "#121212",
     fontSize: 20,
-    marginLeft:20,
+    marginLeft: 20,
     marginTop: 20,
-     fontWeight: "bold"
+    fontWeight: "bold"
   },
   ellipse1: {
     width: 61,
     height: 61,
     marginLeft: 18,
     marginTop: 0,
-    borderRadius:30
+    borderRadius: 30
   },
   ellipseRow: {
     // height: 95,
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 11,
     marginTop: 37,
-     fontWeight: "bold"
+    fontWeight: "bold"
   },
   loremIpsum3: {
     fontFamily: "roboto-regular",
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 20,
     marginTop: 37,
-  fontWeight: "bold"
+    fontWeight: "bold"
   },
   ellipse3: {
     width: 61,

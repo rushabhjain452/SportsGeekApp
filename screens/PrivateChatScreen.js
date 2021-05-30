@@ -14,7 +14,7 @@ const PrivateChatScreen = () => {
     {
       _id: 1,
       name: 'Rushabh Jain',
-      latestMessage: {text: 'How are you ?'}
+      latestMessage: { text: 'How are you ?' }
     },
     {
       _id: 2,
@@ -75,8 +75,8 @@ export default PrivateChatScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
-    alignItems: 'center', 
+    flex: 1,
+    alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#f5f5f5',
   },

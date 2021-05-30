@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    View, 
-    Text, 
-    TouchableOpacity, 
+import {
+    View,
+    Text,
+    TouchableOpacity,
     TextInput,
     Platform,
-    StyleSheet ,
+    StyleSheet,
     StatusBar,
     Alert,
     Dimensions,
@@ -16,14 +16,14 @@ import {
 import * as Animatable from 'react-native-animatable';
 // import LinearGradient from 'react-native-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { Card} from 'react-native-elements';
+import { Card } from 'react-native-elements';
 import Feather from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import { useTheme } from 'react-native-paper';
 import showSweetAlert from '../../helpers/showSweetAlert';
-import {baseurl} from '../../config';
+import { baseurl, errorMessage } from '../../config';
 
 import { AuthContext } from '../components/context';
 import { log } from 'react-native-reanimated';
@@ -35,7 +35,7 @@ import axios from 'axios';
 
 const UpdateMatchMinBet = (props) => {
 
-    const {matchId} = props.route.params;
+    const { matchId } = props.route.params;
 
     const navigation = useNavigation();
 
@@ -61,7 +61,7 @@ const UpdateMatchMinBet = (props) => {
 
     const [token, setToken] = useState('');
 
-    useEffect(async() => {
+    useEffect(async () => {
         const token = await AsyncStorage.getItem('token');
         setToken(token);
         // Get UserId
@@ -103,26 +103,24 @@ const UpdateMatchMinBet = (props) => {
         // })
         // .catch((error) => {
         //     setLoading(false);
-        //     showSweetAlert('error', 'Network Error!', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
+        //     showSweetAlert('error', 'Network Error!', errorMessage);
         // });
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.get(baseurl+'/matches/'+matchId, {headers})
-        .then(response => {
-            setLoading(false);
-            if(response.status == 200){
-                setMatchData(response.data);
-                setPoints(response.data.minimumPoints);
-            }
-            else{
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-        })
-        .catch(error => {
-            setLoading(false);
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })          
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.get(baseurl + '/matches/' + matchId, { headers })
+            .then(response => {
+                setLoading(false);
+                if (response.status == 200) {
+                    setMatchData(response.data);
+                    setPoints(response.data.minimumPoints);
+                }
+                else {
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+            })
+            .catch(error => {
+                setLoading(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
 
     const { colors } = useTheme();
@@ -145,16 +143,16 @@ const UpdateMatchMinBet = (props) => {
         // console.log('CurrentDatetime : ' + current_datetime.toString());
         // console.log(match_date - current_datetime);
         // console.log(match_date < current_datetime);
-        if(points < 1){
+        if (points < 1) {
             showSweetAlert('warning', 'Invalid Contest Points', "Please enter valid value for Contest points.");
         }
-        else if(points != parseInt(points)){
+        else if (points != parseInt(points)) {
             showSweetAlert('warning', 'Invalid Contest Points', "Contest points must be an integer value.");
         }
-        else if(match_date < current_datetime){
+        else if (match_date < current_datetime) {
             showSweetAlert('warning', 'Match time out', "Sorry, the match has already started, so minimum bet points cannot be updated now.");
         }
-        else{
+        else {
             setLoading(true);
             // fetch(baseurl+'/matches/updateMinBet/'+matchId+'/'+points, {
             //     method: 'PUT',
@@ -192,108 +190,106 @@ const UpdateMatchMinBet = (props) => {
             //     showSweetAlert('warning', 'Network Error', 'Something went wrong. Please try again after sometime...');
             //     // setWaiting(false);
             // });
-            const headers = {
-                'Authorization': 'Bearer ' + token
-            }
-            axios.put(baseurl+'/matches/'+matchId+'/update-min-points/'+points, {} , {headers})
-        .then((response) => {
-            setLoading(false);
-            if(response.status == 200){
-                showSweetAlert('success', 'Success', "Minimum Bet Updated Successfully");
-            }
-            else {
-                showSweetAlert('error', 'Error', 'Something went wrong. Please try again after sometime...');
-            }              
-        })
-        .catch((error) => {
-            setLoading(false);
-            showSweetAlert('error', 'Error', 'Something went wrong. Please try again after sometime...');
-        }) 
+            const headers = { 'Authorization': 'Bearer ' + token }
+            axios.put(baseurl + '/matches/' + matchId + '/update-min-points/' + points, {}, { headers })
+                .then((response) => {
+                    setLoading(false);
+                    if (response.status == 200) {
+                        showSweetAlert('success', 'Success', "Minimum Bet Updated Successfully");
+                    }
+                    else {
+                        showSweetAlert('error', 'Error', 'Something went wrong. Please try again after sometime...');
+                    }
+                })
+                .catch((error) => {
+                    setLoading(false);
+                    showSweetAlert('error', 'Error', 'Something went wrong. Please try again after sometime...');
+                })
         }
     }
 
     return (
         <ScrollView keyboardShouldPersistTaps='handled' style={styles.container}>
-        <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
-        {/* {loading == true  && (<ActivityIndicator size="large" color="#19398A" />)} */}
-          <View>
-          <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
-        <View style={styles.header}>
-            <Text style={styles.text_header}>Update Minimum Bet Points</Text>
-        </View>
-        <Animatable.View 
-            animation="fadeInUpBig"
-            style={[styles.footer, {
-                backgroundColor: colors.background
-            }]}
-        >
-           
-            {/* <Text>Minimum Contest Points : {matchData.minimumBet}</Text> */}
-            <Text style={[styles.text_footer, {
-                color: colors.text
-            }]}>Minimum Bet Point
-            </Text>
-            <View style={styles.action}>
-                <FontAwesome 
-                    name="money"
-                    color={colors.text}
-                    size={20}
-                />
-                <TextInput 
-                    placeholder="Minimum Bet Points"
-                    placeholderTextColor="#666666"
-                    keyboardType="numeric"
-                    style={[styles.textInput, {
-                        color: colors.text
-                    }]}
-                    onChangeText={(val) => {
-                        setPoints(val)
-                        // console.log(val);
-                        let betPoints = 0;
-                        if(val == '')
-                            betPoints = 0;
-                        else{
-                            betPoints = parseInt(val);
-                            if(isNaN(betPoints) || betPoints < 0){
-                                betPoints = 0;
-                            }   
-                        }
-                        // setTempAvailablePoints(parseInt(availablePoints) + parseInt(oldPoints) - betPoints);
-                        // console.log(betPoints);
-                    }}
-                    value={points+""}
-                />
-            </View>           
-            <View style={styles.button}>
-                <TouchableOpacity
-                onPress={() => {contestHandler()}}
-                    style={[styles.signIn, {
-                        borderColor: '#19398A',
-                        borderWidth: 1,
-                        // marginTop: 5
+            <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
+            {/* {loading == true  && (<ActivityIndicator size="large" color="#19398A" />)} */}
+            <View>
+                <StatusBar backgroundColor='#19398A' barStyle="light-content" />
+                <View style={styles.header}>
+                    <Text style={styles.text_header}>Update Minimum Bet Points</Text>
+                </View>
+                <Animatable.View
+                    animation="fadeInUpBig"
+                    style={[styles.footer, {
+                        backgroundColor: colors.background
                     }]}
                 >
-                    <Text style={[styles.textSign, {
-                        color:'#19398A'
-                    }]}>
-                    Update
+
+                    {/* <Text>Minimum Contest Points : {matchData.minimumBet}</Text> */}
+                    <Text style={[styles.text_footer, {
+                        color: colors.text
+                    }]}>Minimum Bet Point
+            </Text>
+                    <View style={styles.action}>
+                        <FontAwesome
+                            name="money"
+                            color={colors.text}
+                            size={20}
+                        />
+                        <TextInput
+                            placeholder="Minimum Bet Points"
+                            placeholderTextColor="#666666"
+                            keyboardType="numeric"
+                            style={[styles.textInput, {
+                                color: colors.text
+                            }]}
+                            onChangeText={(val) => {
+                                setPoints(val)
+                                // console.log(val);
+                                let betPoints = 0;
+                                if (val == '')
+                                    betPoints = 0;
+                                else {
+                                    betPoints = parseInt(val);
+                                    if (isNaN(betPoints) || betPoints < 0) {
+                                        betPoints = 0;
+                                    }
+                                }
+                                // setTempAvailablePoints(parseInt(availablePoints) + parseInt(oldPoints) - betPoints);
+                                // console.log(betPoints);
+                            }}
+                            value={points + ""}
+                        />
+                    </View>
+                    <View style={styles.button}>
+                        <TouchableOpacity
+                            onPress={() => { contestHandler() }}
+                            style={[styles.signIn, {
+                                borderColor: '#19398A',
+                                borderWidth: 1,
+                                // marginTop: 5
+                            }]}
+                        >
+                            <Text style={[styles.textSign, {
+                                color: '#19398A'
+                            }]}>
+                                Update
                     </Text>
-                </TouchableOpacity>
+                        </TouchableOpacity>
+                    </View>
+                </Animatable.View>
             </View>
-        </Animatable.View>
-      </View>
-      </ScrollView>
+        </ScrollView>
     );
 }
 
 export default UpdateMatchMinBet;
 
-const {height} = Dimensions.get("screen");
+const { height } = Dimensions.get("screen");
 const styles = StyleSheet.create({
     container: {
-      width: '100%',
-      flex: 1, 
-      backgroundColor: '#19398A'
+        width: '100%',
+        flex: 1,
+        backgroundColor: '#19398A'
     },
     header: {
         flex: 1,
@@ -363,62 +359,62 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         marginTop: 20
     },
-	radioCircle: {
-		height: 30,
-		width: 30,
-		borderRadius: 100,
-		borderWidth: 2,
-		borderColor: '#3740ff',
-		alignItems: 'center',
-		justifyContent: 'center',
+    radioCircle: {
+        height: 30,
+        width: 30,
+        borderRadius: 100,
+        borderWidth: 2,
+        borderColor: '#3740ff',
+        alignItems: 'center',
+        justifyContent: 'center',
         // marginLeft:20 ,
-        marginTop:40,
-        marginLeft:5
-	},
-	selectedRb: {
-		width: 20,
-		height: 20,
-		borderRadius: 50,
-		backgroundColor: '#19398A',
+        marginTop: 40,
+        marginLeft: 5
+    },
+    selectedRb: {
+        width: 20,
+        height: 20,
+        borderRadius: 50,
+        backgroundColor: '#19398A',
     },
     ellipseRow: {
-      // height: 95,
-      display: "flex",
-      flexDirection: "row",
-      marginTop: 8,
-    //   marginLeft: 25,
-      // alignSelf: "flex-start"
-      // flex: 4,
-    //   justifyContent: "space-between",
+        // height: 95,
+        display: "flex",
+        flexDirection: "row",
+        marginTop: 8,
+        //   marginLeft: 25,
+        // alignSelf: "flex-start"
+        // flex: 4,
+        //   justifyContent: "space-between",
     },
     ellipse: {
-      width: 60,
-      height: 60,
-      marginTop: 0,
-      borderRadius: 30,
-      marginLeft: 7
+        width: 60,
+        height: 60,
+        marginTop: 0,
+        borderRadius: 30,
+        marginLeft: 7
     },
     mI: {
-      fontFamily: "roboto-regular",
-      color: "#121212",
-      fontSize: 18,
-      marginLeft: 10,
-      marginTop: 20,
-       fontWeight: "bold"
+        fontFamily: "roboto-regular",
+        color: "#121212",
+        fontSize: 18,
+        marginLeft: 10,
+        marginTop: 20,
+        fontWeight: "bold"
     },
     rect: {
-      width: '39%',
-      height: 110,
-      backgroundColor: "#E6E6E6",
-      borderWidth: 1,
-      borderColor: "#000000",
-      borderRadius: 10,
-    //   marginTop: 10,
-      marginLeft: 8,
-      display: "flex",
-       flexDirection: 'column', 
-    //    justifyContent: 'space-between',
-       marginBottom:30
+        width: '39%',
+        height: 110,
+        backgroundColor: "#E6E6E6",
+        borderWidth: 1,
+        borderColor: "#000000",
+        borderRadius: 10,
+        //   marginTop: 10,
+        marginLeft: 8,
+        display: "flex",
+        flexDirection: 'column',
+        //    justifyContent: 'space-between',
+        marginBottom: 30
     },
     card: {
         width: '100%',
@@ -430,14 +426,14 @@ const styles = StyleSheet.create({
         marginTop: 5,
         // marginLeft: 8,
         display: "flex",
-         flexDirection: 'row', 
-         justifyContent: 'space-between',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         //  marginBottom:50
     },
-    bgLight:{
+    bgLight: {
         backgroundColor: "#E6E6E6",
     },
-    bgDark:{
+    bgDark: {
         // backgroundColor: "#98FB98",
         backgroundColor: '#87CEFA'
     },
@@ -450,28 +446,28 @@ const styles = StyleSheet.create({
     },
     cardlist: {
         display: "flex",
-      flexDirection: "row",
-      marginTop: 4,
-      justifyContent: "space-between",
+        flexDirection: "row",
+        marginTop: 4,
+        justifyContent: "space-between",
     },
     ellipse1: {
-      width: 30,
-      height: 30,
-    //   marginTop: 0,
-      borderRadius: 100,
-      marginLeft: 5,
-      justifyContent: 'center',
-      backgroundColor: '#e9c46a'
+        width: 30,
+        height: 30,
+        //   marginTop: 0,
+        borderRadius: 100,
+        marginLeft: 5,
+        justifyContent: 'center',
+        backgroundColor: '#e9c46a'
     },
     carditem: {
-      color: "#121212",
-      fontSize: 20,
-      marginLeft: 3,
-      marginTop: 5,
-       fontWeight: "bold",
-       display: 'flex',
-       justifyContent: 'space-between',
-    //    textAlign: 'center'
+        color: "#121212",
+        fontSize: 20,
+        marginLeft: 3,
+        marginTop: 5,
+        fontWeight: "bold",
+        display: 'flex',
+        justifyContent: 'space-between',
+        //    textAlign: 'center'
     },
     spinnerTextStyle: {
         color: '#FFF'
@@ -483,4 +479,4 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 10
     }
-  });
+});

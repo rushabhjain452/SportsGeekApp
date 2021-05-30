@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import { 
-    View, 
-    Text, 
-    Button, 
-    TouchableOpacity, 
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    Button,
+    TouchableOpacity,
     Dimensions,
     TextInput,
     Platform,
@@ -11,22 +11,22 @@ import {
     ScrollView,
     StatusBar
 } from 'react-native';
-import { Card} from 'react-native-elements';
+import { Card } from 'react-native-elements';
 import {
     Dropdown
-  } from 'sharingan-rn-modal-dropdown';
+} from 'sharingan-rn-modal-dropdown';
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import SwipeList from 'react-native-smooth-swipe-list';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import showSweetAlert from '../../helpers/showSweetAlert';
-import {baseurl} from '../../config';
+import { baseurl, errorMessage } from '../../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
 
-const PlayerScreen = ({navigation}) => {
+const PlayerScreen = ({ navigation }) => {
 
     // LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
@@ -39,7 +39,7 @@ const PlayerScreen = ({navigation}) => {
     const [valueSS, setValueSS] = useState('');
     const [token, setToken] = useState('');
 
-    useEffect(async() => {
+    useEffect(async () => {
         const token = await AsyncStorage.getItem('token');
         setToken(token);
         displayTeam(token);
@@ -48,69 +48,65 @@ const PlayerScreen = ({navigation}) => {
     }, []);
 
     const displayTeam = (token) => {
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.get(baseurl+'/teams', {headers})
-        .then(response => {
-            // setLoading(false);
-            // setRefreshing(false);
-            if(response.status == 200){
-                setData(response.data);
-                // console.log(json.data);
-                let dt = response.data;
-                // console.log(dt.length);
-                let arr = [];
-                for(let i=0; i<dt.length; i++){
-                    arr.push({
-                        value: dt[i].teamId,
-                        label: dt[i].shortName
-                    });
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.get(baseurl + '/teams', { headers })
+            .then(response => {
+                // setLoading(false);
+                // setRefreshing(false);
+                if (response.status == 200) {
+                    setData(response.data);
+                    // console.log(json.data);
+                    let dt = response.data;
+                    // console.log(dt.length);
+                    let arr = [];
+                    for (let i = 0; i < dt.length; i++) {
+                        arr.push({
+                            value: dt[i].teamId,
+                            label: dt[i].shortName
+                        });
+                    }
+                    setTeamData(arr);
                 }
-                setTeamData(arr);
-            }
-            else{
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-        })
-        .catch(error => {
-            // setLoading(false);
-            // setRefreshing(false);
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })
+                else {
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+            })
+            .catch(error => {
+                // setLoading(false);
+                // setRefreshing(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
 
     const displayPlayerType = (token) => {
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.get(baseurl+'/player-types', {headers})
-        .then(response => {
-            // setLoading(false);
-            // setRefreshing(false);
-            if(response.status == 200){
-                setData(response.data);
-                // console.log(json.data);
-                let dt = response.data;
-                // console.log(dt.length);
-                let arr = [];
-                for(let i=0; i<dt.length; i++){
-                    arr.push({
-                        value: dt[i].playerTypeId,
-                        label: dt[i].typeName
-                    });
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.get(baseurl + '/player-types', { headers })
+            .then(response => {
+                // setLoading(false);
+                // setRefreshing(false);
+                if (response.status == 200) {
+                    setData(response.data);
+                    // console.log(json.data);
+                    let dt = response.data;
+                    // console.log(dt.length);
+                    let arr = [];
+                    for (let i = 0; i < dt.length; i++) {
+                        arr.push({
+                            value: dt[i].playerTypeId,
+                            label: dt[i].typeName
+                        });
+                    }
+                    setPlayerTypeData(arr);
                 }
-                setPlayerTypeData(arr);
-            }
-            else{
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-        })
-        .catch(error => {
-            // setLoading(false);
-            // setRefreshing(false);
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })
+                else {
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+            })
+            .catch(error => {
+                // setLoading(false);
+                // setRefreshing(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
 
     // const addPlayerType = () => {
@@ -207,76 +203,76 @@ const PlayerScreen = ({navigation}) => {
     const onPlayerSS = (value) => {
         setTeamId(value);
     };
-   return (
-      <View style={styles.container}>
-          <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
-        <View style={styles.header}>
-            <Text style={styles.text_header}>Player Details</Text>
-        </View>
-        <Animatable.View 
-            animation="fadeInUpBig"
-            style={styles.footer}
-        >
-            <ScrollView keyboardShouldPersistTaps='handled'>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Team Name</Text>
-            <View style={styles.action}>
-                {/* <FontAwesome 
+    return (
+        <View style={styles.container}>
+            <StatusBar backgroundColor='#19398A' barStyle="light-content" />
+            <View style={styles.header}>
+                <Text style={styles.text_header}>Player Details</Text>
+            </View>
+            <Animatable.View
+                animation="fadeInUpBig"
+                style={styles.footer}
+            >
+                <ScrollView keyboardShouldPersistTaps='handled'>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Team Name</Text>
+                    <View style={styles.action}>
+                        {/* <FontAwesome 
                     name="mars"
                     color="#05375a"
                     size={20}
                 /> */}
-                <Dropdown
-                    label="Team Name"
-                    data={teamData}
-                    enableSearch
-                    value={teamId}
-                    onChange={onChangeSS}
-                />
-            </View>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Player Name</Text>
-            <View style={styles.action}>
-                <FontAwesome 
-                    name="user-o"
-                    color="#05375a"
-                    size={20}
-                />
-                <TextInput 
-                    placeholder="Enter Player Name"
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => setPlayerName(val)}
-                    value={playerName}
-                    maxLength={20}
-                />
-                { (playerName != '') ? 
-                <Animatable.View
-                    animation="bounceIn"
-                >
-                    <Feather 
-                        name="check-circle"
-                        color="green"
-                        size={20}
-                    />
-                </Animatable.View>
-                : null}
-            </View>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Player Type</Text>
-            <View style={styles.action}>
-                {/* <FontAwesome 
+                        <Dropdown
+                            label="Team Name"
+                            data={teamData}
+                            enableSearch
+                            value={teamId}
+                            onChange={onChangeSS}
+                        />
+                    </View>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Player Name</Text>
+                    <View style={styles.action}>
+                        <FontAwesome
+                            name="user-o"
+                            color="#05375a"
+                            size={20}
+                        />
+                        <TextInput
+                            placeholder="Enter Player Name"
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => setPlayerName(val)}
+                            value={playerName}
+                            maxLength={20}
+                        />
+                        {(playerName != '') ?
+                            <Animatable.View
+                                animation="bounceIn"
+                            >
+                                <Feather
+                                    name="check-circle"
+                                    color="green"
+                                    size={20}
+                                />
+                            </Animatable.View>
+                            : null}
+                    </View>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Player Type</Text>
+                    <View style={styles.action}>
+                        {/* <FontAwesome 
                     name="mars"
                     color="#05375a"
                     size={20}
                 /> */}
-                <Dropdown
-                    label="Player Type"
-                    data={playerTypeData}
-                    enableSearch
-                    value={playerTypeId}
-                    onChange={onPlayerSS}
-                />
-            </View>
-             <Text style={[styles.text_footer, {marginTop: 35}]}>Profile Picture</Text>
-             {/* <View style={styles.action}>
+                        <Dropdown
+                            label="Player Type"
+                            data={playerTypeData}
+                            enableSearch
+                            value={playerTypeId}
+                            onChange={onPlayerSS}
+                        />
+                    </View>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Profile Picture</Text>
+                    {/* <View style={styles.action}>
                 <FontAwesome 
                     name="camera-retro"
                     color="#05375a"
@@ -302,42 +298,42 @@ const PlayerScreen = ({navigation}) => {
                 </Animatable.View>
                 </TouchableOpacity>
             </View> */}
-            <View style={styles.imageUploadCard}>
-                <TouchableOpacity>
-                      <Card.Image style={styles.imageuploadStyle} source={{uri: "https://firebasestorage.googleapis.com/v0/b/sportsgeek-74e1e.appspot.com/o/49d6ea02-1daf-4844-ad14-740b02a930f1.png?alt=media&token=e9924ea4-c2d9-4782-bc2d-0fe734431c86"}} />
-     </TouchableOpacity>
-            </View> 
-            <View style={styles.button}>
-            <TouchableOpacity
-                // onPress={(btnText=='Add') ? addPlayerType : updatePlayerType}
-                    style={[styles.signIn, {
-                        borderColor: '#19398A',
-                        borderWidth: 1,
-                        marginTop: 10,
-                        marginBottom: 20
-                    }]}
-                >
-                    <Text style={[styles.textSign, {
-                        color:'#19398A'
-                    }]}>{btnText}</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={styles.button1}>
-            <TouchableOpacity
-                // onPress={(btnText=='Add') ? addPlayerType : updatePlayerType}
-                    style={[styles.signIn, {
-                        borderColor: '#19398A',
-                        borderWidth: 1,
-                        // marginTop: 10,
-                        // marginBottom: 20
-                    }]}
-                >
-                    <Text style={[styles.textSign, {
-                        color:'#19398A'
-                    }]}>Search</Text>
-                </TouchableOpacity>
-            </View>
-            {/* <View style={[styles.card]}>
+                    <View style={styles.imageUploadCard}>
+                        <TouchableOpacity>
+                            <Card.Image style={styles.imageuploadStyle} source={{ uri: "https://firebasestorage.googleapis.com/v0/b/sportsgeek-74e1e.appspot.com/o/49d6ea02-1daf-4844-ad14-740b02a930f1.png?alt=media&token=e9924ea4-c2d9-4782-bc2d-0fe734431c86" }} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.button}>
+                        <TouchableOpacity
+                            // onPress={(btnText=='Add') ? addPlayerType : updatePlayerType}
+                            style={[styles.signIn, {
+                                borderColor: '#19398A',
+                                borderWidth: 1,
+                                marginTop: 10,
+                                marginBottom: 20
+                            }]}
+                        >
+                            <Text style={[styles.textSign, {
+                                color: '#19398A'
+                            }]}>{btnText}</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.button1}>
+                        <TouchableOpacity
+                            // onPress={(btnText=='Add') ? addPlayerType : updatePlayerType}
+                            style={[styles.signIn, {
+                                borderColor: '#19398A',
+                                borderWidth: 1,
+                                // marginTop: 10,
+                                // marginBottom: 20
+                            }]}
+                        >
+                            <Text style={[styles.textSign, {
+                                color: '#19398A'
+                            }]}>Search</Text>
+                        </TouchableOpacity>
+                    </View>
+                    {/* <View style={[styles.card]}>
             <SwipeList rowData={
                 data.map((item) => ({
                     id: item.genderId,
@@ -350,7 +346,7 @@ const PlayerScreen = ({navigation}) => {
             }
              />
             </View> */}
-                {/* {
+                    {/* {
                 data.map((item,index) => (
                     <View style={styles.card} key={item.playerTypeId} >
                         <View style={styles.cardlist}>  
@@ -364,10 +360,10 @@ const PlayerScreen = ({navigation}) => {
                         </View>
                 ))
             } */}
-           
-            </ScrollView>
-        </Animatable.View>
-      </View>
+
+                </ScrollView>
+            </Animatable.View>
+        </View>
     );
 };
 
@@ -375,8 +371,8 @@ export default PlayerScreen;
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1, 
-      backgroundColor: '#19398A',
+        flex: 1,
+        backgroundColor: '#19398A',
     },
     container2: {
         // height:50,
@@ -413,7 +409,7 @@ const styles = StyleSheet.create({
     text_footer: {
         color: '#05375a',
         fontSize: 18,
-        
+
     },
     action: {
         flexDirection: 'row',
@@ -459,10 +455,10 @@ const styles = StyleSheet.create({
     row: {
         alignSelf: 'stretch',
         paddingBottom: 10,
-        paddingTop:5,
+        paddingTop: 5,
         paddingLeft: 20,
         borderBottomWidth: 1,
-        borderBottomColor:'#808080',
+        borderBottomColor: '#808080',
         backgroundColor: '#FFF'
     },
     card: {
@@ -475,60 +471,60 @@ const styles = StyleSheet.create({
         marginTop: 5,
         // marginLeft: 8,
         display: "flex",
-         flexDirection: 'row', 
-         justifyContent: 'space-between',
-         marginBottom:3
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 3
     },
     text_header1: {
         color: '#000',
         fontWeight: 'bold',
         fontSize: 20,
         textAlign: 'center',
-        marginTop:50
+        marginTop: 50
     },
     cardlist: {
         display: "flex",
-      flexDirection: "row",
-      marginTop: 4,
-      justifyContent: "space-between",
+        flexDirection: "row",
+        marginTop: 4,
+        justifyContent: "space-between",
     },
     ellipse1: {
-      width: 40,
-      height: 40,
-    //   marginTop: 0,
-      borderRadius: 100,
-      marginLeft: 10,
-      justifyContent: 'center',
-      backgroundColor: '#e9c46a'
+        width: 40,
+        height: 40,
+        //   marginTop: 0,
+        borderRadius: 100,
+        marginLeft: 10,
+        justifyContent: 'center',
+        backgroundColor: '#e9c46a'
     },
     carditem: {
-      color: "#121212",
-      fontSize: 20,
-      marginLeft: 3,
-      marginTop: 5,
-       fontWeight: "bold",
-       display: 'flex',
-    //    backgroundColor:'red'
-    //    justifyContent: 'space-between',  
-    //    textAlign: 'center'
+        color: "#121212",
+        fontSize: 20,
+        marginLeft: 3,
+        marginTop: 5,
+        fontWeight: "bold",
+        display: 'flex',
+        //    backgroundColor:'red'
+        //    justifyContent: 'space-between',  
+        //    textAlign: 'center'
     },
     buttonTextStyle: {
-      color: '#FFFFFF',
-      paddingVertical: 10,
-      fontSize: 16,
+        color: '#FFFFFF',
+        paddingVertical: 10,
+        fontSize: 16,
     },
     buttonStyle: {
-      backgroundColor: '#19398A',
-      borderWidth: 0,
-      color: '#FFFFFF',
-      borderColor: '#307ecc',
-      height: 40,
-      alignItems: 'center',
-      borderRadius: 30,
-      marginLeft: 80,
-      marginRight: 35,
-    //   marginTop: 15,
-      width: '50%'
+        backgroundColor: '#19398A',
+        borderWidth: 0,
+        color: '#FFFFFF',
+        borderColor: '#307ecc',
+        height: 40,
+        alignItems: 'center',
+        borderRadius: 30,
+        marginLeft: 80,
+        marginRight: 35,
+        //   marginTop: 15,
+        width: '50%'
     },
     imageUploadCard: {
         width: '100%',
@@ -540,17 +536,17 @@ const styles = StyleSheet.create({
         marginTop: 5,
         // marginLeft: 8,
         display: "flex",
-         flexDirection: 'row', 
-         justifyContent: 'space-between',
-         marginBottom:3
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 3
     },
     imageuploadStyle: {
-      width: 100,
-      height: 100,
-      marginTop: 7,
-      borderRadius: 80,
-      marginLeft: '45%',
-      justifyContent: 'center',
-    //   backgroundColor: 'white'
+        width: 100,
+        height: 100,
+        marginTop: 7,
+        borderRadius: 80,
+        marginLeft: '45%',
+        justifyContent: 'center',
+        //   backgroundColor: 'white'
     }
-  });
+});

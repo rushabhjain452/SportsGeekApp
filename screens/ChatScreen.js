@@ -89,12 +89,12 @@ const Tab = createMaterialTopTabNavigator();
 // }
 
 const ChatScreen = () => {
-    return (
-      <Tab.Navigator>
+  return (
+    <Tab.Navigator>
       <Tab.Screen name="Public Chat" component={PublicChatScreen} />
       <Tab.Screen name="Private Chat" component={PrivateChatScreen} />
     </Tab.Navigator>
-    );
+  );
 };
 
 export default ChatScreen;

@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
 
-const HelpScreen = ({navigation}) => {
-    return (
-      <ScrollView style={styles.container} keyboardShouldPersistTaps='handled'>
+const HelpScreen = ({ navigation }) => {
+  return (
+    <ScrollView style={styles.container} keyboardShouldPersistTaps='handled'>
       <Text style={styles.heading}>Rules</Text>
       <Text style={styles.listitem}>1.Register by putting Rs 100.</Text>
       <Text style={styles.listitem}>2.You will get Rs 100 X 5 = 500 points.</Text>
@@ -25,14 +25,14 @@ const HelpScreen = ({navigation}) => {
       <View style={styles.border}></View>
       <Text style={styles.heading2}>Terms and Conditions</Text>
       <Text style={styles.listitem2}>All the players would be bound by the terms and conditions of the game. In case of any discrepancy or dispute, the organizer's decision will be final and binding :)</Text>
-      <View style={{marginTop:20}}></View>
+      <View style={{ marginTop: 20 }}></View>
       <Button
         title="Go Back"
         onPress={() => navigation.goBack()}
       />
-      <View style={{marginTop:100}}></View>
+      <View style={{ marginTop: 100 }}></View>
     </ScrollView>
-    );
+  );
 };
 
 export default HelpScreen;
@@ -43,11 +43,11 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 40,
-    fontWeight: 'bold' 
+    fontWeight: 'bold'
   },
   heading2: {
     fontSize: 20,
-    fontWeight: 'bold' 
+    fontWeight: 'bold'
   },
   titleText: {
     fontSize: 20,

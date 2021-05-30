@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import {View, SafeAreaView, StyleSheet, ScrollView, RefreshControl, ActivityIndicator} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, SafeAreaView, StyleSheet, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
 import {
   Title,
   Caption,
@@ -14,10 +14,10 @@ import ChangePasswordScreen from './ChangePasswordScreen';
 import { AuthContext } from '../components/context';
 import AsyncStorage from '@react-native-community/async-storage';
 import showSweetAlert from '../helpers/showSweetAlert';
-import {baseurl, errorMessage} from '../config';
+import { baseurl, errorMessage } from '../config';
 import axios from 'axios';
 
-const ProfileScreen = ({navigation}) => {
+const ProfileScreen = ({ navigation }) => {
 
   const [data, setData] = useState({});
   const [winningPoints, setWinningPoints] = useState(0);
@@ -28,7 +28,7 @@ const ProfileScreen = ({navigation}) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState('');
 
-  useEffect(async() => {
+  useEffect(async () => {
     const token = await AsyncStorage.getItem('token');
     setToken(token);
     // if(userId == 0){
@@ -48,141 +48,141 @@ const ProfileScreen = ({navigation}) => {
   }, []);
 
   const displayProfile = (userId, token) => {
-    if(userId == 0){
+    if (userId == 0) {
       return;
     }
-    const headers = {'Authorization': 'Bearer ' + token};
-    axios.get(baseurl+'/users/'+userId, {headers})
-    .then((response) => {
-      if(response.status == 200){
+    const headers = { 'Authorization': 'Bearer ' + token };
+    axios.get(baseurl + '/users/' + userId, { headers })
+      .then((response) => {
+        if (response.status == 200) {
           setData(response.data);
-          setShortName(response.data.firstName.substr(0,1) + response.data.lastName.substr(0,1));
-      }else{
+          setShortName(response.data.firstName.substr(0, 1) + response.data.lastName.substr(0, 1));
+        } else {
+          showSweetAlert('error', 'Network Error', errorMessage);
+        }
+      })
+      .catch((error) => {
         showSweetAlert('error', 'Network Error', errorMessage);
-      }
-    })
-    .catch((error) => {
-      showSweetAlert('error', 'Network Error', errorMessage);
-    });
+      });
   }
 
   const displayWinningAndLosingPoints = (userId, token) => {
-    const headers = {'Authorization': 'Bearer ' + token};
-    axios.get(baseurl+'/users/'+userId+'/winning-losing-points', {headers})
-    .then((response) => {
-      setLoading(false);
-      setRefreshing(false);
-      if(response.status == 200){
-        setWinningPoints(response.data.winningPoints);
-        setLosingPoints(response.data.losingPoints);
-      }else{
-        showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-      }
-    })
-    .catch((error) => {
-      setLoading(false);
-      setRefreshing(false);
-      showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-    });
+    const headers = { 'Authorization': 'Bearer ' + token };
+    axios.get(baseurl + '/users/' + userId + '/winning-losing-points', { headers })
+      .then((response) => {
+        setLoading(false);
+        setRefreshing(false);
+        if (response.status == 200) {
+          setWinningPoints(response.data.winningPoints);
+          setLosingPoints(response.data.losingPoints);
+        } else {
+          showSweetAlert('error', 'Network Error', errorMessage);
+        }
+      })
+      .catch((error) => {
+        setLoading(false);
+        setRefreshing(false);
+        showSweetAlert('error', 'Network Error', errorMessage);
+      });
   }
 
   const { signOut } = React.useContext(AuthContext);
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}>
-      {loading == true  && (<ActivityIndicator size="large" color="#19398A" />)}
-      <View style={styles.userInfoSection}>
-        <View style={{flexDirection: 'row', marginTop: 15}}>
-          {
-            data.profilePicture ?
-            (<Avatar 
-              size="medium"
-              rounded
-              source={{
-                uri: data.profilePicture
-              }}
-            />) :
-            (<Avatar
-              size="medium"
-              rounded
-              title= {shortName}
-              activeOpacity={0.7}
-              containerStyle={{color: 'red', backgroundColor: '#adadad', marginTop: 10}}
-            />)
-          }
-          <View style={{marginLeft: 20}}>
-            <Title style={[styles.title, {
-              marginTop:5,
-              marginBottom: 5,
-            }]}>{data.firstName} {data.lastName}</Title>
-            <Caption style={styles.caption}>{data.username}</Caption>
+      <ScrollView keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+        {loading == true && (<ActivityIndicator size="large" color="#19398A" />)}
+        <View style={styles.userInfoSection}>
+          <View style={{ flexDirection: 'row', marginTop: 15 }}>
+            {
+              data.profilePicture ?
+                (<Avatar
+                  size="medium"
+                  rounded
+                  source={{
+                    uri: data.profilePicture
+                  }}
+                />) :
+                (<Avatar
+                  size="medium"
+                  rounded
+                  title={shortName}
+                  activeOpacity={0.7}
+                  containerStyle={{ color: 'red', backgroundColor: '#adadad', marginTop: 10 }}
+                />)
+            }
+            <View style={{ marginLeft: 20 }}>
+              <Title style={[styles.title, {
+                marginTop: 5,
+                marginBottom: 5,
+              }]}>{data.firstName} {data.lastName}</Title>
+              <Caption style={styles.caption}>{data.username}</Caption>
+            </View>
           </View>
         </View>
-      </View>
 
-      <View style={styles.userInfoSection}>
-        <View style={styles.row}>
-          <Icon name="phone" color="#19398A" size={25}/>
-          <Text style={{color:"#000000", marginLeft: 20, fontSize:16}}>{data.mobileNumber}</Text>
+        <View style={styles.userInfoSection}>
+          <View style={styles.row}>
+            <Icon name="phone" color="#19398A" size={25} />
+            <Text style={{ color: "#000000", marginLeft: 20, fontSize: 16 }}>{data.mobileNumber}</Text>
+          </View>
+          <View style={styles.row}>
+            <Icon name="email" color="#19398A" size={25} />
+            <Text style={{ color: "#000000", marginLeft: 20, fontSize: 16 }}>{data.email}</Text>
+          </View>
         </View>
-        <View style={styles.row}>
-          <Icon name="email" color="#19398A" size={25}/>
-          <Text style={{color:"#000000", marginLeft: 20, fontSize:16}}>{data.email}</Text>
-        </View>
-      </View>
 
-      <View style={styles.infoBoxWrapper}>
-      <View style={styles.infoBox}>
-            <Title style = {{color: '#00F', fontWeight: 'bold'}}>{data.availablePoints}</Title>
-            <Caption style = {{color: '#00F'}}>Available Points</Caption>
+        <View style={styles.infoBoxWrapper}>
+          <View style={styles.infoBox}>
+            <Title style={{ color: '#00F', fontWeight: 'bold' }}>{data.availablePoints}</Title>
+            <Caption style={{ color: '#00F' }}>Available Points</Caption>
           </View>
           <View style={[styles.infoBox, {
             borderRightColor: '#dddddd',
             borderRightWidth: 1,
             borderRightColor: '#dddddd',
             borderRightWidth: 1,
-            
+
           }]}>
-            <Title style = {{color: '#30923D', fontWeight: 'bold'}}>{winningPoints}</Title>
-            <Caption style = {{color: '#30923D'}}>Total Winnings</Caption>
+            <Title style={{ color: '#30923D', fontWeight: 'bold' }}>{winningPoints}</Title>
+            <Caption style={{ color: '#30923D' }}>Total Winnings</Caption>
           </View>
           <View style={styles.infoBox}>
-            <Title style = {{color: '#F00', fontWeight: 'bold'}}>{losingPoints}</Title>
-            <Caption style = {{color: '#F00'}}>Total Losing</Caption>
+            <Title style={{ color: '#F00', fontWeight: 'bold' }}>{losingPoints}</Title>
+            <Caption style={{ color: '#F00' }}>Total Losing</Caption>
           </View>
-      </View>
+        </View>
 
-      <View style={styles.menuWrapper}>
-        <TouchableRipple onPress={() => {navigation.navigate('UpdateProfileScreen')}}>
-          <View style={styles.menuItem}>
-            <Icon name="account-edit" color="#19398A" size={25}/>
-            <Text style={styles.menuItemText}>Update Your Profile</Text>
-          </View>
-        </TouchableRipple>
-        <TouchableRipple onPress={() => navigation.navigate('changePasswordScreen')}>
-          <View style={styles.menuItem}>
-            <Icon name="form-textbox-password" color="#19398A" size={25}/>
-            <Text style={styles.menuItemText}>Change Password</Text>
-          </View>
-        </TouchableRipple>
-        <TouchableRipple onPress={() => {signOut()}}>
-          <View style={styles.menuItem}>
-            <Icon name="logout-variant" color="#19398A" size={25}/>
-            <Text style={styles.menuItemText}>Signout</Text>
-          </View>
-        </TouchableRipple>
-      </View>
+        <View style={styles.menuWrapper}>
+          <TouchableRipple onPress={() => { navigation.navigate('UpdateProfileScreen') }}>
+            <View style={styles.menuItem}>
+              <Icon name="account-edit" color="#19398A" size={25} />
+              <Text style={styles.menuItemText}>Update Your Profile</Text>
+            </View>
+          </TouchableRipple>
+          <TouchableRipple onPress={() => navigation.navigate('changePasswordScreen')}>
+            <View style={styles.menuItem}>
+              <Icon name="form-textbox-password" color="#19398A" size={25} />
+              <Text style={styles.menuItemText}>Change Password</Text>
+            </View>
+          </TouchableRipple>
+          <TouchableRipple onPress={() => { signOut() }}>
+            <View style={styles.menuItem}>
+              <Icon name="logout-variant" color="#19398A" size={25} />
+              <Text style={styles.menuItemText}>Signout</Text>
+            </View>
+          </TouchableRipple>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 function updatePassword() {
-return (
-    <ChangePasswordScreen/>
-);
-} 
+  return (
+    <ChangePasswordScreen />
+  );
+}
 export default ProfileScreen;
 
 const styles = StyleSheet.create({

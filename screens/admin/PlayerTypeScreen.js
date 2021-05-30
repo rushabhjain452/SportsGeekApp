@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import { 
-    View, 
-    Text, 
-    Button, 
-    TouchableOpacity, 
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    Button,
+    TouchableOpacity,
     Dimensions,
     TextInput,
     Platform,
@@ -19,12 +19,12 @@ import Feather from 'react-native-vector-icons/Feather';
 import SwipeList from 'react-native-smooth-swipe-list';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import showSweetAlert from '../../helpers/showSweetAlert';
-import {baseurl} from '../../config';
+import { baseurl, errorMessage } from '../../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import axios from 'axios';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-const PlayerTypeScreen = ({navigation}) => {
+const PlayerTypeScreen = ({ navigation }) => {
 
     // LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
@@ -39,7 +39,7 @@ const PlayerTypeScreen = ({navigation}) => {
         setRefreshing(true);
     }, []);
 
-    useEffect(async() => {
+    useEffect(async () => {
         const token = await AsyncStorage.getItem('token');
         setToken(token);
         displayPlayerType(token);
@@ -47,86 +47,80 @@ const PlayerTypeScreen = ({navigation}) => {
     }, [refreshing]);
 
     const displayPlayerType = (token) => {
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.get(baseurl+'/player-types', {headers})
-        .then(response => {
-            setLoading(false);
-            setRefreshing(false);
-            if(response.status == 200){
-                setData(response.data);
-            }
-            else{
-                showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-            }
-        })
-        .catch(error => {
-            setLoading(false);
-            setRefreshing(false);
-            showSweetAlert('error', 'Network Error', 'Oops! Something went wrong and we can’t help you right now. Please try again later.');
-        })
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.get(baseurl + '/player-types', { headers })
+            .then(response => {
+                setLoading(false);
+                setRefreshing(false);
+                if (response.status == 200) {
+                    setData(response.data);
+                }
+                else {
+                    showSweetAlert('error', 'Network Error', errorMessage);
+                }
+            })
+            .catch(error => {
+                setLoading(false);
+                setRefreshing(false);
+                showSweetAlert('error', 'Network Error', errorMessage);
+            })
     }
 
     const addPlayerType = () => {
-        if(playerType != ''){
+        if (playerType != '') {
             const reqData = {
                 typeName: playerType
             };
-            const headers = {
-                'Authorization': 'Bearer ' + token
-            }
-            axios.post(baseurl+'/player-types', reqData, {headers})
-            .then((response) => {
-                setLoading(false);
-                if(response.status == 201){
-                    showSweetAlert('success', 'Success', 'PlayerType added successfully.');
-                    displayPlayerType(token);
-                }
-                else {
+            const headers = { 'Authorization': 'Bearer ' + token }
+            axios.post(baseurl + '/player-types', reqData, { headers })
+                .then((response) => {
+                    setLoading(false);
+                    if (response.status == 201) {
+                        showSweetAlert('success', 'Success', 'PlayerType added successfully.');
+                        displayPlayerType(token);
+                    }
+                    else {
+                        showSweetAlert('error', 'Error', 'Failed to add PlayerType. Please try again...');
+                    }
+                    setPlayerType('');
+                })
+                .catch((error) => {
+                    setLoading(false);
                     showSweetAlert('error', 'Error', 'Failed to add PlayerType. Please try again...');
-                }              
-                setPlayerType('');
-            })
-            .catch((error) => {
-                setLoading(false);
-                showSweetAlert('error', 'Error', 'Failed to add PlayerType. Please try again...');
-            })
-        }else{
+                })
+        } else {
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for PlayerType.');
         }
     }
 
     const deletePlayerType = (id) => {
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        }
-        axios.delete(baseurl+'/player-types/'+id, {headers})
-        .then((response) => {
-            setLoading(false);
-            if(response.status == 200){
-                showSweetAlert('success', 'Success', 'PlayerType deleted successfully.');
-                displayPlayerType(token);
-            }
-            else {
+        const headers = { 'Authorization': 'Bearer ' + token }
+        axios.delete(baseurl + '/player-types/' + id, { headers })
+            .then((response) => {
+                setLoading(false);
+                if (response.status == 200) {
+                    showSweetAlert('success', 'Success', 'PlayerType deleted successfully.');
+                    displayPlayerType(token);
+                }
+                else {
+                    showSweetAlert('error', 'Error', 'Failed to delete PlayerType. Please try again...');
+                }
+                setPlayerType('');
+            })
+            .catch((error) => {
+                setLoading(false);
                 showSweetAlert('error', 'Error', 'Failed to delete PlayerType. Please try again...');
-            }              
-            setPlayerType('');
-        })
-        .catch((error) => {
-            setLoading(false);
-            showSweetAlert('error', 'Error', 'Failed to delete PlayerType. Please try again...');
-        })
+            })
     }
 
     const editPlayerType = (playerTypeId, typeName) => {
-       setPlayerType(typeName);
+        setPlayerType(typeName);
         setBtnText('Update');
         setPlayerTypeId(playerTypeId);
-    } 
+    }
 
     const updatePlayerType = () => {
-        if(playerType != ''){
+        if (playerType != '') {
             // fetch(baseurl+'/playertype/'+playerTypeId, {
             //     method: 'PUT',
             //     headers: {
@@ -155,101 +149,99 @@ const PlayerTypeScreen = ({navigation}) => {
             const reqData = {
                 typeName: playerType
             };
-            const headers = {
-                'Authorization': 'Bearer ' + token
-            }
-            axios.put(baseurl+'/player-types/'+playerTypeId, reqData, {headers})
-        .then((response) => {
-            setLoading(false);
-            if(response.status == 200){
-                showSweetAlert('success', 'Success', 'PlayerType updated successfully..');
-                displayPlayerType(token);
-            }
-            else {
-                showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
-            }              
-            setPlayerType('');
-            setBtnText('Add');
-        })
-        .catch((error) => {
-            setLoading(false);
-            showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
-        })
-        }else{
+            const headers = { 'Authorization': 'Bearer ' + token }
+            axios.put(baseurl + '/player-types/' + playerTypeId, reqData, { headers })
+                .then((response) => {
+                    setLoading(false);
+                    if (response.status == 200) {
+                        showSweetAlert('success', 'Success', 'PlayerType updated successfully..');
+                        displayPlayerType(token);
+                    }
+                    else {
+                        showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
+                    }
+                    setPlayerType('');
+                    setBtnText('Add');
+                })
+                .catch((error) => {
+                    setLoading(false);
+                    showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
+                })
+        } else {
             showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for PlayerType.');
         }
     }
 
     const getConfirmation = (playerTypeId) =>
-    Alert.alert(
-    "Delete Confirmation",
-    "Do you really want to delete the Player Type ?",
-    [
-        {
-            text: "Cancel"
-        },
-        { 
-            text: "OK", 
-            onPress: () => {deletePlayerType(playerTypeId)}
-        }
-    ]
-);
+        Alert.alert(
+            "Delete Confirmation",
+            "Do you really want to delete the Player Type ?",
+            [
+                {
+                    text: "Cancel"
+                },
+                {
+                    text: "OK",
+                    onPress: () => { deletePlayerType(playerTypeId) }
+                }
+            ]
+        );
 
-   return (
-      <View style={styles.container}>
-       <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
-          <StatusBar backgroundColor='#19398A' barStyle="light-content"/>
-        <View style={styles.header}>
-            <Text style={styles.text_header}>PlayerType Details</Text>
-        </View>
-        <Animatable.View 
-            animation="fadeInUpBig"
-            style={styles.footer}
-        >
-            <ScrollView keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-            <Text style={[styles.text_footer, {marginTop: 35}]}>PlayerType Name</Text>
-            <View style={styles.action}>
-                <FontAwesome 
-                    name="mars"
-                    color="#05375a"
-                    size={20}
-                />
-                <TextInput 
-                    placeholder="Enter PlayerType Name"
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => setPlayerType(val)}
-                    value={playerType}
-                    maxLength={20}
-                />
-                { (playerType != '') ? 
-                <Animatable.View
-                    animation="bounceIn"
-                >
-                    <Feather 
-                        name="check-circle"
-                        color="green"
-                        size={20}
-                    />
-                </Animatable.View>
-                : null}
+    return (
+        <View style={styles.container}>
+            <Spinner visible={loading} textContent='Loading...' textStyle={styles.spinnerTextStyle} />
+            <StatusBar backgroundColor='#19398A' barStyle="light-content" />
+            <View style={styles.header}>
+                <Text style={styles.text_header}>PlayerType Details</Text>
             </View>
-            <View style={styles.button}>
-            <TouchableOpacity
-                onPress={(btnText=='Add') ? addPlayerType : updatePlayerType}
-                    style={[styles.signIn, {
-                        borderColor: '#19398A',
-                        borderWidth: 1,
-                        marginTop: 10,
-                        marginBottom: 20
-                    }]}
-                >
-                    <Text style={[styles.textSign, {
-                        color:'#19398A'
-                    }]}>{btnText}</Text>
-                </TouchableOpacity>
-            </View>
-            {/* <View style={[styles.card]}>
+            <Animatable.View
+                animation="fadeInUpBig"
+                style={styles.footer}
+            >
+                <ScrollView keyboardShouldPersistTaps='handled' refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+                    <Text style={[styles.text_footer, { marginTop: 35 }]}>PlayerType Name</Text>
+                    <View style={styles.action}>
+                        <FontAwesome
+                            name="mars"
+                            color="#05375a"
+                            size={20}
+                        />
+                        <TextInput
+                            placeholder="Enter PlayerType Name"
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => setPlayerType(val)}
+                            value={playerType}
+                            maxLength={20}
+                        />
+                        {(playerType != '') ?
+                            <Animatable.View
+                                animation="bounceIn"
+                            >
+                                <Feather
+                                    name="check-circle"
+                                    color="green"
+                                    size={20}
+                                />
+                            </Animatable.View>
+                            : null}
+                    </View>
+                    <View style={styles.button}>
+                        <TouchableOpacity
+                            onPress={(btnText == 'Add') ? addPlayerType : updatePlayerType}
+                            style={[styles.signIn, {
+                                borderColor: '#19398A',
+                                borderWidth: 1,
+                                marginTop: 10,
+                                marginBottom: 20
+                            }]}
+                        >
+                            <Text style={[styles.textSign, {
+                                color: '#19398A'
+                            }]}>{btnText}</Text>
+                        </TouchableOpacity>
+                    </View>
+                    {/* <View style={[styles.card]}>
             <SwipeList rowData={
                 data.map((item) => ({
                     id: item.genderId,
@@ -262,24 +254,24 @@ const PlayerTypeScreen = ({navigation}) => {
             }
              />
             </View> */}
-                {
-                data.map((item,index) => (
-                    <View style={styles.card} key={item.playerTypeId} >
-                        <View style={styles.cardlist}>  
-                            <View style={styles.ellipse1}>
-                                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>{(item.typeName).substr(0,2)}</Text>
+                    {
+                        data.map((item, index) => (
+                            <View style={styles.card} key={item.playerTypeId} >
+                                <View style={styles.cardlist}>
+                                    <View style={styles.ellipse1}>
+                                        <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18 }}>{(item.typeName).substr(0, 2)}</Text>
+                                    </View>
+                                    <Text style={[styles.carditem, { width: '65%', paddingLeft: 20 }]}>{item.typeName}</Text>
+                                    <TouchableOpacity onPress={() => { editPlayerType(item.playerTypeId, item.typeName) }} style={{ width: '10%' }}><Text style={[styles.carditem]}><Icon name="circle-edit-outline" color="#19398A" size={30} /></Text></TouchableOpacity>
+                                    <TouchableOpacity onPress={() => { getConfirmation(item.playerTypeId) }} style={{ width: '10%' }}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30} /></Text></TouchableOpacity>
+                                </View>
                             </View>
-                            <Text style={[styles.carditem, {width: '65%',paddingLeft:20}]}>{item.typeName}</Text>
-                           <TouchableOpacity onPress={() => {editPlayerType(item.playerTypeId, item.typeName)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="circle-edit-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                           <TouchableOpacity onPress={() => {getConfirmation(item.playerTypeId)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                        </View>
-                        </View>
-                ))
-            }
-           
-            </ScrollView>
-        </Animatable.View>
-      </View>
+                        ))
+                    }
+
+                </ScrollView>
+            </Animatable.View>
+        </View>
     );
 };
 
@@ -287,8 +279,8 @@ export default PlayerTypeScreen;
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1, 
-      backgroundColor: '#19398A',
+        flex: 1,
+        backgroundColor: '#19398A',
     },
     container2: {
         // height:50,
@@ -325,7 +317,7 @@ const styles = StyleSheet.create({
     text_footer: {
         color: '#05375a',
         fontSize: 18,
-        
+
     },
     action: {
         flexDirection: 'row',
@@ -367,10 +359,10 @@ const styles = StyleSheet.create({
     row: {
         alignSelf: 'stretch',
         paddingBottom: 10,
-        paddingTop:5,
+        paddingTop: 5,
         paddingLeft: 20,
         borderBottomWidth: 1,
-        borderBottomColor:'#808080',
+        borderBottomColor: '#808080',
         backgroundColor: '#FFF'
     },
     card: {
@@ -383,41 +375,41 @@ const styles = StyleSheet.create({
         marginTop: 5,
         // marginLeft: 8,
         display: "flex",
-         flexDirection: 'row', 
-         justifyContent: 'space-between',
-         marginBottom:3
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 3
     },
     text_header1: {
         color: '#000',
         fontWeight: 'bold',
         fontSize: 20,
         textAlign: 'center',
-        marginTop:50
+        marginTop: 50
     },
     cardlist: {
         display: "flex",
-      flexDirection: "row",
-      marginTop: 4,
-      justifyContent: "space-between",
+        flexDirection: "row",
+        marginTop: 4,
+        justifyContent: "space-between",
     },
     ellipse1: {
-      width: 40,
-      height: 40,
-    //   marginTop: 0,
-      borderRadius: 100,
-      marginLeft: 10,
-      justifyContent: 'center',
-      backgroundColor: '#e9c46a'
+        width: 40,
+        height: 40,
+        //   marginTop: 0,
+        borderRadius: 100,
+        marginLeft: 10,
+        justifyContent: 'center',
+        backgroundColor: '#e9c46a'
     },
     carditem: {
-      color: "#121212",
-      fontSize: 20,
-      marginLeft: 3,
-      marginTop: 5,
-       fontWeight: "bold",
-       display: 'flex',
-    //    backgroundColor:'red'
-    //    justifyContent: 'space-between',  
-    //    textAlign: 'center'
+        color: "#121212",
+        fontSize: 20,
+        marginLeft: 3,
+        marginTop: 5,
+        fontWeight: "bold",
+        display: 'flex',
+        //    backgroundColor:'red'
+        //    justifyContent: 'space-between',  
+        //    textAlign: 'center'
     }
-  });
+});
