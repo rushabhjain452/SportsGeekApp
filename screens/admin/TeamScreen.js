@@ -25,8 +25,11 @@ import { Card } from 'react-native-elements';
 import axios from 'axios';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
+import ImagePicker from 'react-native-image-crop-picker';
 
 const TeamScreen = ({ navigation }) => {
+
+    const userAvatarLogo = 'https://firebasestorage.googleapis.com/v0/b/sportsgeek-74e1e.appspot.com/o/69bba4a0-c114-4379-9854-e4381a3130bc.png?alt=media&token=e9924ea4-c2d9-4782-bc2d-0fe734431c86';
 
     LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
@@ -34,11 +37,12 @@ const TeamScreen = ({ navigation }) => {
     const [btnText, setBtnText] = useState('Add');
     const [teamId, setTeamId] = useState(0);
     const [shortName, setShortName] = useState('');
-    const [teamLogo, setTeamLogo] = useState('');
+    const [teamLogo, setTeamLogo] = useState(null);
+    const [avatarPath, setAvatarPath] = useState(userAvatarLogo);
     const [token, setToken] = useState('');
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-
+    const [success, setSuccess] = useState(false);
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
     }, []);
@@ -73,39 +77,109 @@ const TeamScreen = ({ navigation }) => {
             })
     }
 
+    const photoSelectHandler = () => {
+        ImagePicker.openPicker({
+            width: 300,
+            height: 300,
+            cropping: true
+        }).then((image) => {
+            if (validateImage(image)) {
+                setAvatarPath(image.path);
+                setTeamLogo(image);
+            }
+        }).catch((error) => {
+            showSweetAlert('warning', 'Image not selected', 'Image not selected for team Logo.');
+        });
+    }
+
+    const validateImage = (image) => {
+        let result = true;
+        if (image.height != image.width) {
+            result = false;
+            showSweetAlert('warning', 'Image validation failed!', 'Please select a square image.');
+        }
+        else if (image.mime != "image/jpeg" && image.mime != "image/png" && image.mime != "image/gif") {
+            result = false;
+            showSweetAlert('warning', 'Image validation failed!', 'Please select image of proper format. Only jpg, png and gif images are allowed.');
+        }
+        else if (image.size > 10485760) {
+            result = false;
+            showSweetAlert('warning', 'Image validation failed!', 'Please select image having size less than 10 MB.');
+        }
+        return result;
+    }
+
+    const photoRemoveHandler = () => {
+        setAvatarPath(userAvatarLogo);
+        setTeamLogo(avatarPath);
+    };
+    
     const addTeam = () => {
-        // console.log(data.gender);
-        // console.log(baseurl+'/gender');
-        if (team != '' && shortName != '') {
-            fetch(baseurl + '/team', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    name: team,
-                    shortName: shortName,
-                    teamLogo: teamLogo
-                })
-            })
-                .then((response) => response.json())
-                .then((json) => {
-                    if (json.code == 201) {
+        if (team.length < 3) {
+            showSweetAlert('warning', 'Invalid Input!', 'Please enter Team name greater than 3 characters to proceed.');
+        }
+        else if (shortName.length < 2) {
+            showSweetAlert('warning', 'Invalid Input!', 'Please enter Short name greater than 2 characters to proceed.');
+        }
+        else if (!teamLogo) {
+            showSweetAlert('warning', 'Invalid Input!', 'Please Select Team logo.');
+        }
+        else {
+            // setLoading(true);
+            // Submitting Form Data (with Profile Picture)
+            const formData = new FormData();
+            formData.append('name', team);
+            formData.append('shortName', shortName);
+            if (teamLogo == null) {
+                formData.append('teamLogo', null);
+            } else {
+                let picturePath = teamLogo.path;
+                let pathParts = picturePath.split('/');
+                formData.append('teamLogo', {
+                    // name: picturePath.substr(picturePath.lastIndexOf('/') + 1),
+                    name: pathParts[pathParts.length - 1],
+                    type: teamLogo.mime,
+                    uri: teamLogo.path
+                });
+            }
+            const headers = { 'Content-Type': 'multipart/form-data', 'Authorization': 'Bearer ' + token }
+            axios.post(baseurl + '/teams', formData, { headers })
+                .then((response) => {
+                    // setLoading(false);
+                    if (response.status == 201) {
                         showSweetAlert('success', 'Success', 'Team added successfully.');
-                        displayTeam();
+                        setSuccess(true);
+                        // navigation.goBack();
+                        // navigator.navigate('SignInScreen');
+                    } else {
+                        showSweetAlert('error', 'Network Error', errorMessage);
                     }
-                    else
-                        showSweetAlert('error', 'Error', 'Failed to add Team. Please try again...');
-                    setVenue('');
+                    setTeam('');
+                    setShortName('');
+                    setTeamLogo(null);
+                    setAvatarPath(avatarPath);
                 })
                 .catch((error) => {
-                    showSweetAlert('error', 'Error', 'Failed to add Team. Please try again...');
+                    // setLoading(false);
+                    // console.log(error);
+                        showSweetAlert('error', 'Network Error', errorMessage);
                 });
-        } else {
-            showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for Team.');
-        }
+            }
     }
+    const getConfirmation = (teamId) =>
+    Alert.alert(
+        "Delete Confirmation",
+        "Do you really want to delete the Team ?",
+        [
+            {
+                text: "Cancel"
+            },
+            {
+                text: "OK",
+                onPress: () => { deleteTeam(teamId) }
+            }
+        ]
+    );
 
     const deleteTeam = (id) => {
         const headers = { 'Authorization': 'Bearer ' + token }
@@ -125,80 +199,70 @@ const TeamScreen = ({ navigation }) => {
             })
             .catch((error) => {
                 console.log(error);
-                setLoading(false);
+                // setLoading(false);
                 showSweetAlert('error', 'Error', 'Failed to delete Team. Please try again...');
             })
     }
 
-    const editVenue = (teamId, name, shortName, teamLogo) => {
+    const editTeam = (teamId, name, shortName, teamLogo) => {
         setTeam(name);
         setBtnText('Update');
         setTeamId(teamId);
         setTeamLogo(teamLogo);
         setShortName(shortName);
+        setAvatarPath(teamLogo);
     }
 
     const updateTeam = () => {
-        if (team != '' && shortName != '') {
-            fetch(baseurl + '/team/' + teamId, {
-                method: 'PUT',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    name: team,
-                    shortName: shortName,
-                    teamLogo: teamLogo
-                })
-            })
-                .then((response) => response.json())
-                .then((json) => {
-                    if (json.code == 201) {
-                        showSweetAlert('success', 'Success', 'Team updated successfully.');
-                        displayTeam();
+        if (team.length < 3) {
+            showSweetAlert('warning', 'Invalid Input!', 'Please enter Team name greater than 3 characters to proceed.');
+        }
+        else if (shortName.length < 2) {
+            showSweetAlert('warning', 'Invalid Input!', 'Please enter Short name greater than 2 characters to proceed.');
+        }
+        else if (!teamLogo) {
+            showSweetAlert('warning', 'Invalid Input!', 'Please Select Team logo.');
+        }
+        else {
+            const formData = new FormData();
+            formData.append('name', team);
+            formData.append('shortName', shortName);
+            if (teamLogo == null) {
+                formData.append('teamLogo', null);
+            } else {
+                console.log("TeamLogo:"+teamLogo.path);
+                let picturePath = teamLogo.path;
+                let pathParts = picturePath.split('/');
+                formData.append('teamLogo', {
+                    // name: picturePath.substr(picturePath.lastIndexOf('/') + 1),
+                    name: pathParts[pathParts.length - 1],
+                    type: teamLogo.mime,
+                    uri: teamLogo.path
+                });
+            }
+            const headers = { 'Content-Type': 'multipart/form-data', 'Authorization': 'Bearer ' + token }
+            axios.put(baseurl + '/teams/' + teamId, formData, { headers })
+                .then((response) => {
+                    // setLoading(false);
+                    if (response.status == 200) {
+                        setSuccess(true);
+                        showSweetAlert('success', 'Success', 'Team updated successfully..');
                     }
-                    else
+                    else {
                         showSweetAlert('error', 'Error', 'Failed to update Team. Please try again...');
+                    }
                     setTeam('');
                     setShortName('');
+                    setTeamLogo(null);
                     setBtnText('Add');
+                    setAvatarPath(avatarPath);
                 })
                 .catch((error) => {
+                    // setLoading(false);
+                    console.log(error);
                     showSweetAlert('error', 'Error', 'Failed to update Team. Please try again...');
-                });
-        } else {
-            showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for Team.');
+                })
         }
-    }
-
-    const launchImageLibrary = () => {
-        let options = {
-            storageOptions: {
-                skipBackup: true,
-                path: 'images',
-            },
-        };
-        // ImagePicker.launchImageLibrary(options, (response) => {
-        //   console.log('Response = ', response);
-
-        //   if (response.didCancel) {
-        //     console.log('User cancelled image picker');
-        //   } else if (response.error) {
-        //     console.log('ImagePicker Error: ', response.error);
-        //   } else if (response.customButton) {
-        //     console.log('User tapped custom button: ', response.customButton);
-        //     alert(response.customButton);
-        //   } else {
-        //     const source = { uri: response.uri };
-        //     console.log('response', JSON.stringify(response));
-        //     this.setState({
-        //       filePath: response,
-        //       fileData: response.data,
-        //       fileUri: response.uri
-        //     });
-        //   }
-        // });
     }
     return (
         <View style={styles.container}>
@@ -267,9 +331,20 @@ const TeamScreen = ({ navigation }) => {
                     </View>
                     <Text style={[styles.text_footer, { marginTop: 35 }]}>Team Logo</Text>
                     <View style={styles.imageUploadCard}>
-                        <TouchableOpacity onPress={launchImageLibrary}>
-                            <Card.Image style={styles.imageuploadStyle} source={{ uri: "https://firebasestorage.googleapis.com/v0/b/sportsgeek-74e1e.appspot.com/o/49d6ea02-1daf-4844-ad14-740b02a930f1.png?alt=media&token=e9924ea4-c2d9-4782-bc2d-0fe734431c86" }} />
-                        </TouchableOpacity>
+                            <Card.Image style={styles.imageuploadStyle} source={{ uri: avatarPath }} />
+                        <TouchableOpacity
+                        style={styles.buttonStyle}
+                        onPress={() => { photoSelectHandler() }}>
+                        <Text style={styles.buttonTextStyle}>
+                            {teamLogo == null ? <Icon name="account-check" color="#19398A" size={50} /> : <Icon name="account-edit" color="#19398A" size={50} />}
+                        </Text>
+                    </TouchableOpacity>
+                    {teamLogo !=null &&
+                        (<TouchableOpacity
+                            // style={styles.removeButtonStyle}
+                            onPress={() => { photoRemoveHandler() }}>
+                            <Text style={styles.buttonTextStyle1}><Icon name="account-cancel" color="#19398A" size={50} /></Text>
+                        </TouchableOpacity>)}
                     </View>
 
                     <View style={styles.button}>
@@ -310,8 +385,8 @@ const TeamScreen = ({ navigation }) => {
                                     </View>
                                     <Text style={[styles.carditem, { width: '15%', paddingLeft: 20 }]}>{item.shortName}</Text>
                                     <Text style={[styles.carditem, { width: '50%', paddingLeft: 20 }]}>{item.name}</Text>
-                                    <TouchableOpacity onPress={() => { editVenue(item.teamId, item.name) }} style={{ width: '10%' }}><Text style={[styles.carditem]}><Icon name="circle-edit-outline" color="#19398A" size={30} /></Text></TouchableOpacity>
-                                    <TouchableOpacity onPress={() => { deleteTeam(item.teamId) }} style={{ width: '10%' }}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30} /></Text></TouchableOpacity>
+                                    <TouchableOpacity onPress={() => { editTeam(item.teamId, item.name,item.shortName,item.teamLogo) }} style={{ width: '10%' }}><Text style={[styles.carditem]}><Icon name="circle-edit-outline" color="#19398A" size={30} /></Text></TouchableOpacity>
+                                    <TouchableOpacity onPress={() => { getConfirmation(item.teamId) }} style={{ width: '10%' }}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30} /></Text></TouchableOpacity>
                                 </View>
                             </View>
                         ))
@@ -482,5 +557,31 @@ const styles = StyleSheet.create({
         marginLeft: '45%',
         justifyContent: 'center',
         //   backgroundColor: 'white'
+    },
+    buttonTextStyle: {
+        color: '#FFFFFF',
+        paddingVertical: 5,
+        fontSize: 16,
+    },
+    buttonTextStyle1: {
+        color: '#FFFFFF',
+        // paddingHorizontal:20,
+        paddingVertical: 5,
+        fontSize: 16,
     }
+    // buttonStyle: {
+    //     backgroundColor: '#19398A',
+    //     borderWidth: 0,
+    //     color: '#FFFFFF',
+    //     borderColor: '#307ecc',
+    //     height: 40,
+    //     alignItems: 'center',
+    //     borderRadius: 30,
+    //     width: 30,
+    //     alignSelf: 'center',
+    //     // marginLeft: 80,
+    //     // marginRight: 35,
+    //     marginTop: 10,
+    //     marginBottom: 15
+    // }
 });

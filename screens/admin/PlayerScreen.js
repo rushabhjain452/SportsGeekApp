@@ -25,19 +25,26 @@ import { baseurl, errorMessage } from '../../config';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
+import ImagePicker from 'react-native-image-crop-picker';
 
 const PlayerScreen = ({ navigation }) => {
+
+    const userAvatarLogo = 'https://firebasestorage.googleapis.com/v0/b/sportsgeek-74e1e.appspot.com/o/69bba4a0-c114-4379-9854-e4381a3130bc.png?alt=media&token=e9924ea4-c2d9-4782-bc2d-0fe734431c86';
 
     // LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
     const [teamData, setTeamData] = useState([]);
     const [teamId, setTeamId] = useState(0);
+    const [playerId, setPlayerId] = useState(0);
     const [playerTypeData, setPlayerTypeData] = useState([]);
     const [playerName, setPlayerName] = useState('');
     const [playerTypeId, setPlayerTypeId] = useState(0);
     const [btnText, setBtnText] = useState('Add');
+    const [profilePicture, setProfilePicture] = useState(null);
     const [valueSS, setValueSS] = useState('');
     const [token, setToken] = useState('');
+    const [avatarPath, setAvatarPath] = useState(userAvatarLogo);
+    const [success, setSuccess] = useState(false);
 
     useEffect(async () => {
         const token = await AsyncStorage.getItem('token');
@@ -108,100 +115,109 @@ const PlayerScreen = ({ navigation }) => {
                 showSweetAlert('error', 'Network Error', errorMessage);
             })
     }
+    const photoSelectHandler = () => {
+        ImagePicker.openPicker({
+            width: 300,
+            height: 300,
+            cropping: true
+        }).then((image) => {
+            if (validateImage(image)) {
+                setAvatarPath(image.path);
+                setProfilePicture(image);
+            }
+        }).catch((error) => {
+            showSweetAlert('warning', 'Image not selected', 'Image not selected for team Logo.');
+        });
+    }
 
-    // const addPlayerType = () => {
-    //     // console.log(data.gender);
-    //     // console.log(baseurl+'/gender');
-    //     if(playerType != ''){
-    //         fetch(baseurl+'/playertype', {
-    //             method: 'POST',
-    //             headers: {
-    //                 Accept: 'application/json',
-    //                 'Content-Type': 'application/json' 
-    //             },
-    //             body: JSON.stringify({
-    //                 typeName: playerType
-    //             })
-    //         })
-    //         .then((response) => response.json())
-    //         .then((json) => {
-    //             if(json.code == 201){
-    //                 showSweetAlert('success', 'Success', 'PlayerType added successfully.');
-    //                 displayPlayerType();
-    //             }
-    //             else
-    //                 showSweetAlert('error', 'Error', 'Failed to add PlayerType. Please try again...');
-    //                 setPlayerType('');
-    //         })
-    //         .catch((error) => {
-    //             showSweetAlert('error', 'Error', 'Failed to add PlayerType. Please try again...');
-    //         });
-    //     }else{
-    //         showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for PlayerType.');
-    //     }
-    // }
+    const validateImage = (image) => {
+        let result = true;
+        if (image.height != image.width) {
+            result = false;
+            showSweetAlert('warning', 'Image validation failed!', 'Please select a square image.');
+        }
+        else if (image.mime != "image/jpeg" && image.mime != "image/png" && image.mime != "image/gif") {
+            result = false;
+            showSweetAlert('warning', 'Image validation failed!', 'Please select image of proper format. Only jpg, png and gif images are allowed.');
+        }
+        else if (image.size > 10485760) {
+            result = false;
+            showSweetAlert('warning', 'Image validation failed!', 'Please select image having size less than 10 MB.');
+        }
+        return result;
+    }
 
-    // const deletePlayerType = (id) => {
-    //     fetch(baseurl+'/playertype/'+id, {
-    //         method: 'DELETE'
-    //     })
-    //     .then((response) => response.json())
-    //     .then((json) => {
-    //         if(json.code == 200){
-    //             showSweetAlert('success', 'Success', 'PlayerType deleted successfully.');
-    //             displayPlayerType();
-    //         }
-    //         else
-    //             showSweetAlert('error', 'Error', 'Failed to delete PlayerType. Please try again...');
-    //             setPlayerType('');
-    //     })
-    //     .catch((error) => {
-    //         showSweetAlert('error', 'Error', 'Failed to delete PlayerType. Please try again...');
-    //     });
-    // }
+    const photoRemoveHandler = () => {
+        setAvatarPath(userAvatarLogo);
+        setProfilePicture(avatarPath);
+    };
 
-    // const editPlayerType = (playerTypeId, typeName) => {
-    //    setPlayerType(typeName);
-    //     setBtnText('Update');
-    //     setPlayerTypeId(playerTypeId);
-    // } 
+    const addPlayer = () => {
+        if (playerId == 0){
+            showSweetAlert('warning', 'Invalid Input!', 'Please enter Player Id.');
+        }
+        else if (teamId == 0) {
+            showSweetAlert('warning', 'Invalid Input!', 'Please enter Team name greater than 3 characters to proceed.');
+        }
+        else if (playerName.length < 3) {
+            showSweetAlert('warning', 'Invalid Input!', 'Please enter Short name greater than 2 characters to proceed.');
+        }
+        else if (!profilePicture) {
+            showSweetAlert('warning', 'Invalid Input!', 'Please Select Profile Picture.');
+        }
+        else {
+            // setLoading(true);
+            // Submitting Form Data (with Profile Picture)
+            const formData = new FormData();
+            formData.append('playerId', playerId);
+            formData.append('teamId', teamId);
+            formData.append('name', playerName);
+            formData.append('typeId', playerTypeId);
+            if (profilePicture == null) {
+                formData.append('profilePicture', null);
+            } else {
+                let picturePath = profilePicture.path;
+                let pathParts = picturePath.split('/');
+                formData.append('profilePicture', {
+                    // name: picturePath.substr(picturePath.lastIndexOf('/') + 1),
+                    name: pathParts[pathParts.length - 1],
+                    type: profilePicture.mime,
+                    uri: profilePicture.path
+                });
+            }
+            const headers = { 'Content-Type': 'multipart/form-data', 'Authorization': 'Bearer ' + token }
+            axios.post(baseurl + '/players', formData, { headers })
+                .then((response) => {
+                    // setLoading(false);
+                    if (response.status == 201) {
+                        showSweetAlert('success', 'Success', 'Player added successfully.');
+                        setSuccess(true);
+                        // navigation.goBack();
+                        // navigator.navigate('SignInScreen');
+                    } else {
+                        showSweetAlert('error', 'Network Error', errorMessage);
+                    }
+                    setPlayerId(0);
+                    setPlayerName('');
+                    setProfilePicture(null);
+                    setAvatarPath(avatarPath);
+                    setPlayerTypeId(0);
+                    setTeamId(0);
+                })
+                .catch((error) => {
+                    // setLoading(false);
+                    // console.log(error);
+                    console.log(error);
+                        showSweetAlert('error', 'Network Error', errorMessage);
+                });
+            }
+    }
 
-    // const updatePlayerType = () => {
-    //     if(playerType != ''){
-    //         fetch(baseurl+'/playertype/'+playerTypeId, {
-    //             method: 'PUT',
-    //             headers: {
-    //                 Accept: 'application/json',
-    //                 'Content-Type': 'application/json' 
-    //             },
-    //             body: JSON.stringify({
-    //                 typeName: playerType
-    //             })
-    //         })
-    //         .then((response) => response.json())
-    //         .then((json) => {
-    //             if(json.code == 201){
-    //                 showSweetAlert('success', 'Success', 'PlayerType updated successfully.');
-    //                 displayPlayerType();
-    //             }
-    //             else
-    //                 showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
-    //             setPlayerType('');
-    //             setBtnText('Add');
-    //             // setGenderId(0);
-    //         })
-    //         .catch((error) => {
-    //             showSweetAlert('error', 'Error', 'Failed to update PlayerType. Please try again...');
-    //         });
-    //     }else{
-    //         showSweetAlert('warning', 'Invalid Input', 'Please enter valid value for PlayerType.');
-    //     }
-    // }
     const onChangeSS = (value) => {
         setTeamId(value);
     };
     const onPlayerSS = (value) => {
-        setTeamId(value);
+        setPlayerTypeId(value);
     };
     return (
         <View style={styles.container}>
@@ -214,6 +230,29 @@ const PlayerScreen = ({ navigation }) => {
                 style={styles.footer}
             >
                 <ScrollView keyboardShouldPersistTaps='handled'>
+                <Text style={[styles.text_footer, { marginTop: 35 }]}>Player Id</Text>
+                    <View style={styles.action}>
+                        <TextInput
+                            placeholder="Enter Player Id"
+                            style={styles.textInput}
+                            autoCapitalize="none"
+                            onChangeText={(val) => setPlayerId(val)}
+                            value={playerId}
+                            maxLength={20}
+                        />
+                        {(playerId != 0) ?
+                            <Animatable.View
+                                animation="bounceIn"
+                            >
+                                <Feather
+                                    name="check-circle"
+                                    color="green"
+                                    size={20}
+                                />
+                            </Animatable.View>
+                            : null}
+                    </View>
+
                     <Text style={[styles.text_footer, { marginTop: 35 }]}>Team Name</Text>
                     <View style={styles.action}>
                         {/* <FontAwesome 
@@ -231,11 +270,6 @@ const PlayerScreen = ({ navigation }) => {
                     </View>
                     <Text style={[styles.text_footer, { marginTop: 35 }]}>Player Name</Text>
                     <View style={styles.action}>
-                        <FontAwesome
-                            name="user-o"
-                            color="#05375a"
-                            size={20}
-                        />
                         <TextInput
                             placeholder="Enter Player Name"
                             style={styles.textInput}
@@ -272,40 +306,25 @@ const PlayerScreen = ({ navigation }) => {
                         />
                     </View>
                     <Text style={[styles.text_footer, { marginTop: 35 }]}>Profile Picture</Text>
-                    {/* <View style={styles.action}>
-                <FontAwesome 
-                    name="camera-retro"
-                    color="#05375a"
-                    size={20}
-                />
-                <TextInput 
-                    placeholder="Uploaded File Name"
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    // onChangeText={(val) => (val)}
-                    // value={teamLogo}
-                    maxLength={20}
-                />
-                 <TouchableOpacity >
-                 <Animatable.View
-                    animation="bounceIn"
-                >
-                    <Feather 
-                        name="camera"
-                        color="#19398A"
-                        size={35}
-                    />
-                </Animatable.View>
-                </TouchableOpacity>
-            </View> */}
                     <View style={styles.imageUploadCard}>
-                        <TouchableOpacity>
-                            <Card.Image style={styles.imageuploadStyle} source={{ uri: "https://firebasestorage.googleapis.com/v0/b/sportsgeek-74e1e.appspot.com/o/49d6ea02-1daf-4844-ad14-740b02a930f1.png?alt=media&token=e9924ea4-c2d9-4782-bc2d-0fe734431c86" }} />
-                        </TouchableOpacity>
+                            <Card.Image style={styles.imageuploadStyle} source={{ uri: avatarPath }} />
+                        <TouchableOpacity
+                        style={styles.buttonStyle}
+                        onPress={() => { photoSelectHandler() }}>
+                        <Text style={styles.buttonTextStyle}>
+                            {profilePicture == null ? <Icon name="account-check" color="#19398A" size={50} /> : <Icon name="account-edit" color="#19398A" size={50} />}
+                        </Text>
+                    </TouchableOpacity>
+                    {profilePicture !=null &&
+                        (<TouchableOpacity
+                            // style={styles.removeButtonStyle}
+                            onPress={() => { photoRemoveHandler() }}>
+                            <Text style={styles.buttonTextStyle1}><Icon name="account-cancel" color="#19398A" size={50} /></Text>
+                        </TouchableOpacity>)}
                     </View>
                     <View style={styles.button}>
                         <TouchableOpacity
-                            // onPress={(btnText=='Add') ? addPlayerType : updatePlayerType}
+                            onPress={addPlayer}
                             style={[styles.signIn, {
                                 borderColor: '#19398A',
                                 borderWidth: 1,
@@ -318,49 +337,6 @@ const PlayerScreen = ({ navigation }) => {
                             }]}>{btnText}</Text>
                         </TouchableOpacity>
                     </View>
-                    <View style={styles.button1}>
-                        <TouchableOpacity
-                            // onPress={(btnText=='Add') ? addPlayerType : updatePlayerType}
-                            style={[styles.signIn, {
-                                borderColor: '#19398A',
-                                borderWidth: 1,
-                                // marginTop: 10,
-                                // marginBottom: 20
-                            }]}
-                        >
-                            <Text style={[styles.textSign, {
-                                color: '#19398A'
-                            }]}>Search</Text>
-                        </TouchableOpacity>
-                    </View>
-                    {/* <View style={[styles.card]}>
-            <SwipeList rowData={
-                data.map((item) => ({
-                    id: item.genderId,
-                    rowView: getRowView(item),
-                    leftSubView: getUpdateButton(item.genderId, item.name), //optional
-                    rightSubView: getDeleteButton(item.genderId), //optional
-                    style: styles.row, //optional but recommended to style your rows
-                    useNativeDriver: false 
-                }))
-            }
-             />
-            </View> */}
-                    {/* {
-                data.map((item,index) => (
-                    <View style={styles.card} key={item.playerTypeId} >
-                        <View style={styles.cardlist}>  
-                            <View style={styles.ellipse1}>
-                                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>{(item.typeName).substr(0,2)}</Text>
-                            </View>
-                            <Text style={[styles.carditem, {width: '65%',paddingLeft:20}]}>{item.typeName}</Text>
-                           <TouchableOpacity onPress={() => {editPlayerType(item.playerTypeId, item.typeName)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="circle-edit-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                           <TouchableOpacity onPress={() => {deletePlayerType(item.playerTypeId)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                        </View>
-                        </View>
-                ))
-            } */}
-
                 </ScrollView>
             </Animatable.View>
         </View>
@@ -513,19 +489,19 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         fontSize: 16,
     },
-    buttonStyle: {
-        backgroundColor: '#19398A',
-        borderWidth: 0,
-        color: '#FFFFFF',
-        borderColor: '#307ecc',
-        height: 40,
-        alignItems: 'center',
-        borderRadius: 30,
-        marginLeft: 80,
-        marginRight: 35,
-        //   marginTop: 15,
-        width: '50%'
-    },
+    // buttonStyle: {
+    //     backgroundColor: '#19398A',
+    //     borderWidth: 0,
+    //     color: '#FFFFFF',
+    //     borderColor: '#307ecc',
+    //     height: 40,
+    //     alignItems: 'center',
+    //     borderRadius: 30,
+    //     marginLeft: 80,
+    //     marginRight: 35,
+    //     //   marginTop: 15,
+    //     width: '50%'
+    // },
     imageUploadCard: {
         width: '100%',
         height: 120,
@@ -548,5 +524,16 @@ const styles = StyleSheet.create({
         marginLeft: '45%',
         justifyContent: 'center',
         //   backgroundColor: 'white'
+    },
+    buttonTextStyle: {
+        color: '#FFFFFF',
+        paddingVertical: 5,
+        fontSize: 16,
+    },
+    buttonTextStyle1: {
+        color: '#FFFFFF',
+        // paddingHorizontal:20,
+        paddingVertical: 5,
+        fontSize: 16,
     }
 });
