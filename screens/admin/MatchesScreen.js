@@ -23,7 +23,7 @@ import showSweetAlert from '../../helpers/showSweetAlert';
 import { baseurl, errorMessage } from '../../config';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import axios from 'axios';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MatchesScreen = (props) => {
 

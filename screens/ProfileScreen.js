@@ -12,7 +12,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Share from 'react-native-share';
 import ChangePasswordScreen from './ChangePasswordScreen';
 import { AuthContext } from '../components/context';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import showSweetAlert from '../helpers/showSweetAlert';
 import { baseurl, errorMessage } from '../config';
 import axios from 'axios';
