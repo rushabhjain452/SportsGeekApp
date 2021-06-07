@@ -28,7 +28,6 @@ import axios from 'axios';
 
 const AssignRoleToUserScreen = ({ navigation }) => {
 
-    // LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
     const [data, setData] = useState([]);
     const [userData, setUserData] = useState([]);
     const [roleData, setRoleData] = useState([]);
@@ -43,8 +42,6 @@ const AssignRoleToUserScreen = ({ navigation }) => {
         setToken(token);
         displayUser(token);
         displayRole(token);
-        // displayTeam();
-        // setPlayerType('');
     }, []);
 
     const displayUser = (token) => {
@@ -53,9 +50,7 @@ const AssignRoleToUserScreen = ({ navigation }) => {
             .then(response => {
                 if (response.status == 200) {
                     setData(response.data);
-                    // console.log(json.data);
                     let dt = response.data;
-                    // console.log(dt.length);
                     let arr = [];
                     for (let i = 0; i < dt.length; i++) {
                         arr.push({
@@ -64,7 +59,7 @@ const AssignRoleToUserScreen = ({ navigation }) => {
                         });
                     }
                     setUserData(arr);
-                    // console.log(userData);
+                    
                 }
                 else {
                     showSweetAlert('error', 'Network Error', errorMessage);
@@ -82,9 +77,9 @@ const AssignRoleToUserScreen = ({ navigation }) => {
                 setLoading(false);
                 if (response.status == 200) {
                     setData(response.data);
-                    // console.log(json.data);
+                  
                     let dt = response.data;
-                    // console.log(dt.length);
+                    
                     let arr = [];
                     for (let i = 0; i < dt.length; i++) {
                         arr.push({
@@ -93,7 +88,7 @@ const AssignRoleToUserScreen = ({ navigation }) => {
                         });
                     }
                     setRoleData(arr);
-                    // console.log(userData);
+            
                 }
                 else {
                     showSweetAlert('error', 'Network Error', errorMessage);
@@ -214,34 +209,7 @@ const AssignRoleToUserScreen = ({ navigation }) => {
                             }]}>Assign Role</Text>
                         </TouchableOpacity>
                     </View>
-                    {/* <View style={[styles.card]}>
-            <SwipeList rowData={
-                data.map((item) => ({
-                    id: item.genderId,
-                    rowView: getRowView(item),
-                    leftSubView: getUpdateButton(item.genderId, item.name), //optional
-                    rightSubView: getDeleteButton(item.genderId), //optional
-                    style: styles.row, //optional but recommended to style your rows
-                    useNativeDriver: false 
-                }))
-            }
-             />
-            </View> */}
-                    {/* {
-                data.map((item,index) => (
-                    <View style={styles.card} key={item.playerTypeId} >
-                        <View style={styles.cardlist}>  
-                            <View style={styles.ellipse1}>
-                                <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18}}>{(item.typeName).substr(0,2)}</Text>
-                            </View>
-                            <Text style={[styles.carditem, {width: '65%',paddingLeft:20}]}>{item.typeName}</Text>
-                           <TouchableOpacity onPress={() => {editPlayerType(item.playerTypeId, item.typeName)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="circle-edit-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                           <TouchableOpacity onPress={() => {deletePlayerType(item.playerTypeId)}} style={{width:'10%'}}><Text style={[styles.carditem]}><Icon name="delete-circle-outline" color="#19398A" size={30}/></Text></TouchableOpacity> 
-                        </View>
-                        </View>
-                ))
-            } */}
-
+                   
                 </Animatable.View>
             </View>
         </ScrollView>
