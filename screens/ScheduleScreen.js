@@ -4,7 +4,7 @@ import { Card, ListItem, Button, Icon } from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
 // import { useNavigation } from '@react-navigation/native';
 import ContestScreen from "./ContestScreen";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-community/async-storage';
 import axios from 'axios';
 
 import showSweetAlert from '../helpers/showSweetAlert';

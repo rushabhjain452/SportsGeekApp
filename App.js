@@ -41,7 +41,7 @@ import { AuthContext } from './components/context';
 
 import RootStackScreen from './screens/RootStackScreen';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-community/async-storage';
 import ChangePasswordScreen from './screens/ChangePasswordScreen';
 import UpdateProfileScreen from './screens/UpdateProfileScreen';
 import RoleScreen from './screens/admin/RoleScreen';

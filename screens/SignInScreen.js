@@ -20,7 +20,7 @@ import { useTheme } from 'react-native-paper';
 import { baseurl, errorMessage } from '../config';
 import showSweetAlert from '../helpers/showSweetAlert';
 import Spinner from 'react-native-loading-spinner-overlay';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+// import AsyncStorage from '@react-native-community/async-storage';
 import axios from 'axios';
 
 import { AuthContext } from '../components/context';
