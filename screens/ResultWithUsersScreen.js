@@ -4,7 +4,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import {
   Avatar
 } from 'react-native-paper';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Card } from 'react-native-elements';
 import axios from 'axios';
 

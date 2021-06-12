@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, ScrollView, Alert, ActivityIndicator, RefreshCo
 import { Card, ListItem, Button } from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
 // import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import UpdateMatchMinBet from './UpdateMatchMinBet';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';

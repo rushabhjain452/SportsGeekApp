@@ -14,7 +14,7 @@ import MyMatchesScreen from './MyMatchesScreen';
 import ScheduleScreen from './ScheduleScreen';
 import RootStackScreen from './RootStackScreen';
 import AdminScreen from './AdminScreen';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeStack = createStackNavigator();
 const AdminStack = createStackNavigator();
